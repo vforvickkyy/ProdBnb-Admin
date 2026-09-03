@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+*.tsbuildinfo
+
+# Environment — never commit real values. NEXT_PUBLIC_* vars are the ONLY
+# vars this project ever uses; they are safe to ship to the browser by
+# design (Supabase anon key + this backend's public URL), never a secret.
+.env.local
+.env*.local
+
+# Generated (regenerate via `npm run generate:api-types`)
+# Kept out of git so it can never silently drift from the backend without
+# being obviously regenerated — same reasoning as not hand-copying types.
+src/types/admin-api.d.ts
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+npm-debug.log*
