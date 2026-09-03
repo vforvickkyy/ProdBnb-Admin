@@ -19,10 +19,21 @@ project's own role check (`src/lib/useAdminGate.ts`) is UI gating only, never th
 ## Stack
 
 Next.js (App Router) + TypeScript + Tailwind CSS. API request/response types
-(`src/types/admin-api.d.ts`, gitignored — regenerate, don't hand-copy) are generated from the
-backend's own OpenAPI contract via [`openapi-typescript`](https://openapi-ts.dev), consumed
-through [`openapi-fetch`](https://openapi-ts.dev/openapi-fetch/) (`src/lib/api.ts`) so a backend
-schema change that isn't reflected here becomes a type error at build time.
+(`src/types/admin-api.d.ts`) are generated from the backend's own OpenAPI contract via
+[`openapi-typescript`](https://openapi-ts.dev), consumed through
+[`openapi-fetch`](https://openapi-ts.dev/openapi-fetch/) (`src/lib/api.ts`) so a backend schema
+change that isn't reflected here becomes a type error at build time.
+
+**`src/types/admin-api.d.ts` is committed, not gitignored** (Phase 13) — `generate:api-types`
+reads the backend's OpenAPI doc via a relative sibling-directory path
+(`../ProdBnb Backend/docs/admin-openapi.json`), which only resolves on a machine with both repos
+checked out side by side. A CI/deploy pipeline that only clones this repo has no way to produce
+that file otherwise, so it has to already be in git. This isn't a second source of truth: the
+backend's own CI regenerates `docs/admin-openapi.json` from its zod schemas and fails the build if
+the committed spec has drifted, and this repo's `npm run typecheck` fails if a stale `.d.ts` no
+longer matches how `src/lib/api.ts` actually uses it. Regenerating and committing the result after
+any admin API change is still a deliberate, manual step — run `npm run generate:api-types` and
+commit what it produces.
 
 ## Local development
 
@@ -61,7 +72,7 @@ src/
     supabase.ts   Sign-in only — never used to query Supabase tables directly
     api.ts        Typed client for /v1/admin/* (openapi-fetch + generated types)
     useAdminGate.ts   UI-only "is this session an admin" check
-  types/          Generated from the backend's OpenAPI contract (gitignored)
+  types/          Generated from the backend's OpenAPI contract (committed — see "Stack" above)
 ```
 
 ## Scripts
@@ -69,9 +80,19 @@ src/
 | Command | Purpose |
 |---|---|
 | `npm run dev` | Start the app locally |
-| `npm run build` | Production build (also type-checks and lints) |
+| `npm run build` | Production build (`next build` — type-checks; no ESLint config exists yet, so it does not lint) |
 | `npm run typecheck` | Type-check without building |
 | `npm run generate:api-types` | Regenerate `src/types/admin-api.d.ts` from the backend's `docs/admin-openapi.json` |
+
+## Deployment
+
+Deployed on [Vercel](https://vercel.com) — one Project per environment (staging, production), each
+pointing at its own backend/Supabase project via the three `NEXT_PUBLIC_*` variables (they're
+baked into the browser bundle at **build** time, so changing one requires a new build, not just a
+redeploy of the same build). No server-side secrets are ever involved in deployment — see "What
+this project never holds" above. The backend's `CORS_ORIGINS` for the matching environment must
+include this app's deployed origin, or every API call from the browser fails preflight. See the
+backend repo's `docs/DEPLOYMENT.md` for the full staging/production setup.
 
 ## Status
 

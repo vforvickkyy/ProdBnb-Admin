@@ -12,10 +12,16 @@ out/
 .env.local
 .env*.local
 
-# Generated (regenerate via `npm run generate:api-types`)
-# Kept out of git so it can never silently drift from the backend without
-# being obviously regenerated — same reasoning as not hand-copying types.
-src/types/admin-api.d.ts
+# src/types/admin-api.d.ts (generated via `npm run generate:api-types`) is
+# INTENTIONALLY COMMITTED, not ignored (Phase 13) — a clean CI/deploy
+# checkout of only this repo has no access to the sibling backend repo's
+# filesystem path the generator reads from, so the build needs this file to
+# already be present in git. Anti-drift is enforced from the backend side
+# instead: its own CI regenerates docs/admin-openapi.json and fails if that
+# diverges from what the zod schemas would produce, and this repo's own
+# `npm run typecheck` fails loudly if a stale committed .d.ts stops matching
+# how src/lib/api.ts actually uses it. Regenerating and committing the
+# result is still a deliberate, manual step after any admin API change.
 
 # Editor / OS
 .DS_Store
