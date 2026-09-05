@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { AdminShell } from "@/components/AdminShell";
+import { NotificationDeliveryPanel } from "@/components/NotificationDeliveryPanel";
 import { StatusBadge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
@@ -141,6 +142,8 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 </ul>
               )}
             </section>
+
+            <NotificationDeliveryPanel bookingId={id} />
 
             {booking.status === "cancelled" && (
               <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">

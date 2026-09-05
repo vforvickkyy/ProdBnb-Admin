@@ -1804,6 +1804,11 @@ export interface components {
                 } | null;
             } | null;
         };
+        DeliveryAttemptDevice: {
+            platform: string;
+            environment: string | null;
+            is_active: boolean;
+        } | null;
         DeliveryAttemptRow: {
             /** Format: uuid */
             id: string;
@@ -1818,6 +1823,7 @@ export interface components {
             error_reason: string | null;
             /** Format: date-time */
             created_at: string;
+            device: components["schemas"]["DeliveryAttemptDevice"];
         };
         AuditLogEntry: {
             /** Format: uuid */

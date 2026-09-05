@@ -15,6 +15,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/users", label: "Users" },
   { href: "/hosts", label: "Hosts" },
   { href: "/audit-log", label: "Audit Log" },
+  { href: "/system", label: "System Health" },
 ];
 
 export function Sidebar() {
