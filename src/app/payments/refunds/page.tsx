@@ -105,7 +105,9 @@ function RefundsPageInner() {
       ) : (
         <>
           <Table columns={columns} rows={rows} rowKey={(r) => r.id} caption="Refunds" />
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+          {meta && (
+            <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} label="Refunds" />
+          )}
         </>
       )}
     </AdminShell>

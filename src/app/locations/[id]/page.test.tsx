@@ -117,6 +117,7 @@ describe("Location detail page", () => {
     renderPage();
     await waitFor(() => expect(screen.queryByText("Resolving route…")).not.toBeInTheDocument());
     expect(screen.queryByRole("heading", { name: "Rooftop Studio" })).not.toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Loading" })).toBeInTheDocument();
 
     resolveDetail({ data: { data: baseLocation }, error: undefined, response: { status: 200 } });
     expect(await screen.findByRole("heading", { name: "Rooftop Studio" })).toBeInTheDocument();

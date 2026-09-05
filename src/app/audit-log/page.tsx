@@ -206,7 +206,9 @@ function AuditLogPageInner() {
               {JSON.stringify(rows.find((r) => r.id === expanded)?.metadata, null, 2)}
             </pre>
           )}
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+          {meta && (
+            <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} label="Audit log" />
+          )}
         </>
       )}
     </AdminShell>

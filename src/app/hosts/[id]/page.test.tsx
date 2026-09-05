@@ -103,6 +103,7 @@ describe("Host detail page", () => {
     renderPage();
     await waitFor(() => expect(screen.queryByText("Resolving route…")).not.toBeInTheDocument());
     expect(screen.queryByText("Ravi Kumar")).not.toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Loading" })).toBeInTheDocument();
 
     resolveDetail({ data: { data: baseHost }, error: undefined, response: { status: 200 } });
     expect(await screen.findByText("Ravi Kumar")).toBeInTheDocument();

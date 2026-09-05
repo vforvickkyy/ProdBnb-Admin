@@ -126,7 +126,7 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
       </Link>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" role="status" aria-label="Loading">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-40 w-full" />
         </div>
@@ -135,9 +135,9 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
       ) : (
         <>
           <div className="mb-6 flex items-start justify-between">
-            <div>
-              <h1 className="text-xl font-semibold">{location.title}</h1>
-              <p className="text-sm text-slate-500">
+            <div className="min-w-0">
+              <h1 className="break-words text-xl font-semibold">{location.title}</h1>
+              <p className="break-words text-sm text-slate-500">
                 {location.city}, {location.region ? `${location.region}, ` : ""}
                 {location.country}
               </p>
@@ -156,7 +156,7 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="shrink-0 text-slate-500">Address</dt>
-                  <dd className="text-right">
+                  <dd className="min-w-0 break-words text-right">
                     {location.address_line1 ?? "—"}
                     {location.address_line2 ? `, ${location.address_line2}` : ""}
                     {location.postal_code ? `, ${location.postal_code}` : ""}
@@ -177,7 +177,7 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                 {location.moderation_reason && (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500">Moderation reason</dt>
-                    <dd className="text-right text-red-700">{location.moderation_reason}</dd>
+                    <dd className="min-w-0 break-words text-right text-red-700">{location.moderation_reason}</dd>
                   </div>
                 )}
               </dl>
@@ -286,7 +286,13 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                 <>
                   <Table columns={bookingColumns} rows={bookings.rows} rowKey={(b) => b.id} caption="Bookings for this location" />
                   {bookings.meta && (
-                    <Pagination page={bookings.meta.page} pageSize={bookings.meta.pageSize} total={bookings.meta.total} onPageChange={setBookingsPage} />
+                    <Pagination
+                      page={bookings.meta.page}
+                      pageSize={bookings.meta.pageSize}
+                      total={bookings.meta.total}
+                      onPageChange={setBookingsPage}
+                      label="Bookings"
+                    />
                   )}
                 </>
               )}
@@ -314,7 +320,13 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                     ))}
                   </ul>
                   {auditLog.meta && (
-                    <Pagination page={auditLog.meta.page} pageSize={auditLog.meta.pageSize} total={auditLog.meta.total} onPageChange={setAuditPage} />
+                    <Pagination
+                      page={auditLog.meta.page}
+                      pageSize={auditLog.meta.pageSize}
+                      total={auditLog.meta.total}
+                      onPageChange={setAuditPage}
+                      label="Audit history"
+                    />
                   )}
                 </>
               )}

@@ -65,7 +65,7 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
       </Link>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" role="status" aria-label="Loading">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-40 w-full" />
         </div>
@@ -74,9 +74,9 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
       ) : (
         <>
           <div className="mb-6 flex items-start justify-between">
-            <div>
-              <h1 className="text-xl font-semibold">{payment.booking?.location?.title ?? "Payment"}</h1>
-              <p className="text-sm text-slate-500">
+            <div className="min-w-0">
+              <h1 className="break-words text-xl font-semibold">{payment.booking?.location?.title ?? "Payment"}</h1>
+              <p className="break-words text-sm text-slate-500">
                 {payment.provider} · {payment.provider_order_id}
               </p>
             </div>
@@ -89,7 +89,7 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Booker</dt>
-                  <dd>{name(payment.booking?.booker)}</dd>
+                  <dd className="min-w-0 break-words text-right">{name(payment.booking?.booker)}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Amount</dt>
@@ -102,7 +102,7 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
                 {payment.failure_reason && (
                   <div className="flex justify-between">
                     <dt className="text-slate-500">Failure reason</dt>
-                    <dd className="text-red-700">{payment.failure_reason}</dd>
+                    <dd className="min-w-0 break-words text-right text-red-700">{payment.failure_reason}</dd>
                   </div>
                 )}
                 {payment.booking && (

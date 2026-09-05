@@ -116,7 +116,9 @@ function LocationsPageInner() {
       ) : (
         <>
           <Table columns={columns} rows={rows} rowKey={(l) => l.id} caption="Locations" />
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+          {meta && (
+            <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} label="Locations" />
+          )}
         </>
       )}
     </AdminShell>

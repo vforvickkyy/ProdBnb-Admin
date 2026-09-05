@@ -107,4 +107,19 @@ describe("Booking detail page — notification delivery panel integration", () =
     await screen.findByRole("heading", { name: "Notification delivery" });
     expect(screen.getByText("No delivery attempts recorded yet")).toBeInTheDocument();
   });
+
+  it("wraps the loading skeleton in role=status while the detail fetch is pending", async () => {
+    let resolveDetail!: (v: unknown) => void;
+    getMock.mockImplementation((path: string) => {
+      if (path === "/bookings/{id}") return new Promise((resolve) => (resolveDetail = resolve));
+      return jsonOkPaginated([]);
+    });
+
+    renderPage();
+    await waitFor(() => expect(screen.queryByText("Resolving route…")).not.toBeInTheDocument());
+    expect(screen.getByRole("status", { name: "Loading" })).toBeInTheDocument();
+
+    resolveDetail({ data: { data: baseBooking }, error: undefined, response: { status: 200 } });
+    expect(await screen.findByRole("heading", { name: "Rooftop Studio" })).toBeInTheDocument();
+  });
 });

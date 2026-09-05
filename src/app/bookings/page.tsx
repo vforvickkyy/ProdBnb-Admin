@@ -147,7 +147,9 @@ function BookingsPageInner() {
       ) : (
         <>
           <Table columns={columns} rows={rows} rowKey={(b) => b.id} onRowClick={(b) => router.push(`/bookings/${b.id}`)} caption="Bookings" />
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+          {meta && (
+            <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} label="Bookings" />
+          )}
         </>
       )}
     </AdminShell>

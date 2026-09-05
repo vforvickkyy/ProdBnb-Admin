@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { MobileNav } from "@/components/MobileNav";
 import { Sidebar } from "@/components/Sidebar";
 import { supabase } from "@/lib/supabase";
 import { useAdminGate } from "@/lib/useAdminGate";
@@ -64,12 +65,21 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-slate-900 focus:shadow-lg focus:ring-2 focus:ring-slate-500"
+      >
+        Skip to main content
+      </a>
       <div className="hidden md:block">
         <Sidebar />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-          <span className="font-semibold">ProdBnb Admin</span>
+          <div className="flex items-center gap-3">
+            <MobileNav />
+            <span className="font-semibold">ProdBnb Admin</span>
+          </div>
           <button
             type="button"
             className="text-sm text-slate-500 hover:text-slate-800"
@@ -78,9 +88,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             Sign out
           </button>
         </header>
-        {/* Below md, the sidebar collapses entirely rather than overlapping
-            content -- a compact drawer/icon-rail variant is 14-B scope. */}
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
       </div>
     </div>
   );

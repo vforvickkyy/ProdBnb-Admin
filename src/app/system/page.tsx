@@ -38,7 +38,9 @@ export default function SystemHealthPage() {
         <section className="rounded border border-slate-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Backend</h2>
           {readinessLoading ? (
-            <Skeleton className="h-6 w-32" />
+            <div role="status" aria-label="Loading">
+              <Skeleton className="h-6 w-32" />
+            </div>
           ) : (
             <Field label="Readiness" tone={readiness === "ready" ? "success" : "danger"}>
               {readiness === "ready" ? "Ready" : "Not Ready"}
@@ -49,7 +51,7 @@ export default function SystemHealthPage() {
         <section className="rounded border border-slate-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-slate-700">Configuration</h2>
           {statusLoading ? (
-            <div className="space-y-3">
+            <div className="space-y-3" role="status" aria-label="Loading">
               <Skeleton className="h-6 w-full" />
               <Skeleton className="h-6 w-full" />
               <Skeleton className="h-6 w-full" />

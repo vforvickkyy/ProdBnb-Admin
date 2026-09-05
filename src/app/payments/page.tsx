@@ -137,7 +137,9 @@ function PaymentsPageInner() {
       ) : (
         <>
           <Table columns={columns} rows={rows} rowKey={(p) => p.id} onRowClick={(p) => router.push(`/payments/${p.id}`)} caption="Payments" />
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+          {meta && (
+            <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} label="Payments" />
+          )}
         </>
       )}
     </AdminShell>

@@ -76,7 +76,7 @@ export function NotificationDeliveryPanel({ bookingId }: { bookingId: string }) 
       ) : (
         <>
           <Table columns={columns} rows={rows} rowKey={(a) => a.id} caption="Notification delivery attempts for this booking" />
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={setPage} />}
+          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={setPage} label="Notification delivery" />}
         </>
       )}
     </section>

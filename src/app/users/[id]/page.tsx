@@ -134,7 +134,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
       </Link>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" role="status" aria-label="Loading">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-40 w-full" />
         </div>
@@ -152,9 +152,9 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                   {initials(user)}
                 </div>
               )}
-              <div>
-                <h1 className="text-xl font-semibold">{displayName(user)}</h1>
-                <p className="text-sm text-slate-500">{user.email ?? "No email on file"}</p>
+              <div className="min-w-0">
+                <h1 className="break-words text-xl font-semibold">{displayName(user)}</h1>
+                <p className="break-words text-sm text-slate-500">{user.email ?? "No email on file"}</p>
               </div>
             </div>
             <StatusBadge status={user.status} />
@@ -223,7 +223,13 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                   <>
                     <Table columns={locationColumns} rows={locations.rows} rowKey={(l) => l.id} caption="Locations owned by this user" />
                     {locations.meta && (
-                      <Pagination page={locations.meta.page} pageSize={locations.meta.pageSize} total={locations.meta.total} onPageChange={setLocPage} />
+                      <Pagination
+                        page={locations.meta.page}
+                        pageSize={locations.meta.pageSize}
+                        total={locations.meta.total}
+                        onPageChange={setLocPage}
+                        label="Locations"
+                      />
                     )}
                   </>
                 )}
@@ -247,6 +253,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                       pageSize={bookedBookings.meta.pageSize}
                       total={bookedBookings.meta.total}
                       onPageChange={setBookedPage}
+                      label="Bookings made"
                     />
                   )}
                 </>
@@ -271,6 +278,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                         pageSize={hostedBookings.meta.pageSize}
                         total={hostedBookings.meta.total}
                         onPageChange={setHostedPage}
+                        label="Bookings hosted"
                       />
                     )}
                   </>
@@ -300,7 +308,13 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                     ))}
                   </ul>
                   {auditLog.meta && (
-                    <Pagination page={auditLog.meta.page} pageSize={auditLog.meta.pageSize} total={auditLog.meta.total} onPageChange={setAuditPage} />
+                    <Pagination
+                      page={auditLog.meta.page}
+                      pageSize={auditLog.meta.pageSize}
+                      total={auditLog.meta.total}
+                      onPageChange={setAuditPage}
+                      label="Audit history"
+                    />
                   )}
                 </>
               )}

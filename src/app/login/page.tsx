@@ -46,7 +46,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="mb-6 text-lg font-semibold">ProdBnb Admin</h1>
         <label htmlFor="login-email" className="mb-1 block text-sm text-slate-600">

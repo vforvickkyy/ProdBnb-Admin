@@ -65,7 +65,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       </button>
 
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" role="status" aria-label="Loading">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-40 w-full" />
         </div>
@@ -74,8 +74,8 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       ) : (
         <>
           <div className="mb-6 flex items-start justify-between">
-            <div>
-              <h1 className="text-xl font-semibold">{booking.location.title}</h1>
+            <div className="min-w-0">
+              <h1 className="break-words text-xl font-semibold">{booking.location.title}</h1>
               <p className="text-sm text-slate-500">
                 {booking.booking_type.replace("_", " ")} · {new Date(booking.start_at).toLocaleString()} –{" "}
                 {new Date(booking.end_at).toLocaleString()}
@@ -90,11 +90,11 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Booker</dt>
-                  <dd>{name(booking.booker)}</dd>
+                  <dd className="min-w-0 break-words text-right">{name(booking.booker)}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Host</dt>
-                  <dd>{name(booking.location.host)}</dd>
+                  <dd className="min-w-0 break-words text-right">{name(booking.location.host)}</dd>
                 </div>
               </dl>
             </section>

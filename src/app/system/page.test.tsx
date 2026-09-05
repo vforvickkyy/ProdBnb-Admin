@@ -48,6 +48,7 @@ describe("System Health page", () => {
 
     renderPage();
     expect(screen.queryByText("Ready")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("status", { name: "Loading" }).length).toBeGreaterThan(0);
 
     resolveReadiness("ready");
     expect(await screen.findByText("Ready")).toBeInTheDocument();

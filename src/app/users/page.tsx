@@ -143,7 +143,9 @@ function UsersPageInner() {
       ) : (
         <>
           <Table columns={columns} rows={rows} rowKey={(u) => u.id} caption="Users" />
-          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+          {meta && (
+            <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} label="Users" />
+          )}
         </>
       )}
     </AdminShell>

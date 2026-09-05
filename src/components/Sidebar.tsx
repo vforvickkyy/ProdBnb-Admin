@@ -18,11 +18,11 @@ const NAV: { href: string; label: string }[] = [
   { href: "/system", label: "System Health" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ navLabel = "Admin sections" }: { navLabel?: string } = {}) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Admin sections" className="flex w-56 shrink-0 flex-col gap-1 border-r border-slate-200 bg-white p-4">
+    <nav aria-label={navLabel} className="flex w-56 shrink-0 flex-col gap-1 border-r border-slate-200 bg-white p-4">
       {NAV.map((item) => {
         const active = pathname === item.href || pathname?.startsWith(`${item.href}/`);
         return (
