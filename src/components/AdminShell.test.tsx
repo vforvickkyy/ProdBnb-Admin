@@ -1,14 +1,26 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { AdminShell } from "./AdminShell";
 
-const { useAdminGateMock } = vi.hoisted(() => ({ useAdminGateMock: vi.fn() }));
+const { useAdminGateMock, signOutMock, clearSessionHintMock, replaceMock, mutateMock } = vi.hoisted(() => ({
+  useAdminGateMock: vi.fn(),
+  signOutMock: vi.fn().mockResolvedValue(undefined),
+  clearSessionHintMock: vi.fn(),
+  replaceMock: vi.fn(),
+  mutateMock: vi.fn(),
+}));
 
 vi.mock("@/lib/useAdminGate", () => ({ useAdminGate: useAdminGateMock }));
-vi.mock("@/lib/supabase", () => ({ supabase: { auth: { signOut: vi.fn() } } }));
-vi.mock("@/lib/sessionHint", () => ({ clearSessionHint: vi.fn() }));
+vi.mock("@/lib/supabase", () => ({ supabase: { auth: { signOut: signOutMock } } }));
+vi.mock("@/lib/sessionHint", () => ({ clearSessionHint: clearSessionHintMock }));
+// The only real SWR consumer in this tree is useAdminGate, already mocked
+// above -- so mocking the whole `swr` module is safe here and lets this
+// test verify the logout flow calls the documented global-cache-clear
+// pattern without asserting anything about SWR's own internals (Phase 14-B5).
+vi.mock("swr", () => ({ mutate: mutateMock }));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: vi.fn() }),
+  useRouter: () => ({ replace: replaceMock }),
   usePathname: () => "/dashboard",
 }));
 
@@ -59,5 +71,24 @@ describe("AdminShell", () => {
     );
     expect(screen.queryByRole("link", { name: "Skip to main content" })).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Checking session…");
+  });
+
+  it("clears the SWR cache and completes Supabase sign-out before redirecting to /login", async () => {
+    useAdminGateMock.mockReturnValue("admin");
+    const user = userEvent.setup();
+    render(
+      <AdminShell>
+        <p>Page content</p>
+      </AdminShell>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
+
+    await waitFor(() => {
+      expect(signOutMock).toHaveBeenCalled();
+      expect(clearSessionHintMock).toHaveBeenCalled();
+      expect(mutateMock).toHaveBeenCalledWith(expect.any(Function), undefined, { revalidate: false });
+      expect(replaceMock).toHaveBeenCalledWith("/login");
+    });
   });
 });

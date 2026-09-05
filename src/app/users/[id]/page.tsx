@@ -89,6 +89,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
       }
       setConfirmAction(null);
       await mutate();
+      await locations.refresh();
       await auditLog.refresh();
     } catch (err) {
       toast.error(extractErrorMessage(err, "Action failed."));

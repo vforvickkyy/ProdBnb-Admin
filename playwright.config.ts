@@ -10,6 +10,16 @@ const baseURL = process.env.ADMIN_BASE_URL ?? "https://prodbnb-admin-staging.ver
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
+  // Every spec signs in as the same single shared staging admin account
+  // (Phase 14-B5) -- fullyParallel:false only serializes tests within one
+  // file, but Playwright still runs different spec files concurrently
+  // across multiple workers by default. That let several tests log in to
+  // the same account at once, and real interference resulted (a detail
+  // page reverting to "Checking session...", a nav click timing out) that
+  // vanished as soon as the same files ran one at a time. Forcing a single
+  // worker makes the whole suite deterministic without needing a second
+  // account.
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: "list",
   use: {

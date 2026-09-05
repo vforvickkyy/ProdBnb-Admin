@@ -2,15 +2,26 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { mutate } from "swr";
 import { MobileNav } from "@/components/MobileNav";
 import { Sidebar } from "@/components/Sidebar";
 import { supabase } from "@/lib/supabase";
 import { useAdminGate } from "@/lib/useAdminGate";
 import { clearSessionHint } from "@/lib/sessionHint";
 
+/**
+ * SWR's cache is a module-level singleton for the whole tab (Phase 14-B5) --
+ * without this, a second admin signing in on the same tab without a full
+ * reload could briefly see the previous admin's cached list/detail data via
+ * stale-while-revalidate before their own request replaces it. The matcher
+ * form of the documented global-mutate pattern (`() => true`) clears every
+ * key; `revalidate: false` is deliberate, since there's no valid session to
+ * revalidate against once signOut() below has run anyway.
+ */
 async function signOutAndRedirect(router: ReturnType<typeof useRouter>) {
   await supabase.auth.signOut();
   clearSessionHint();
+  await mutate(() => true, undefined, { revalidate: false });
   router.replace("/login");
 }
 

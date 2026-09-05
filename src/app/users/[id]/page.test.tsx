@@ -158,7 +158,7 @@ describe("User detail page", () => {
     expect(screen.getByRole("heading", { name: "Bookings made" })).toBeInTheDocument();
   });
 
-  it("requires a reason before suspending, and calls the suspend endpoint", async () => {
+  it("requires a reason before suspending, calls the suspend endpoint, and refreshes the locations list (mirrors Host Detail)", async () => {
     const user = userEvent.setup();
     postMock.mockResolvedValue({ data: { data: { ...baseUser, status: "suspended" } }, error: undefined, response: { status: 200 } });
 
@@ -172,6 +172,8 @@ describe("User detail page", () => {
     await user.type(within(dialog).getByLabelText("Reason"), "Repeated policy violations");
     expect(confirmButton).toBeEnabled();
 
+    const locationsCallsBefore = getMock.mock.calls.filter(([path]) => path === "/locations").length;
+
     await user.click(confirmButton);
 
     expect(postMock).toHaveBeenCalledWith(
@@ -179,5 +181,13 @@ describe("User detail page", () => {
       expect.objectContaining({ params: { path: { id: "u1" } }, body: { reason: "Repeated policy violations" } })
     );
     expect(toastSuccessMock).toHaveBeenCalled();
+
+    // Suspending a host cascades to their published locations on the
+    // backend -- this user's own Locations section must be refreshed too
+    // (Phase 14-B5 fix: this previously only happened on Host Detail).
+    await waitFor(() => {
+      const locationsCallsAfter = getMock.mock.calls.filter(([path]) => path === "/locations").length;
+      expect(locationsCallsAfter).toBeGreaterThan(locationsCallsBefore);
+    });
   });
 });

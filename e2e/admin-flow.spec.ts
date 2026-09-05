@@ -16,6 +16,14 @@ import { expect, test } from "@playwright/test";
 const email = process.env.E2E_ADMIN_EMAIL;
 const password = process.env.E2E_ADMIN_PASSWORD;
 
+// Needs no credentials at all -- exercises middleware.ts's session-hint
+// redirect directly, so it always runs regardless of whether the rest of
+// this file's describe block is skipped (Phase 14-B5).
+test("an unauthenticated request to a protected page redirects to /login", async ({ page }) => {
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/login/);
+});
+
 test.describe("admin login and moderation flow", () => {
   test.skip(!email || !password, "E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set -- see file header.");
 
