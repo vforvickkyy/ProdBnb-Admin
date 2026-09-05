@@ -28,7 +28,73 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["DashboardSummary"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Provider/config status -- booleans and enums only, never a credential (Phase 14) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SystemStatus"];
                         };
                     };
                 };
@@ -100,7 +166,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminUserDetail"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -168,7 +239,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminUserDetail"];
                         };
                     };
                 };
@@ -244,7 +315,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminUserDetail"];
                         };
                     };
                 };
@@ -316,7 +387,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminUserDetail"];
                         };
                     };
                 };
@@ -367,11 +438,11 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    status?: string;
+                    page?: number;
+                    pageSize?: number;
+                    status?: "draft" | "submitted" | "under_review" | "approved" | "published" | "rejected" | "suspended" | "archived";
                     host_id?: string;
                     search?: string;
-                    page?: number | null;
-                    pageSize?: number | null;
                 };
                 header?: never;
                 path?: never;
@@ -386,7 +457,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["LocationDetail"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -435,7 +511,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Location detail (includes moderation_reason) */
+        /** Location detail (includes moderation_reason, suspended_by_host_suspension) */
         get: {
             parameters: {
                 query?: never;
@@ -454,7 +530,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["LocationDetail"];
                         };
                     };
                 };
@@ -528,7 +604,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["LocationDetail"];
                         };
                     };
                 };
@@ -602,7 +678,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["LocationDetail"];
                         };
                     };
                 };
@@ -676,7 +752,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["LocationDetail"];
                         };
                     };
                 };
@@ -748,7 +824,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["LocationDetail"];
                         };
                     };
                 };
@@ -795,7 +871,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List bookings (booker_id/host_id/location_id/status filters) */
+        /** List bookings (booker_id/host_id/location_id/status/start_after/start_before filters) */
         get: {
             parameters: {
                 query?: {
@@ -803,6 +879,8 @@ export interface paths {
                     status?: "requested" | "confirmed" | "cancelled" | "completed" | "rejected";
                     booker_id?: string;
                     host_id?: string;
+                    start_after?: string;
+                    start_before?: string;
                     page?: number;
                     pageSize?: number;
                 };
@@ -819,7 +897,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["BookingDetail"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -887,7 +970,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["BookingDetail"];
                         };
                     };
                 };
@@ -963,7 +1046,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["BookingDetail"];
                         };
                     };
                 };
@@ -1010,13 +1093,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List payments (status/provider/booking_id filters) */
+        /** List payments (status/provider/booking_id/created_after/created_before filters) */
         get: {
             parameters: {
                 query?: {
                     status?: "created" | "pending" | "success" | "failed" | "cancelled" | "refunded" | "partially_refunded";
                     provider?: "cashfree";
                     booking_id?: string;
+                    created_after?: string;
+                    created_before?: string;
                     page?: number;
                     pageSize?: number;
                 };
@@ -1033,7 +1118,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminPaymentDetail"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -1101,7 +1191,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminPaymentDetail"];
                         };
                     };
                 };
@@ -1150,11 +1240,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List refunds (status filter) */
+        /** List refunds (status/payment_id filters) */
         get: {
             parameters: {
                 query?: {
                     status?: "pending" | "success" | "failed" | "cancelled";
+                    payment_id?: string;
                     page?: number;
                     pageSize?: number;
                 };
@@ -1171,7 +1262,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AdminRefundDetail"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -1248,7 +1344,22 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                payment_id: string;
+                                provider_refund_id: string;
+                                provider_reference_id: string | null;
+                                /** @enum {string} */
+                                status: "pending" | "success" | "failed" | "cancelled";
+                                amount_minor_units: number;
+                                reason: string | null;
+                                /** Format: date-time */
+                                created_at: string;
+                                /** Format: date-time */
+                                updated_at: string;
+                            };
                         };
                     };
                 };
@@ -1317,7 +1428,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["DeliveryAttemptRow"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -1366,13 +1482,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Immutable audit log (target_type/target_id/admin_id filters) -- no write endpoint exists */
+        /** Immutable audit log (target_type/target_id/admin_id/action/created_after/created_before filters) -- no write endpoint exists */
         get: {
             parameters: {
                 query?: {
                     target_type?: "location" | "user" | "booking" | "payment";
                     target_id?: string;
                     admin_id?: string;
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND";
+                    created_after?: string;
+                    created_before?: string;
                     page?: number;
                     pageSize?: number;
                 };
@@ -1389,7 +1508,12 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data?: unknown;
+                            data: components["schemas"]["AuditLogEntry"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
                         };
                     };
                 };
@@ -1434,7 +1558,286 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        DashboardSummary: {
+            total_users: number;
+            active_hosts: number;
+            published_locations: number;
+            locations_awaiting_approval: number;
+            upcoming_bookings: number;
+            recent_bookings: {
+                /** Format: uuid */
+                id: string;
+                status: string;
+                /** Format: date-time */
+                start_at: string;
+                /** Format: date-time */
+                created_at: string;
+            }[];
+            payment_activity_30d: {
+                count: number;
+                total_amount_minor_units: number;
+            };
+            refund_activity_30d: {
+                count: number;
+                total_amount_minor_units: number;
+            };
+            recent_admin_actions: {
+                /** Format: uuid */
+                id: string;
+                action: string;
+                target_type: string;
+                /** Format: uuid */
+                target_id: string;
+                /** Format: date-time */
+                created_at: string;
+            }[];
+        };
+        SystemStatus: {
+            environment: string;
+            payments: {
+                provider: string;
+                mode: string;
+            };
+            notifications: {
+                provider: string;
+            };
+            media: {
+                configured: boolean;
+            };
+        };
+        AdminUserDetail: {
+            /** Format: uuid */
+            id: string;
+            first_name: string | null;
+            last_name: string | null;
+            avatar_url: string | null;
+            /** @enum {string} */
+            status: "active" | "suspended" | "deleted";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            roles: ("booker" | "host" | "admin")[];
+            email: string | null;
+            /** Format: date-time */
+            last_sign_in_at: string | null;
+            locations_count: number;
+            bookings_count: number;
+        };
+        CatalogRef: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        PublicMediaItem: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            media_type: "photo" | "video";
+            /** Format: uri */
+            url: string;
+            position: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        HostPublicSummary: {
+            /** Format: uuid */
+            id: string;
+            first_name: string | null;
+            last_name: string | null;
+            avatar_url: string | null;
+        } | null;
+        BookingOption: {
+            type: string;
+            amount_minor_units: number;
+            currency: string;
+        };
+        LocationDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            host_id: string;
+            title: string;
+            description: string;
+            address_line1: string | null;
+            address_line2: string | null;
+            city: string;
+            region: string | null;
+            country: string;
+            postal_code: string | null;
+            latitude: number | null;
+            longitude: number | null;
+            capacity: number | null;
+            timezone: string;
+            instant_booking_enabled: boolean;
+            /** @enum {string} */
+            status: "draft" | "submitted" | "under_review" | "approved" | "published" | "rejected" | "suspended" | "archived";
+            moderation_reason: string | null;
+            suspended_by_host_suspension: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            categories: components["schemas"]["CatalogRef"][];
+            amenities: components["schemas"]["CatalogRef"][];
+            use_cases: components["schemas"]["CatalogRef"][];
+            media: components["schemas"]["PublicMediaItem"][];
+            host: components["schemas"]["HostPublicSummary"];
+            booking_options: components["schemas"]["BookingOption"][];
+        };
+        NameRef: {
+            first_name: string | null;
+            last_name: string | null;
+        } | null;
+        BookingDetail: {
+            /** Format: uuid */
+            id: string;
+            location: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                city: string;
+                timezone: string;
+                /** Format: uuid */
+                host_id: string;
+                host: components["schemas"]["NameRef"];
+            };
+            /** Format: uuid */
+            booker_id: string;
+            booker: components["schemas"]["NameRef"];
+            /** @enum {string} */
+            booking_type: "hourly" | "half_day" | "day" | "multi_day";
+            /** Format: date-time */
+            start_at: string;
+            /** Format: date-time */
+            end_at: string;
+            /** @enum {string} */
+            status: "requested" | "confirmed" | "cancelled" | "completed" | "rejected";
+            pricing: {
+                base_amount_minor_units: number;
+                platform_fee_minor_units: number;
+                tax_minor_units: number;
+                discount_minor_units: number;
+                total_amount_minor_units: number;
+                currency: string;
+            };
+            payments: {
+                /** Format: uuid */
+                id: string;
+                status: string;
+                amount_minor_units: number;
+                /** Format: date-time */
+                created_at: string;
+            }[];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            cancelled_at: string | null;
+            /** Format: uuid */
+            cancelled_by: string | null;
+            cancellation_reason: string | null;
+        };
+        AdminPaymentDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            booking_id: string;
+            provider: string;
+            provider_order_id: string;
+            provider_reference_id: string | null;
+            /** @enum {string} */
+            status: "created" | "pending" | "success" | "failed" | "cancelled" | "refunded" | "partially_refunded";
+            amount_minor_units: number;
+            currency: string;
+            failure_reason: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            booking: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                location_id: string;
+                /** Format: uuid */
+                booker_id: string;
+                location: {
+                    title: string;
+                } | null;
+                booker: components["schemas"]["NameRef"];
+            } | null;
+        };
+        AdminRefundDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            payment_id: string;
+            provider_refund_id: string;
+            provider_reference_id: string | null;
+            /** @enum {string} */
+            status: "pending" | "success" | "failed" | "cancelled";
+            amount_minor_units: number;
+            reason: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            payment: {
+                /** Format: uuid */
+                id: string;
+                booking: {
+                    /** Format: uuid */
+                    id: string;
+                    /** Format: uuid */
+                    location_id: string;
+                    /** Format: uuid */
+                    booker_id: string;
+                    location: {
+                        title: string;
+                    } | null;
+                    booker: components["schemas"]["NameRef"];
+                } | null;
+            } | null;
+        };
+        DeliveryAttemptRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            notification_id: string;
+            /** Format: uuid */
+            device_id: string;
+            provider: string;
+            /** @enum {string} */
+            status: "sent" | "failed" | "invalid_token" | "skipped";
+            provider_message_id: string | null;
+            error_reason: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        AuditLogEntry: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            admin_id: string;
+            /** @enum {string} */
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND";
+            /** @enum {string} */
+            target_type: "location" | "user" | "booking" | "payment";
+            /** Format: uuid */
+            target_id: string;
+            reason: string | null;
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            created_at: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;

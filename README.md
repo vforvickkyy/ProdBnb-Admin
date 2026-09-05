@@ -18,11 +18,22 @@ project's own role check (`src/lib/useAdminGate.ts`) is UI gating only, never th
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind CSS. API request/response types
-(`src/types/admin-api.d.ts`) are generated from the backend's own OpenAPI contract via
+Next.js (App Router) + TypeScript + Tailwind CSS, [SWR](https://swr.vercel.app) for data fetching/
+caching, [Radix UI Dialog](https://www.radix-ui.com/primitives/docs/components/dialog) for
+accessible modals, and [Sonner](https://sonner.emilkowal.ski) for toasts. API request/response
+types (`src/types/admin-api.d.ts`) are generated from the backend's own OpenAPI contract via
 [`openapi-typescript`](https://openapi-ts.dev), consumed through
 [`openapi-fetch`](https://openapi-ts.dev/openapi-fetch/) (`src/lib/api.ts`) so a backend schema
-change that isn't reflected here becomes a type error at build time.
+change that isn't reflected here becomes a type error at build time. Response *bodies*, not just
+request shapes, are fully typed as of Phase 14 (the backend's generator now registers real zod
+response schemas), so pages consume real types instead of casting from `unknown`.
+
+**Route protection**: `middleware.ts` does a basic session-presence check via a lightweight,
+non-sensitive marker cookie (`src/lib/sessionHint.ts`) — this project's Supabase client persists
+sessions to `localStorage`, which edge middleware can never read, so this is the cheapest available
+way to stop the app shell rendering before the real client-side gate resolves. It is **not** a
+security boundary: the actual authorization is still `requireRole('admin')` on the backend
+(`src/lib/useAdminGate.ts`'s own check is UI-only) and remains completely unchanged by this cookie.
 
 **`src/types/admin-api.d.ts` is committed, not gitignored** (Phase 13) — `generate:api-types`
 reads the backend's OpenAPI doc via a relative sibling-directory path
@@ -65,14 +76,25 @@ self-service way to grant it, deliberately).
 ## Project structure
 
 ```
+middleware.ts     Basic session-presence check (see "Route protection" above)
 src/
-  app/            One folder per route (App Router) — dashboard, users, locations, login
-  components/     Shared UI (AdminShell: nav + the client-side admin gate)
+  app/            One folder per route (App Router):
+                    dashboard, moderation (queue), locations, bookings (+ [id]),
+                    payments (+ [id], refunds), users, audit-log, login
+  components/
+    AdminShell.tsx  Sidebar + header + the client-side admin gate
+    Sidebar.tsx     Navigation
+    ui/             Shared primitives: Table, Badge, Dialog, ConfirmDialog, Pagination,
+                    SearchInput, Skeleton, EmptyState, ErrorState
   lib/
-    supabase.ts   Sign-in only — never used to query Supabase tables directly
-    api.ts        Typed client for /v1/admin/* (openapi-fetch + generated types)
-    useAdminGate.ts   UI-only "is this session an admin" check
-  types/          Generated from the backend's OpenAPI contract (committed — see "Stack" above)
+    supabase.ts     Sign-in only — never used to query Supabase tables directly
+    api.ts          Typed client for /v1/admin/* (openapi-fetch + generated types),
+                    unwrap()/unwrapPaginated() envelope helpers, authorizedFetch() for /v1/me
+    useAdminGate.ts UI-only "is this session an admin" check, backed by SWR
+    useAdminList.ts Shared paginated-list data-fetching hook
+    sessionHint.ts  The middleware marker cookie described above
+  types/            Generated from the backend's OpenAPI contract (committed — see "Stack" above)
+e2e/                Playwright end-to-end specs (see "Testing" below)
 ```
 
 ## Scripts
@@ -80,9 +102,34 @@ src/
 | Command | Purpose |
 |---|---|
 | `npm run dev` | Start the app locally |
-| `npm run build` | Production build (`next build` — type-checks; no ESLint config exists yet, so it does not lint) |
+| `npm run build` | Production build (`next build`) |
 | `npm run typecheck` | Type-check without building |
+| `npm run lint` | ESLint (`next/core-web-vitals` + `next/typescript`) |
+| `npm test` | Run the Vitest component/unit suite once |
+| `npm run test:watch` | Vitest in watch mode |
+| `npm run test:e2e` | Playwright suite against a deployed environment — see below |
 | `npm run generate:api-types` | Regenerate `src/types/admin-api.d.ts` from the backend's `docs/admin-openapi.json` |
+
+## Testing
+
+**Unit/component** (Vitest + React Testing Library, `src/**/*.test.{ts,tsx}`): covers the shared UI
+primitives (e.g. a destructive `ConfirmDialog` can't be confirmed without a reason when one is
+required), the `unwrap`/`unwrapPaginated` API envelope helpers, and every state of
+`useAdminGate` (signed-out, not-admin, admin, and a failed `/v1/me` call degrading to signed-out
+rather than crashing). Runs in CI (`.github/workflows/ci.yml`) on every push/PR, alongside
+typecheck/lint/build.
+
+**End-to-end** (Playwright, `e2e/`): exercises the real login → dashboard → navigate-every-section →
+sign-out flow against a real deployed environment (staging by default). Requires a real admin
+account's credentials passed as environment variables at run time — never hardcoded, never
+committed — and skips itself cleanly when they're absent:
+
+```bash
+E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... npm run test:e2e
+```
+
+Deliberately **not** wired into CI (it needs a live staging admin account's real credentials as
+secrets, which is a separate setup decision) — run it manually before/after a staging deploy.
 
 ## Deployment
 
@@ -96,8 +143,16 @@ backend repo's `docs/DEPLOYMENT.md` for the full staging/production setup.
 
 ## Status
 
-Initial scaffold (dashboard, users, locations pages) verified end-to-end against the real ProdBnb
-backend and local Supabase stack — sign-in, the admin role gate, and typed API calls all confirmed
-working. Bookings, payments/refunds, notification diagnostics, and audit log pages follow the same
-pattern and can be added incrementally; the backend already exposes the full `/v1/admin/*` surface
-these would consume.
+**Phase 14-A** (critical ops core): dashboard, moderation queue, locations, bookings (list +
+detail + cancel), payments (list + detail + refund) and refunds, and a fully filterable audit log
+are built against the backend's complete `/v1/admin/*` surface, with real pagination, debounced
+search, accessible dialogs replacing `window.prompt`/`window.alert`, toasts, loading skeletons, and
+empty/error states throughout. Test infrastructure (Vitest + Testing Library + Playwright), ESLint,
+and CI were stood up from nothing as part of this phase.
+
+**Phase 14-B** (not yet built): dedicated user/location detail pages (suspend/restore and
+approve/reject currently act inline from their list pages), a Hosts-specific view (today just a
+`role=host`-filtered link into Users), notification delivery-diagnostics panels embedded in
+booking/user detail, a System Health page (the backend's `GET /v1/admin/system/status` endpoint
+already exists), and a full accessibility/responsive pass beyond the baseline (labeled forms,
+table semantics, focus-trapped dialogs, tablet-width table scrolling) already in place.

@@ -1,77 +1,204 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { AdminShell } from "@/components/AdminShell";
-import { supabase } from "@/lib/supabase";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
+import { Pagination } from "@/components/ui/Pagination";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { StatusBadge } from "@/components/ui/Badge";
+import { Column, Table } from "@/components/ui/Table";
+import { TableSkeleton } from "@/components/ui/Skeleton";
+import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
+import { useAdminList } from "@/lib/useAdminList";
+import type { components } from "@/types/admin-api";
 
-interface AdminUserRow {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  status: string;
-  roles: string[];
-  created_at: string;
+type AdminUserDetail = components["schemas"]["AdminUserDetail"];
+
+const PAGE_SIZE = 20;
+const ROLE_OPTIONS = ["booker", "host", "admin"] as const;
+const STATUS_OPTIONS = ["active", "suspended", "deleted"] as const;
+
+function displayName(u: AdminUserDetail): string {
+  const name = [u.first_name, u.last_name].filter(Boolean).join(" ");
+  return name || "(no name set)";
 }
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<AdminUserRow[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <Suspense fallback={<AdminShell><TableSkeleton columns={5} /></AdminShell>}>
+      <UsersPageInner />
+    </Suspense>
+  );
+}
 
-  useEffect(() => {
-    async function load() {
-      // GET /v1/admin/users already existed pre-Phase-11 (extended in
-      // place with search/role/status filters) and isn't part of the
-      // generated Phase-11-only OpenAPI contract -- called directly here,
-      // same auth model, just not the typed client.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/admin/users?pageSize=20`, {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (!res.ok) {
-        setError("Failed to load users.");
-        return;
-      }
-      const body = await res.json();
-      setUsers(body.data);
+function UsersPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const page = Number(searchParams.get("page") ?? "1");
+  const search = searchParams.get("search") ?? "";
+  const role = searchParams.get("role") ?? "";
+  const status = searchParams.get("status") ?? "";
+
+  const [confirmTarget, setConfirmTarget] = useState<{ user: AdminUserDetail; action: "suspend" | "restore" } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  function updateParams(next: Record<string, string | undefined>) {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(next)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
     }
-    load();
-  }, []);
+    if (!("page" in next)) params.delete("page");
+    router.push(`/users?${params.toString()}`);
+  }
+
+  const listKey = `/v1/admin/users?page=${page}&search=${search}&role=${role}&status=${status}`;
+  const fetcher = useCallback(
+    () =>
+      adminApi
+        .GET("/users", {
+          params: {
+            query: {
+              page,
+              pageSize: PAGE_SIZE,
+              search: search || undefined,
+              role: (role || undefined) as never,
+              status: (status || undefined) as never,
+            },
+          },
+        })
+        .then(unwrapPaginated),
+    [page, search, role, status]
+  );
+  const { rows, meta, isLoading, error, refresh } = useAdminList<AdminUserDetail>(listKey, fetcher);
+
+  const columns: Column<AdminUserDetail>[] = useMemo(
+    () => [
+      { key: "name", header: "Name", render: (u) => <span className="font-medium text-slate-900">{displayName(u)}</span> },
+      {
+        key: "roles",
+        header: "Roles",
+        render: (u) => (
+          <div className="flex flex-wrap gap-1">
+            {u.roles.length === 0 ? <span className="text-slate-400">none</span> : u.roles.map((r) => <StatusBadge key={r} status={r} />)}
+          </div>
+        ),
+      },
+      { key: "status", header: "Status", render: (u) => <StatusBadge status={u.status} /> },
+      { key: "joined", header: "Joined", render: (u) => new Date(u.created_at).toLocaleDateString() },
+      {
+        key: "actions",
+        header: "Actions",
+        render: (u) =>
+          u.status === "suspended" ? (
+            <button
+              type="button"
+              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+              onClick={() => setConfirmTarget({ user: u, action: "restore" })}
+            >
+              Restore
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+              onClick={() => setConfirmTarget({ user: u, action: "suspend" })}
+            >
+              Suspend
+            </button>
+          ),
+      },
+    ],
+    []
+  );
+
+  async function handleConfirm(reason?: string) {
+    if (!confirmTarget) return;
+    setBusy(true);
+    try {
+      if (confirmTarget.action === "suspend") {
+        await adminApi.POST("/users/{id}/suspend", { params: { path: { id: confirmTarget.user.id } }, body: { reason: reason! } }).then(unwrap);
+        toast.success(`${displayName(confirmTarget.user)} suspended.`);
+      } else {
+        await adminApi.POST("/users/{id}/restore", { params: { path: { id: confirmTarget.user.id } }, body: {} }).then(unwrap);
+        toast.success(`${displayName(confirmTarget.user)} restored.`);
+      }
+      setConfirmTarget(null);
+      await refresh();
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Action failed."));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <AdminShell>
       <h1 className="mb-6 text-xl font-semibold">Users</h1>
-      {error && <p className="text-red-700">{error}</p>}
-      {!users && !error && <p className="text-slate-500">Loading…</p>}
-      {users && (
-        <table className="w-full border-collapse overflow-hidden rounded border border-slate-200 bg-white text-sm">
-          <thead className="bg-slate-100 text-left text-slate-600">
-            <tr>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Roles</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2">Joined</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td className="px-4 py-2">{[u.first_name, u.last_name].filter(Boolean).join(" ") || "—"}</td>
-                <td className="px-4 py-2">{u.roles.join(", ") || "—"}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={u.status === "active" ? "text-green-700" : "text-red-700"}
-                  >
-                    {u.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-slate-500">{new Date(u.created_at).toLocaleDateString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <SearchInput label="Search users by name" value={search} onChange={(v) => updateParams({ search: v || undefined })} placeholder="Search by name…" />
+        <select
+          aria-label="Filter by role"
+          value={role}
+          onChange={(e) => updateParams({ role: e.target.value || undefined })}
+          className="rounded border border-slate-300 px-3 py-1.5 text-sm"
+        >
+          <option value="">All roles</option>
+          {ROLE_OPTIONS.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Filter by status"
+          value={status}
+          onChange={(e) => updateParams({ status: e.target.value || undefined })}
+          className="rounded border border-slate-300 px-3 py-1.5 text-sm"
+        >
+          <option value="">All statuses</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {isLoading && !meta ? (
+        <TableSkeleton columns={5} />
+      ) : error ? (
+        <ErrorState message={extractErrorMessage(error, "Failed to load users.")} onRetry={refresh} />
+      ) : rows.length === 0 ? (
+        <EmptyState title="No users match these filters." description="Try clearing the search or filters above." />
+      ) : (
+        <>
+          <Table columns={columns} rows={rows} rowKey={(u) => u.id} caption="Users" />
+          {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
+        </>
       )}
+
+      <ConfirmDialog
+        open={confirmTarget !== null}
+        onOpenChange={(open) => !open && setConfirmTarget(null)}
+        title={confirmTarget?.action === "suspend" ? "Suspend user" : "Restore user"}
+        description={
+          confirmTarget?.action === "suspend"
+            ? `This also suspends every published location ${confirmTarget ? displayName(confirmTarget.user) : ""} owns.`
+            : "This republishes only locations this user's own suspension put down."
+        }
+        requireReason={confirmTarget?.action === "suspend"}
+        confirmLabel={confirmTarget?.action === "suspend" ? "Suspend" : "Restore"}
+        danger={confirmTarget?.action === "suspend"}
+        busy={busy}
+        onConfirm={handleConfirm}
+      />
     </AdminShell>
   );
 }

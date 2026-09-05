@@ -8,5 +8,9 @@ export default function RootPage() {
   useEffect(() => {
     router.replace("/dashboard");
   }, [router]);
-  return null;
+  return (
+    <div className="flex min-h-screen items-center justify-center text-slate-500" role="status">
+      Loading…
+    </div>
+  );
 }

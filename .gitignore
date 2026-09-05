@@ -29,3 +29,8 @@ out/
 .idea/
 
 npm-debug.log*
+
+# Test tooling output (Phase 14)
+coverage/
+playwright-report/
+test-results/

@@ -1,0 +1,48 @@
+name: CI
+
+# Typecheck/lint/test/build on every push and PR (Phase 14) -- no test
+# infrastructure existed before this phase. Does NOT run e2e/admin-flow.spec.ts:
+# that suite needs a real admin account's credentials against a live
+# deployment (see its own file header) and is a deliberate, separate,
+# opt-in smoke check, not part of the fast feedback loop every push gets.
+#
+# NEXT_PUBLIC_* values below are dummy placeholders for this CI build only --
+# next build needs them present at build time (module-top-level
+# createClient() calls run during prerendering) but this workflow never
+# deploys the result, so no real project URL/key is needed or used.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      NEXT_PUBLIC_API_BASE_URL: https://ci-placeholder.example.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
