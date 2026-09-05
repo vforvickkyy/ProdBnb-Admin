@@ -13,6 +13,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/bookings", label: "Bookings" },
   { href: "/payments", label: "Payments" },
   { href: "/users", label: "Users" },
+  { href: "/hosts", label: "Hosts" },
   { href: "/audit-log", label: "Audit Log" },
 ];
 
@@ -37,12 +38,6 @@ export function Sidebar() {
           </Link>
         );
       })}
-      <Link
-        href="/users?role=host"
-        className="ml-3 rounded px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-      >
-        Hosts
-      </Link>
     </nav>
   );
 }
