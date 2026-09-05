@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 import { AdminShell } from "@/components/AdminShell";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Pagination } from "@/components/ui/Pagination";
@@ -12,7 +11,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { StatusBadge } from "@/components/ui/Badge";
 import { Column, Table } from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/Skeleton";
-import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
+import { adminApi, unwrapPaginated } from "@/lib/api";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
 
@@ -43,9 +42,6 @@ function UsersPageInner() {
   const search = searchParams.get("search") ?? "";
   const role = searchParams.get("role") ?? "";
   const status = searchParams.get("status") ?? "";
-
-  const [confirmTarget, setConfirmTarget] = useState<{ user: AdminUserDetail; action: "suspend" | "restore" } | null>(null);
-  const [busy, setBusy] = useState(false);
 
   function updateParams(next: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -92,50 +88,17 @@ function UsersPageInner() {
       { key: "status", header: "Status", render: (u) => <StatusBadge status={u.status} /> },
       { key: "joined", header: "Joined", render: (u) => new Date(u.created_at).toLocaleDateString() },
       {
-        key: "actions",
-        header: "Actions",
-        render: (u) =>
-          u.status === "suspended" ? (
-            <button
-              type="button"
-              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-              onClick={() => setConfirmTarget({ user: u, action: "restore" })}
-            >
-              Restore
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
-              onClick={() => setConfirmTarget({ user: u, action: "suspend" })}
-            >
-              Suspend
-            </button>
-          ),
+        key: "view",
+        header: "",
+        render: (u) => (
+          <Link href={`/users/${u.id}`} className="text-sm font-medium text-slate-700 underline hover:text-slate-900">
+            View
+          </Link>
+        ),
       },
     ],
     []
   );
-
-  async function handleConfirm(reason?: string) {
-    if (!confirmTarget) return;
-    setBusy(true);
-    try {
-      if (confirmTarget.action === "suspend") {
-        await adminApi.POST("/users/{id}/suspend", { params: { path: { id: confirmTarget.user.id } }, body: { reason: reason! } }).then(unwrap);
-        toast.success(`${displayName(confirmTarget.user)} suspended.`);
-      } else {
-        await adminApi.POST("/users/{id}/restore", { params: { path: { id: confirmTarget.user.id } }, body: {} }).then(unwrap);
-        toast.success(`${displayName(confirmTarget.user)} restored.`);
-      }
-      setConfirmTarget(null);
-      await refresh();
-    } catch (err) {
-      toast.error(extractErrorMessage(err, "Action failed."));
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <AdminShell>
@@ -183,22 +146,6 @@ function UsersPageInner() {
           {meta && <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => updateParams({ page: String(p) })} />}
         </>
       )}
-
-      <ConfirmDialog
-        open={confirmTarget !== null}
-        onOpenChange={(open) => !open && setConfirmTarget(null)}
-        title={confirmTarget?.action === "suspend" ? "Suspend user" : "Restore user"}
-        description={
-          confirmTarget?.action === "suspend"
-            ? `This also suspends every published location ${confirmTarget ? displayName(confirmTarget.user) : ""} owns.`
-            : "This republishes only locations this user's own suspension put down."
-        }
-        requireReason={confirmTarget?.action === "suspend"}
-        confirmLabel={confirmTarget?.action === "suspend" ? "Suspend" : "Restore"}
-        danger={confirmTarget?.action === "suspend"}
-        busy={busy}
-        onConfirm={handleConfirm}
-      />
     </AdminShell>
   );
 }
