@@ -9,21 +9,39 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Sidebar", () => {
-  it("includes a System Health navigation entry linking to /system", () => {
+  it("includes a Integrations & Health navigation entry linking to /system", () => {
     usePathnameMock.mockReturnValue("/dashboard");
     render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "System Health" })).toHaveAttribute("href", "/system");
+    expect(screen.getByRole("link", { name: "Integrations & Health" })).toHaveAttribute("href", "/system");
   });
 
-  it("marks System Health as the current page when on /system", () => {
+  it("marks Integrations & Health as the current page when on /system", () => {
     usePathnameMock.mockReturnValue("/system");
     render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "System Health" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Integrations & Health" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("does not mark System Health as current on an unrelated page", () => {
+  it("does not mark Integrations & Health as current on an unrelated page", () => {
     usePathnameMock.mockReturnValue("/dashboard");
     render(<Sidebar />);
-    expect(screen.getByRole("link", { name: "System Health" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Integrations & Health" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("hides sections the admin's team role cannot use, keeping the always-available ones", () => {
+    usePathnameMock.mockReturnValue("/dashboard");
+    render(<Sidebar permissions={["dashboard.view", "users.view", "bookings.view"]} />);
+    expect(screen.getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Bookings" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Admin Team" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Payments" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Integrations & Health" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Disputes & Messages" })).not.toBeInTheDocument();
+  });
+
+  it("shows every section while permissions are not known yet", () => {
+    usePathnameMock.mockReturnValue("/dashboard");
+    render(<Sidebar />);
+    expect(screen.getByRole("link", { name: "Payments" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Analytics" })).toBeInTheDocument();
   });
 });

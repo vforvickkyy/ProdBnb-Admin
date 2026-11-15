@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import { Sidebar } from "@/components/Sidebar";
+import type { AdminPermission } from "@/lib/useAdminMe";
 
 /**
  * Below md, AdminShell's desktop Sidebar is display:none -- this drawer is
@@ -12,7 +13,7 @@ import { Sidebar } from "@/components/Sidebar";
  * drawer copy and the desktop copy landmark shouldn't share one identical
  * name when both are present in the DOM.
  */
-export function MobileNav() {
+export function MobileNav({ permissions }: { permissions?: readonly AdminPermission[] } = {}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,9 +28,9 @@ export function MobileNav() {
       </RadixDialog.Trigger>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className="fixed inset-0 z-40 bg-slate-900/40" />
-        <RadixDialog.Content className="fixed inset-y-0 left-0 z-50 w-64 max-w-[80vw] overflow-y-auto bg-white shadow-lg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-500">
+        <RadixDialog.Content className="fixed inset-y-0 left-0 z-50 w-60 max-w-[80vw] overflow-y-auto bg-slate-950 shadow-lg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-500">
           <RadixDialog.Title className="sr-only">Navigation</RadixDialog.Title>
-          <Sidebar navLabel="Admin sections (mobile menu)" />
+          <Sidebar navLabel="Admin sections (mobile menu)" permissions={permissions} />
         </RadixDialog.Content>
       </RadixDialog.Portal>
     </RadixDialog.Root>

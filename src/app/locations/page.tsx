@@ -11,6 +11,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Column, Table } from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { CsvExportButton } from "@/components/ui/CsvExportButton";
 import { adminApi, unwrapPaginated } from "@/lib/api";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
@@ -64,7 +65,7 @@ function LocationsPageInner() {
         key: "status",
         header: "Status",
         render: (l) => (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-start gap-1">
             <StatusBadge status={l.status} />
             {l.status === "suspended" && (
               <Badge tone="neutral">{l.suspended_by_host_suspension ? "Host account suspended" : "Policy violation"}</Badge>
@@ -88,7 +89,29 @@ function LocationsPageInner() {
 
   return (
     <AdminShell>
-      <h1 className="mb-6 text-xl font-semibold">Locations</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">Locations</h1>
+        <CsvExportButton<LocationDetail>
+          filename="locations"
+          fetchPage={(p, size) =>
+            adminApi
+              .GET("/locations", { params: { query: { page: p, pageSize: size, search: search || undefined, status: (status || undefined) as never } } })
+              .then(unwrapPaginated<LocationDetail>)
+          }
+          columns={[
+            { header: "Listing ID", value: (l) => l.id },
+            { header: "Title", value: (l) => l.title },
+            { header: "City", value: (l) => l.city },
+            { header: "Region", value: (l) => l.region },
+            { header: "Country", value: (l) => l.country },
+            { header: "Status", value: (l) => l.status },
+            { header: "Host ID", value: (l) => l.host_id },
+            { header: "Capacity", value: (l) => l.capacity },
+            { header: "Instant booking", value: (l) => (l.instant_booking_enabled ? "yes" : "no") },
+            { header: "Created", value: (l) => l.created_at },
+          ]}
+        />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <SearchInput label="Search locations by title" value={search} onChange={(v) => updateParams({ search: v || undefined })} placeholder="Search by title…" />

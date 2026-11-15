@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -9,6 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Column, Table } from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { useAdminMe } from "@/lib/useAdminMe";
 import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
 import type { components } from "@/types/admin-api";
 
@@ -26,15 +28,15 @@ async function fetchQueue(): Promise<LocationDetail[]> {
     adminApi.GET("/locations", { params: { query: { status: "submitted", pageSize: 100 } } }).then(unwrapPaginated),
     adminApi.GET("/locations", { params: { query: { status: "under_review", pageSize: 100 } } }).then(unwrapPaginated),
   ]);
-  return [...submitted.data, ...underReview.data].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  );
+  return [...submitted.data, ...underReview.data].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 }
 
 export default function ModerationPage() {
   const { data: rows, error, isLoading, mutate } = useSWR("/v1/admin/moderation-queue", fetchQueue, { revalidateOnFocus: false });
   const [confirmTarget, setConfirmTarget] = useState<{ location: LocationDetail; action: Action } | null>(null);
   const [busy, setBusy] = useState(false);
+  const { can } = useAdminMe();
+  const canModerate = can("locations.moderate");
 
   const columns: Column<LocationDetail>[] = useMemo(
     () => [
@@ -42,29 +44,42 @@ export default function ModerationPage() {
       { key: "city", header: "Location", render: (l) => `${l.city}, ${l.country}` },
       { key: "submitted", header: "Waiting since", render: (l) => new Date(l.created_at).toLocaleString() },
       {
-        key: "actions",
-        header: "Actions",
+        key: "review",
+        header: "",
         render: (l) => (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setConfirmTarget({ location: l, action: "approve" })}
-              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-            >
-              Approve
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmTarget({ location: l, action: "reject" })}
-              className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
-            >
-              Reject
-            </button>
-          </div>
+          <Link href={`/locations/${l.id}`} className="text-xs text-slate-600 underline hover:text-slate-900">
+            Review details
+          </Link>
         ),
       },
+      ...(canModerate
+        ? ([
+            {
+              key: "actions",
+              header: "Actions",
+              render: (l) => (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmTarget({ location: l, action: "approve" })}
+                    className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmTarget({ location: l, action: "reject" })}
+                    className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+                  >
+                    Reject
+                  </button>
+                </div>
+              ),
+            },
+          ] satisfies Column<LocationDetail>[])
+        : []),
     ],
-    []
+    [canModerate],
   );
 
   const handleConfirm = useCallback(
@@ -88,7 +103,7 @@ export default function ModerationPage() {
         setBusy(false);
       }
     },
-    [confirmTarget, mutate]
+    [confirmTarget, mutate],
   );
 
   return (

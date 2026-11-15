@@ -11,6 +11,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { StatusBadge } from "@/components/ui/Badge";
 import { Column, Table } from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { CsvExportButton } from "@/components/ui/CsvExportButton";
 import { adminApi, unwrapPaginated } from "@/lib/api";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
@@ -102,7 +103,27 @@ function UsersPageInner() {
 
   return (
     <AdminShell>
-      <h1 className="mb-6 text-xl font-semibold">Users</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">Users</h1>
+        <CsvExportButton<AdminUserDetail>
+          filename="users"
+          fetchPage={(p, size) =>
+            adminApi
+              .GET("/users", {
+                params: { query: { page: p, pageSize: size, search: search || undefined, role: (role || undefined) as never, status: (status || undefined) as never } },
+              })
+              .then(unwrapPaginated<AdminUserDetail>)
+          }
+          columns={[
+            { header: "User ID", value: (u) => u.id },
+            { header: "First name", value: (u) => u.first_name },
+            { header: "Last name", value: (u) => u.last_name },
+            { header: "Roles", value: (u) => u.roles.join(" ") },
+            { header: "Status", value: (u) => u.status },
+            { header: "Joined", value: (u) => u.created_at },
+          ]}
+        />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <SearchInput label="Search users by name" value={search} onChange={(v) => updateParams({ search: v || undefined })} placeholder="Search by name…" />

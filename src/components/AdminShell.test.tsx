@@ -12,6 +12,10 @@ const { useAdminGateMock, signOutMock, clearSessionHintMock, replaceMock, mutate
 }));
 
 vi.mock("@/lib/useAdminGate", () => ({ useAdminGate: useAdminGateMock }));
+vi.mock("@/lib/useAdminMe", () => ({
+  useAdminMe: () => ({ me: undefined, permissions: undefined, can: () => true }),
+  TEAM_ROLE_LABELS: { super_admin: "Super admin", moderator: "Moderator", support: "Support", finance: "Finance" },
+}));
 vi.mock("@/lib/supabase", () => ({ supabase: { auth: { signOut: signOutMock } } }));
 vi.mock("@/lib/sessionHint", () => ({ clearSessionHint: clearSessionHintMock }));
 // The only real SWR consumer in this tree is useAdminGate, already mocked

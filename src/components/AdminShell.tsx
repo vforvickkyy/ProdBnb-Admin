@@ -7,6 +7,9 @@ import { MobileNav } from "@/components/MobileNav";
 import { Sidebar } from "@/components/Sidebar";
 import { supabase } from "@/lib/supabase";
 import { useAdminGate } from "@/lib/useAdminGate";
+import { TEAM_ROLE_LABELS, useAdminMe } from "@/lib/useAdminMe";
+import { consoleEnvironment } from "@/lib/config";
+import { cn } from "@/lib/cn";
 import { clearSessionHint } from "@/lib/sessionHint";
 
 /**
@@ -37,9 +40,18 @@ async function signOutAndRedirect(router: ReturnType<typeof useRouter>) {
  * side effect during render) that happened to work but is fragile under
  * concurrent rendering.
  */
+const ENV_BADGE: Record<string, { label: string; className: string }> = {
+  local: { label: "Local", className: "bg-slate-100 text-slate-700 ring-slate-300" },
+  staging: { label: "Staging", className: "bg-brand-50 text-brand-800 ring-brand-200" },
+  production: { label: "Production", className: "bg-red-50 text-red-700 ring-red-200" },
+  unknown: { label: "Custom backend", className: "bg-slate-100 text-slate-700 ring-slate-300" },
+};
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const status = useAdminGate();
   const router = useRouter();
+  const { me, permissions } = useAdminMe(status === "admin");
+  const env = ENV_BADGE[consoleEnvironment()] ?? ENV_BADGE.unknown!;
 
   useEffect(() => {
     if (status === "signed-out") {
@@ -82,24 +94,35 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       >
         Skip to main content
       </a>
-      <div className="hidden md:block">
-        <Sidebar />
+      <div className="sticky top-0 hidden h-screen md:block">
+        <Sidebar permissions={permissions} />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-          <div className="flex items-center gap-3">
-            <MobileNav />
-            <span className="font-semibold">ProdBnb Admin</span>
+        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <MobileNav permissions={permissions} />
+            <span className="font-semibold md:hidden">ProdBnb Admin</span>
+            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset", env.className)}>{env.label}</span>
           </div>
-          <button
-            type="button"
-            className="text-sm text-slate-500 hover:text-slate-800"
-            onClick={() => signOutAndRedirect(router)}
-          >
-            Sign out
-          </button>
+          <div className="flex min-w-0 items-center gap-3">
+            {me && (
+              <div className="hidden min-w-0 text-right sm:block">
+                <div className="truncate text-sm font-medium text-slate-800">
+                  {[me.first_name, me.last_name].filter(Boolean).join(" ") || me.email || "Admin"}
+                </div>
+                <div className="text-xs text-slate-500">{TEAM_ROLE_LABELS[me.team_role]}</div>
+              </div>
+            )}
+            <button
+              type="button"
+              className="rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+              onClick={() => signOutAndRedirect(router)}
+            >
+              Sign out
+            </button>
+          </div>
         </header>
-        <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
       </div>
     </div>
   );

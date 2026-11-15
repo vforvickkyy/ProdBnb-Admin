@@ -12,7 +12,11 @@ import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Pagination } from "@/components/ui/Pagination";
 import { Column, Table } from "@/components/ui/Table";
 import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton";
+import { LocationEditDialog } from "@/components/LocationEditDialog";
+import { LocationGallery } from "@/components/LocationGallery";
+import { Button } from "@/components/ui/Button";
 import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
+import { useAdminMe } from "@/lib/useAdminMe";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
 
@@ -45,6 +49,8 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
   const { id } = use(params);
   const [confirmAction, setConfirmAction] = useState<Action | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const { can } = useAdminMe();
 
   const { data: location, error, isLoading, mutate } = useSWR(`/v1/admin/locations/${id}`, () =>
     adminApi.GET("/locations/{id}", { params: { path: { id } } }).then(unwrap<LocationDetail>)
@@ -258,20 +264,15 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
 
             <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
               <h2 className="mb-3 text-sm font-semibold text-slate-700">Media</h2>
-              {location.media.length === 0 ? (
-                <p className="text-sm text-slate-400">No media uploaded.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {location.media.map((m) =>
-                    m.media_type === "photo" ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={m.id} src={m.url} alt="" className="h-32 w-full rounded object-cover" />
-                    ) : (
-                      <video key={m.id} src={m.url} controls className="h-32 w-full rounded object-cover" />
-                    )
-                  )}
-                </div>
-              )}
+              <LocationGallery
+                locationId={id}
+                fallbackMedia={location.media}
+                canModerate={can("locations.moderate")}
+                onChanged={() => {
+                  void mutate();
+                  void auditLog.refresh();
+                }}
+              />
             </section>
 
             <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
@@ -333,8 +334,29 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
             </section>
           </div>
 
-          {MODERATABLE.has(location.status) && (
-            <div className="mt-6 flex gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            {can("locations.moderate") && (
+              <Button onClick={() => setEditOpen(true)}>Edit listing</Button>
+            )}
+            {can("messages.access") && (
+              <Link href={`/conversations?location_id=${id}`} className="text-sm text-slate-600 underline hover:text-slate-900">
+                Conversations about this listing
+              </Link>
+            )}
+          </div>
+
+          <LocationEditDialog
+            location={location}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            onSaved={() => {
+              void mutate();
+              void auditLog.refresh();
+            }}
+          />
+
+          {MODERATABLE.has(location.status) && can("locations.moderate") && (
+            <div className="mt-3 flex gap-2">
               {(location.status === "submitted" || location.status === "under_review") && (
                 <>
                   <button

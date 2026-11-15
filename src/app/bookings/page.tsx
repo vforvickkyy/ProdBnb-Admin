@@ -9,11 +9,16 @@ import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Pagination } from "@/components/ui/Pagination";
 import { Column, Table } from "@/components/ui/Table";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { CsvExportButton } from "@/components/ui/CsvExportButton";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Segmented } from "@/components/ui/Segmented";
 import { adminApi, unwrapPaginated } from "@/lib/api";
+import { relativeTime } from "@/lib/format";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
 
-type BookingDetail = components["schemas"]["BookingDetail"];
+type BookingDetail = components["schemas"]["AdminBooking"];
+type PaymentState = "" | "paid" | "unpaid" | "unpaid_hold";
 
 const PAGE_SIZE = 20;
 const STATUS_OPTIONS = ["requested", "confirmed", "cancelled", "completed", "rejected"] as const;
@@ -48,6 +53,7 @@ function BookingsPageInner() {
   const status = searchParams.get("status") ?? "";
   const startAfter = searchParams.get("start_after") ?? "";
   const startBefore = searchParams.get("start_before") ?? "";
+  const paymentState = (searchParams.get("payment_state") ?? "") as PaymentState;
 
   function updateParams(next: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -59,24 +65,26 @@ function BookingsPageInner() {
     router.push(`/bookings?${params.toString()}`);
   }
 
-  const listKey = `/v1/admin/bookings?page=${page}&status=${status}&start_after=${startAfter}&start_before=${startBefore}`;
-  const fetcher = useCallback(
-    () =>
+  const listKey = `/v1/admin/bookings?page=${page}&status=${status}&start_after=${startAfter}&start_before=${startBefore}&payment_state=${paymentState}`;
+  const fetchPage = useCallback(
+    (pageNumber: number, pageSize: number) =>
       adminApi
         .GET("/bookings", {
           params: {
             query: {
-              page,
-              pageSize: PAGE_SIZE,
+              page: pageNumber,
+              pageSize,
               status: (status || undefined) as never,
               start_after: startAfter ? new Date(startAfter).toISOString() : undefined,
               start_before: startBefore ? new Date(startBefore).toISOString() : undefined,
+              payment_state: paymentState || undefined,
             },
           },
         })
-        .then(unwrapPaginated),
-    [page, status, startAfter, startBefore]
+        .then(unwrapPaginated<BookingDetail>),
+    [status, startAfter, startBefore, paymentState]
   );
+  const fetcher = useCallback(() => fetchPage(page, PAGE_SIZE), [fetchPage, page]);
   const { rows, meta, isLoading, error, refresh } = useAdminList<BookingDetail>(listKey, fetcher);
 
   const columns: Column<BookingDetail>[] = useMemo(
@@ -96,13 +104,68 @@ function BookingsPageInner() {
         },
       },
       { key: "total", header: "Total", render: (b) => formatAmount(b.pricing.total_amount_minor_units, b.pricing.currency) },
+      {
+        key: "hold",
+        header: "Unpaid hold",
+        render: (b) =>
+          b.hold_expires_at ? (
+            <span className={new Date(b.hold_expires_at).getTime() < Date.now() ? "text-red-700" : "text-brand-700"}>
+              {new Date(b.hold_expires_at).getTime() < Date.now() ? "lapsing now" : `expires ${relativeTime(b.hold_expires_at)}`}
+            </span>
+          ) : b.hold_expired_at ? (
+            <span className="text-slate-500">expired</span>
+          ) : (
+            <span className="text-slate-300">—</span>
+          ),
+      },
     ],
     []
   );
 
   return (
     <AdminShell>
-      <h1 className="mb-6 text-xl font-semibold">Bookings</h1>
+      <PageHeader
+        title="Bookings"
+        description="Every booking on the platform, including ones a host cannot see because nobody has paid."
+        actions={
+          <CsvExportButton<BookingDetail>
+            filename="bookings"
+            fetchPage={fetchPage}
+            columns={[
+              { header: "Booking ID", value: (b) => b.id },
+              { header: "Listing", value: (b) => b.location.title },
+              { header: "City", value: (b) => b.location.city },
+              { header: "Booker", value: (b) => name(b.booker) },
+              { header: "Host", value: (b) => name(b.location.host) },
+              { header: "Type", value: (b) => b.booking_type },
+              { header: "Start", value: (b) => b.start_at },
+              { header: "End", value: (b) => b.end_at },
+              { header: "Status", value: (b) => b.status },
+              { header: "Latest payment", value: (b) => latestPaymentStatus(b) },
+              { header: "Base (minor)", value: (b) => b.pricing.base_amount_minor_units },
+              { header: "Platform fee (minor)", value: (b) => b.pricing.platform_fee_minor_units },
+              { header: "Tax (minor)", value: (b) => b.pricing.tax_minor_units },
+              { header: "Total (minor)", value: (b) => b.pricing.total_amount_minor_units },
+              { header: "Currency", value: (b) => b.pricing.currency },
+              { header: "Created", value: (b) => b.created_at },
+            ]}
+          />
+        }
+      />
+
+      <div className="mb-4">
+        <Segmented<PaymentState>
+          label="Payment"
+          value={paymentState}
+          options={[
+            { value: "", label: "All" },
+            { value: "paid", label: "Paid" },
+            { value: "unpaid", label: "Unpaid" },
+            { value: "unpaid_hold", label: "Unpaid holds" },
+          ]}
+          onChange={(v) => updateParams({ payment_state: v || undefined })}
+        />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <select

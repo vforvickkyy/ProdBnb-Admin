@@ -10,6 +10,8 @@ interface ConfirmDialogProps {
   description?: string;
   /** When set, a reason textarea is required and non-empty before confirming -- matches the backend's own reason-required validation (reject/suspend). */
   requireReason?: boolean;
+  /** Shows the reason textarea without requiring it (e.g. cancel/reject, where a reason helps but is optional). */
+  optionalReason?: boolean;
   /** Label on the confirm button; red styling when `danger` is true. */
   confirmLabel?: string;
   danger?: boolean;
@@ -23,6 +25,7 @@ export function ConfirmDialog({
   title,
   description,
   requireReason,
+  optionalReason,
   confirmLabel = "Confirm",
   danger,
   busy,
@@ -32,8 +35,10 @@ export function ConfirmDialog({
 
   const canConfirm = !requireReason || reason.trim().length > 0;
 
+  const showReason = requireReason || optionalReason;
+
   function handleConfirm() {
-    onConfirm(requireReason ? reason.trim() : undefined);
+    onConfirm(showReason ? reason.trim() || undefined : undefined);
   }
 
   function handleOpenChange(next: boolean) {
@@ -43,10 +48,10 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange} title={title} description={description}>
-      {requireReason && (
+      {showReason && (
         <div className="mb-4">
           <label htmlFor="confirm-dialog-reason" className="mb-1 block text-sm text-slate-600">
-            Reason
+            Reason{optionalReason && !requireReason ? " (optional)" : ""}
           </label>
           <textarea
             id="confirm-dialog-reason"

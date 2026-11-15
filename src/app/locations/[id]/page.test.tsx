@@ -103,6 +103,7 @@ describe("Location detail page", () => {
     vi.clearAllMocks();
     getMock.mockImplementation((path: string) => {
       if (path === "/locations/{id}") return jsonOk(baseLocation);
+      if (path === "/locations/{id}/gallery") return jsonOk({ general: baseLocation.media, sections: [] });
       return jsonOkPaginated([]);
     });
   });

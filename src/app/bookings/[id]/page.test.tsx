@@ -122,4 +122,31 @@ describe("Booking detail page — notification delivery panel integration", () =
     resolveDetail({ data: { data: baseBooking }, error: undefined, response: { status: 200 } });
     expect(await screen.findByRole("heading", { name: "Rooftop Studio" })).toBeInTheDocument();
   });
+
+  describe("admin booking actions", () => {
+    async function renderWithRole(permissions: string[], status = "requested") {
+      getMock.mockImplementation((path: string) => {
+        if (path === "/me") return Promise.resolve({ data: { data: { user_id: "u", email: null, first_name: null, last_name: null, team_role: "support", permissions } }, error: undefined, response: { status: 200 } });
+        if (path === "/bookings/{id}") return Promise.resolve({ data: { data: { ...baseBooking, status } }, error: undefined, response: { status: 200 } });
+        return Promise.resolve({ data: { data: [], meta: { page: 1, pageSize: 20, total: 0 } }, error: undefined, response: { status: 200 } });
+      });
+      renderPage();
+      await screen.findByRole("heading", { level: 1 });
+    }
+
+    it("offers confirm/reject/cancel to an admin with bookings.manage", async () => {
+      await renderWithRole(["bookings.view", "bookings.manage"]);
+      expect(await screen.findByRole("button", { name: "Confirm" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Cancel booking" })).toBeInTheDocument();
+    });
+
+    it("offers no actions to an admin without bookings.manage", async () => {
+      await renderWithRole(["bookings.view"]);
+      await screen.findByText("Pricing snapshot");
+      expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Cancel booking" })).not.toBeInTheDocument();
+    });
+  });
 });
+

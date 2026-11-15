@@ -4,8 +4,8 @@ The operational admin panel for the ProdBnb marketplace — a **separate fronten
 built inside the [ProdBnb Backend](../ProdBnb%20Backend) repository. It signs in through the same
 Supabase Auth project as every other ProdBnb client (iOS, the backend itself) and calls the
 backend's authenticated `/v1/admin/*` REST API for everything else. See the backend repo's
-[`docs/DATABASE.md`](../ProdBnb%20Backend/docs/DATABASE.md#admin-control--admin-panel-phase-11)
-for the full architecture.
+`docs/ADMIN_CONSOLE.md` (team roles, settings, hold expiry, disputes, integrations) and
+`docs/DATABASE.md` for the full architecture.
 
 ## What this project never holds
 
@@ -36,9 +36,10 @@ security boundary: the actual authorization is still `requireRole('admin')` on t
 (`src/lib/useAdminGate.ts`'s own check is UI-only) and remains completely unchanged by this cookie.
 
 **`src/types/admin-api.d.ts` is committed, not gitignored** (Phase 13) — `generate:api-types`
-reads the backend's OpenAPI doc via a relative sibling-directory path
-(`../ProdBnb Backend/docs/admin-openapi.json`), which only resolves on a machine with both repos
-checked out side by side. A CI/deploy pipeline that only clones this repo has no way to produce
+(`scripts/generate-api-types.mjs`) reads the backend's OpenAPI doc from the sibling backend
+checkout, whichever way that folder is named (`ProdBnb.Backend` from a `git clone`, or
+`ProdBnb Backend`; override with `ADMIN_OPENAPI=/path/to/admin-openapi.json`), which only resolves
+on a machine with both repos checked out side by side. A CI/deploy pipeline that only clones this repo has no way to produce
 that file otherwise, so it has to already be in git. This isn't a second source of truth: the
 backend's own CI regenerates `docs/admin-openapi.json` from its zod schemas and fails the build if
 the committed spec has drifted, and this repo's `npm run typecheck` fails if a stale `.d.ts` no
@@ -141,7 +142,47 @@ this project never holds" above. The backend's `CORS_ORIGINS` for the matching e
 include this app's deployed origin, or every API call from the browser fails preflight. See the
 backend repo's `docs/DEPLOYMENT.md` for the full staging/production setup.
 
+## Content-Security-Policy
+
+Built **per request** in `src/middleware.ts` (`src/lib/csp.ts`) with a fresh nonce, and every page
+renders dynamically so it can carry that nonce. Next.js streams page data through small inline
+scripts; the earlier static `script-src 'self'` header (Phase 14-B5, in `next.config.mjs`) blocked
+them, so the deployed console could not hydrate — the login form rendered but did nothing. Static
+headers (`X-Frame-Options`, `Referrer-Policy`) stay in `next.config.mjs`.
+
+## Optional configuration
+
+Besides the three required `NEXT_PUBLIC_*` values, the Integrations page's "Edit in Vercel" links
+can be pointed elsewhere with `NEXT_PUBLIC_VERCEL_BACKEND_ENV_URL`,
+`NEXT_PUBLIC_VERCEL_ADMIN_ENV_URL` and `NEXT_PUBLIC_VERCEL_BACKEND_DEPLOYMENTS_URL` (defaults: the
+current staging projects). None of these are secrets.
+
 ## Status
+
+**Admin Console** (current): every page is permission-aware — the sidebar and controls follow the
+signed-in admin's team role from `GET /v1/admin/me` (Super admin / Moderator / Support / Finance;
+the backend enforces the same permissions on every call regardless of what renders). Added:
+
+- **Analytics** — bookings, booking value, new users, status and city breakdowns, top listings,
+  for 7/30/90 days or 12 months, bucketed by day/week/month in India time. Charts are
+  dependency-free SVG with hover/keyboard tooltips and a table view.
+- **Catalog** — categories, amenities and use cases with usage counts; add, rename, delete (refused
+  while in use).
+- **Disputes & Messages** — find a conversation by booker, host, listing or booking (metadata
+  only), read it only after recording a reason, and the permanent access log.
+- **Admin Team** — add by email, change team role, remove; last super admin is protected.
+- **Settings** — platform fee %, tax %, unpaid-hold expiry, with a live price preview.
+- **Integrations & Health** — every backend key per service (set/missing; identifiers masked;
+  secret values never shown), live checks, deployment info, links to Vercel to edit keys.
+- Bookings: paid / unpaid / unpaid-holds views with hold countdowns; confirm, reject, complete and
+  cancel on the host's behalf. Payments: "needs attention" queue and re-check with Cashfree. User
+  detail: contact, GST billing, team role, grant/revoke booker/host. Listing detail: full gallery
+  with photo/section removal, content editing. CSV export on users, listings, bookings, payments and
+  the audit log. Dashboard: unpaid holds and payments needing attention.
+
+**Phase 14-B** (built): dedicated user/location detail pages, a Hosts view, notification
+delivery diagnostics, System Health, and the accessibility/responsive pass.
+
 
 **Phase 14-A** (critical ops core): dashboard, moderation queue, locations, bookings (list +
 detail + cancel), payments (list + detail + refund) and refunds, and a fully filterable audit log
@@ -149,10 +190,3 @@ are built against the backend's complete `/v1/admin/*` surface, with real pagina
 search, accessible dialogs replacing `window.prompt`/`window.alert`, toasts, loading skeletons, and
 empty/error states throughout. Test infrastructure (Vitest + Testing Library + Playwright), ESLint,
 and CI were stood up from nothing as part of this phase.
-
-**Phase 14-B** (not yet built): dedicated user/location detail pages (suspend/restore and
-approve/reject currently act inline from their list pages), a Hosts-specific view (today just a
-`role=host`-filtered link into Users), notification delivery-diagnostics panels embedded in
-booking/user detail, a System Health page (the backend's `GET /v1/admin/system/status` endpoint
-already exists), and a full accessibility/responsive pass beyond the baseline (labeled forms,
-table semantics, focus-trapped dialogs, tablet-width table scrolling) already in place.

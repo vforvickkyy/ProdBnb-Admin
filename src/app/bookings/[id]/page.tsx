@@ -11,10 +11,33 @@ import { StatusBadge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Button } from "@/components/ui/Button";
 import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
+import { formatDateTime, relativeTime } from "@/lib/format";
+import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 
-type BookingDetail = components["schemas"]["BookingDetail"];
+type BookingDetail = components["schemas"]["AdminBooking"];
+type Action = "cancel" | "confirm" | "reject" | "complete";
+
+const ACTIONS: Record<Action, { title: string; description: string; label: string; danger?: boolean; reasonRequired?: boolean; done: string }> = {
+  cancel: {
+    title: "Cancel booking",
+    description: "This releases the booked interval immediately. The reason is optional but recommended. Cancelling does not refund — refund from the payment if money was taken.",
+    label: "Cancel booking",
+    danger: true,
+    done: "Booking cancelled.",
+  },
+  confirm: { title: "Confirm on the host's behalf", description: "The booker is notified that their booking is confirmed.", label: "Confirm booking", done: "Booking confirmed." },
+  reject: {
+    title: "Reject on the host's behalf",
+    description: "The slot is released and the booker is notified. Refund separately if they paid.",
+    label: "Reject booking",
+    danger: true,
+    done: "Booking rejected.",
+  },
+  complete: { title: "Mark as completed", description: "Use once the shoot has happened.", label: "Mark completed", done: "Booking marked completed." },
+};
 type AuditLogEntry = components["schemas"]["AuditLogEntry"];
 
 function name(n: { first_name: string | null; last_name: string | null } | null | undefined): string {
@@ -31,8 +54,9 @@ const CANCELLABLE = new Set(["requested", "confirmed"]);
 export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [action, setAction] = useState<Action | null>(null);
   const [busy, setBusy] = useState(false);
+  const { can } = useAdminMe();
 
   const { data: booking, error, isLoading, mutate } = useSWR(`/v1/admin/bookings/${id}`, () =>
     adminApi.GET("/bookings/{id}", { params: { path: { id } } }).then(unwrap<BookingDetail>)
@@ -44,15 +68,20 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       .then(unwrapPaginated<AuditLogEntry>)
   );
 
-  async function handleCancel(reason?: string) {
+  async function runAction(reason?: string) {
+    if (!action) return;
     setBusy(true);
+    const path = { params: { path: { id } } };
     try {
-      await adminApi.POST("/bookings/{id}/cancel", { params: { path: { id } }, body: { reason: reason || undefined } }).then(unwrap);
-      toast.success("Booking cancelled.");
-      setConfirmOpen(false);
+      if (action === "cancel") await adminApi.POST("/bookings/{id}/cancel", { ...path, body: { reason: reason || undefined } }).then(unwrap);
+      if (action === "reject") await adminApi.POST("/bookings/{id}/reject", { ...path, body: { reason: reason || undefined } }).then(unwrap);
+      if (action === "confirm") await adminApi.POST("/bookings/{id}/confirm", { ...path, body: {} }).then(unwrap);
+      if (action === "complete") await adminApi.POST("/bookings/{id}/complete", { ...path, body: {} }).then(unwrap);
+      toast.success(ACTIONS[action].done);
+      setAction(null);
       await mutate();
     } catch (err) {
-      toast.error(extractErrorMessage(err, "Failed to cancel booking."));
+      toast.error(extractErrorMessage(err, "That action failed."));
     } finally {
       setBusy(false);
     }
@@ -83,6 +112,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             </div>
             <StatusBadge status={booking.status} />
           </div>
+
+          {booking.hold_expires_at && (
+            <p className="mb-4 rounded-md bg-brand-50 px-3 py-2 text-sm text-brand-800 ring-1 ring-inset ring-brand-200">
+              Unpaid: this booking holds its slot without a payment. The hold {new Date(booking.hold_expires_at).getTime() < Date.now() ? "has lapsed and will be released within a minute" : `expires ${relativeTime(booking.hold_expires_at)} (${formatDateTime(booking.hold_expires_at)})`}, unless a checkout is in progress. The host cannot see it until it is paid.
+            </p>
+          )}
+          {booking.hold_expired_at && (
+            <p className="mb-4 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-700">
+              Cancelled automatically {formatDateTime(booking.hold_expired_at)} because payment was not completed in time.
+            </p>
+          )}
 
           <div className="grid gap-6 sm:grid-cols-2">
             <section className="rounded border border-slate-200 bg-white p-4">
@@ -175,28 +215,45 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             </section>
           </div>
 
-          {CANCELLABLE.has(booking.status) && (
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={() => setConfirmOpen(true)}
-                className="rounded border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
-              >
+          <div className="mt-6 flex flex-wrap gap-2">
+            {can("bookings.manage") && booking.status === "requested" && (
+              <>
+                <Button variant="primary" onClick={() => setAction("confirm")}>
+                  Confirm
+                </Button>
+                <Button variant="danger" onClick={() => setAction("reject")}>
+                  Reject
+                </Button>
+              </>
+            )}
+            {can("bookings.manage") && booking.status === "confirmed" && (
+              <Button onClick={() => setAction("complete")}>Mark completed</Button>
+            )}
+            {can("bookings.manage") && CANCELLABLE.has(booking.status) && (
+              <Button variant="danger" onClick={() => setAction("cancel")}>
                 Cancel booking
-              </button>
-            </div>
-          )}
+              </Button>
+            )}
+            {can("messages.access") && (
+              <Link href={`/conversations?booking_id=${id}`} className="ml-auto self-center text-sm text-slate-600 underline hover:text-slate-900">
+                Conversations about this booking
+              </Link>
+            )}
+          </div>
 
-          <ConfirmDialog
-            open={confirmOpen}
-            onOpenChange={setConfirmOpen}
-            title="Cancel booking"
-            description="This releases the booked interval immediately. The reason is optional but recommended."
-            confirmLabel="Cancel booking"
-            danger
-            busy={busy}
-            onConfirm={handleCancel}
-          />
+          {action && (
+            <ConfirmDialog
+              open
+              onOpenChange={(open) => !open && setAction(null)}
+              title={ACTIONS[action].title}
+              description={ACTIONS[action].description}
+              confirmLabel={ACTIONS[action].label}
+              danger={ACTIONS[action].danger}
+              optionalReason={action === "cancel" || action === "reject"}
+              busy={busy}
+              onConfirm={runAction}
+            />
+          )}
         </>
       )}
     </AdminShell>

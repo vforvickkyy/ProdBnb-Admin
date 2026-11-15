@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Pagination } from "@/components/ui/Pagination";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { CsvExportButton } from "@/components/ui/CsvExportButton";
 import { adminApi, unwrapPaginated } from "@/lib/api";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
@@ -22,12 +23,28 @@ const ACTION_OPTIONS = [
   "ADMIN_SUSPENDED_LOCATION",
   "ADMIN_RESTORED_LOCATION",
   "ADMIN_UPDATED_LOCATION_STATUS",
+  "ADMIN_UPDATED_LOCATION",
+  "ADMIN_DELETED_MEDIA",
+  "ADMIN_DELETED_SECTION",
   "ADMIN_SUSPENDED_USER",
   "ADMIN_RESTORED_USER",
+  "ADMIN_GRANTED_ROLE",
+  "ADMIN_REVOKED_ROLE",
   "ADMIN_CANCELLED_BOOKING",
+  "ADMIN_CONFIRMED_BOOKING",
+  "ADMIN_REJECTED_BOOKING",
+  "ADMIN_COMPLETED_BOOKING",
   "ADMIN_CREATED_REFUND",
-] as const;
-const TARGET_TYPE_OPTIONS = ["location", "user", "booking", "payment"] as const;
+  "ADMIN_VERIFIED_PAYMENT",
+  "ADMIN_CREATED_CATALOG_ITEM",
+  "ADMIN_UPDATED_CATALOG_ITEM",
+  "ADMIN_DELETED_CATALOG_ITEM",
+  "ADMIN_SET_TEAM_ROLE",
+  "ADMIN_REMOVED_TEAM_MEMBER",
+  "ADMIN_UPDATED_SETTINGS",
+] as const satisfies readonly AuditLogEntry["action"][];
+
+const TARGET_TYPE_OPTIONS = ["location", "user", "booking", "payment", "media", "section", "catalog_item", "settings"] as const;
 
 const ACTION_TONE: Record<string, "success" | "danger" | "warning" | "info"> = {
   ADMIN_APPROVED_LOCATION: "success",
@@ -39,6 +56,21 @@ const ACTION_TONE: Record<string, "success" | "danger" | "warning" | "info"> = {
   ADMIN_CANCELLED_BOOKING: "danger",
   ADMIN_CREATED_REFUND: "warning",
   ADMIN_UPDATED_LOCATION_STATUS: "info",
+  ADMIN_UPDATED_LOCATION: "info",
+  ADMIN_DELETED_MEDIA: "danger",
+  ADMIN_DELETED_SECTION: "danger",
+  ADMIN_GRANTED_ROLE: "info",
+  ADMIN_REVOKED_ROLE: "warning",
+  ADMIN_CONFIRMED_BOOKING: "success",
+  ADMIN_REJECTED_BOOKING: "danger",
+  ADMIN_COMPLETED_BOOKING: "success",
+  ADMIN_VERIFIED_PAYMENT: "info",
+  ADMIN_CREATED_CATALOG_ITEM: "info",
+  ADMIN_UPDATED_CATALOG_ITEM: "info",
+  ADMIN_DELETED_CATALOG_ITEM: "warning",
+  ADMIN_SET_TEAM_ROLE: "warning",
+  ADMIN_REMOVED_TEAM_MEMBER: "danger",
+  ADMIN_UPDATED_SETTINGS: "warning",
 };
 
 export default function AuditLogPage() {
@@ -94,7 +126,14 @@ function AuditLogPageInner() {
   const targetHref = useCallback((entry: AuditLogEntry): string | null => {
     if (entry.target_type === "booking") return `/bookings/${entry.target_id}`;
     if (entry.target_type === "payment") return `/payments/${entry.target_id}`;
-    return null; // location/user detail pages are Phase 14-B
+    if (entry.target_type === "location") return `/locations/${entry.target_id}`;
+    if (entry.target_type === "user") return `/users/${entry.target_id}`;
+    if (entry.target_type === "catalog_item") return "/catalog";
+    if (entry.target_type === "settings") return "/settings";
+    // A removed photo/section no longer exists; its listing is in the metadata.
+    const locationId = (entry.metadata as { location_id?: unknown }).location_id;
+    if ((entry.target_type === "media" || entry.target_type === "section") && typeof locationId === "string") return `/locations/${locationId}`;
+    return null;
   }, []);
 
   const columns: Column<AuditLogEntry>[] = useMemo(
@@ -143,7 +182,44 @@ function AuditLogPageInner() {
 
   return (
     <AdminShell>
-      <h1 className="mb-6 text-xl font-semibold">Audit Log</h1>
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">Audit Log</h1>
+        <CsvExportButton<AuditLogEntry>
+          filename="audit-log"
+          fetchPage={(p, size) =>
+            adminApi
+              .GET("/audit-log", {
+                params: {
+                  query: {
+                    page: p,
+                    pageSize: size,
+                    action: (action || undefined) as never,
+                    target_type: (targetType || undefined) as never,
+                    created_after: createdAfter ? new Date(createdAfter).toISOString() : undefined,
+                    created_before: createdBefore ? new Date(createdBefore).toISOString() : undefined,
+                  },
+                },
+              })
+              .then(unwrapPaginated<AuditLogEntry>)
+          }
+          columns={[
+            { header: "When", value: (e) => e.created_at },
+            { header: "Admin ID", value: (e) => e.admin_id },
+            { header: "Action", value: (e) => e.action },
+            { header: "Target type", value: (e) => e.target_type },
+            { header: "Target ID", value: (e) => e.target_id },
+            { header: "Reason", value: (e) => e.reason },
+            { header: "Metadata", value: (e) => JSON.stringify(e.metadata) },
+          ]}
+        />
+      </div>
+      <p className="mb-6 text-sm text-slate-500">
+        Every admin action, permanently. Reads of private conversations are logged separately in{" "}
+        <a href="/conversations?view=log" className="underline">
+          Disputes &amp; Messages → Access log
+        </a>
+        .
+      </p>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <select

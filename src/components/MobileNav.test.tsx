@@ -22,7 +22,7 @@ describe("MobileNav", () => {
 
     expect(await screen.findByRole("link", { name: "Dashboard" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Hosts" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "System Health" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Integrations & Health" })).toBeInTheDocument();
   });
 
   it("gives the drawer's nav landmark a distinct accessible label from the desktop sidebar", async () => {

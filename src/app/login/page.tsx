@@ -48,7 +48,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="mb-6 text-lg font-semibold">ProdBnb Admin</h1>
+        <div className="mb-6 flex items-center gap-2">
+          <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-500 text-sm font-bold text-white">
+            P
+          </span>
+          <h1 className="text-lg font-semibold">
+            Prod<span className="text-brand-500">.</span>Bnb Admin
+          </h1>
+        </div>
         <label htmlFor="login-email" className="mb-1 block text-sm text-slate-600">
           Email
         </label>

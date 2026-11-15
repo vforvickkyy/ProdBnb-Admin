@@ -239,7 +239,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: components["schemas"]["AdminUserDetail"];
+                            data: components["schemas"]["AdminUserFullDetail"];
                         };
                     };
                 };
@@ -315,7 +315,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: components["schemas"]["AdminUserDetail"];
+                            data: components["schemas"]["AdminUserFullDetail"];
                         };
                     };
                 };
@@ -387,7 +387,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: components["schemas"]["AdminUserDetail"];
+                            data: components["schemas"]["AdminUserFullDetail"];
                         };
                     };
                 };
@@ -569,7 +569,81 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Correct a listing's content (not status). Audited with the fields changed. */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        title?: string;
+                        description?: string;
+                        address_line1?: string | null;
+                        address_line2?: string | null;
+                        city?: string;
+                        region?: string | null;
+                        country?: string;
+                        postal_code?: string | null;
+                        latitude?: number | null;
+                        longitude?: number | null;
+                        capacity?: number | null;
+                        timezone?: string;
+                        instant_booking_enabled?: boolean;
+                        category_ids?: string[];
+                        amenity_ids?: string[];
+                        use_case_ids?: string[];
+                        reason?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["LocationDetail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         trace?: never;
     };
     "/locations/{id}/approve": {
@@ -881,6 +955,8 @@ export interface paths {
                     host_id?: string;
                     start_after?: string;
                     start_before?: string;
+                    sort?: "created_at_desc" | "start_at_desc";
+                    payment_state?: "paid" | "unpaid" | "unpaid_hold";
                     page?: number;
                     pageSize?: number;
                 };
@@ -897,7 +973,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: components["schemas"]["BookingDetail"][];
+                            data: components["schemas"]["AdminBooking"][];
                             meta: {
                                 page: number;
                                 pageSize: number;
@@ -970,7 +1046,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: components["schemas"]["BookingDetail"];
+                            data: components["schemas"]["AdminBooking"];
                         };
                     };
                 };
@@ -1486,10 +1562,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    target_type?: "location" | "user" | "booking" | "payment";
+                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings";
                     target_id?: string;
                     admin_id?: string;
-                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND";
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS";
                     created_after?: string;
                     created_before?: string;
                     page?: number;
@@ -1509,6 +1585,1799 @@ export interface paths {
                     content: {
                         "application/json": {
                             data: components["schemas"]["AuditLogEntry"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The calling admin: team role and the exact permissions it grants */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminMe"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every admin and their team role */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["TeamMember"][];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** Add an existing account to the admin team by email (super admin) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: email */
+                        email: string;
+                        /** @enum {string} */
+                        team_role: "super_admin" | "moderator" | "support" | "finance";
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["TeamMember"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/team/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set a team role (super admin). The last super admin cannot be demoted (409). */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        team_role: "super_admin" | "moderator" | "support" | "finance";
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["TeamMember"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        /** Remove from the admin team (super admin). Booker/host roles are kept. */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                removed: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Platform fee, tax and unpaid-hold window */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["PlatformSettings"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change platform settings (super admin). Applies to new bookings only; audited. */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        platform_fee_bps?: number;
+                        tax_bps?: number;
+                        unpaid_hold_minutes?: number | null;
+                        reason?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["PlatformSettings"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/system/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every integration's configuration status (never a secret value); ?check=true runs live checks */
+        get: {
+            parameters: {
+                query?: {
+                    check?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["IntegrationsReport"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Marketplace analytics for a range (bucketed by day/week/month in the given time zone) */
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    bucket?: "day" | "week" | "month";
+                    tz?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Analytics"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/roles/{role}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grant booker/host on a user's behalf (audited). 'admin' is the team API's job. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    role: "booker" | "host";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminUserFullDetail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        /** Revoke booker/host (audited). Existing listings are not touched. */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    role: "booker" | "host";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminUserFullDetail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/locations/{id}/gallery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every photo on a listing: the general gallery and each section's */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["LocationGallery"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/locations/{id}/media/{mediaId}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Remove a photo/video from a listing (deletes the stored object; audited) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        reason?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                deleted: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/locations/{id}/sections/{sectionId}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Remove an empty section from a listing (audited) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    sectionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        reason?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                deleted: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Categories / amenities / use-cases, with how many listings use each */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    kind: "categories" | "amenities" | "use-cases";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminCatalogItem"][];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** Add a catalog option (audited; duplicate names are 409) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    kind: "categories" | "amenities" | "use-cases";
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminCatalogItem"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/catalog/{kind}/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an unused catalog option (409 while any listing uses it; audited) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    kind: "categories" | "amenities" | "use-cases";
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                deleted: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Rename a catalog option (audited) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    kind: "categories" | "amenities" | "use-cases";
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminCatalogItem"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/bookings/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm on the host's behalf (audited) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["BookingDetail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject on the host's behalf, optional reason (audited) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        reason?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["BookingDetail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bookings/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark completed (audited) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["BookingDetail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Re-check a payment with the provider (same guarded path as the webhook; audited) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                booking_id: string;
+                                provider: string;
+                                provider_order_id: string;
+                                provider_reference_id: string | null;
+                                /** @enum {string} */
+                                status: "created" | "pending" | "success" | "failed" | "cancelled" | "refunded" | "partially_refunded";
+                                amount_minor_units: number;
+                                currency: string;
+                                failure_reason: string | null;
+                                /** Format: date-time */
+                                created_at: string;
+                                /** Format: date-time */
+                                updated_at: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/attention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Money taken for a cancelled/rejected booking and not yet fully refunded */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["PaymentNeedingAttention"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find conversations -- metadata only, never message text */
+        get: {
+            parameters: {
+                query?: {
+                    booker_id?: string;
+                    host_id?: string;
+                    location_id?: string;
+                    booking_id?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminConversationSummary"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read a conversation for a stated reason. Writes a permanent access record first. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        reason: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminConversationTranscript"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message-access-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every admin read of private correspondence, with its reason (append-only) */
+        get: {
+            parameters: {
+                query?: {
+                    conversation_id?: string;
+                    admin_user_id?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["MessageAccessLogEntry"][];
                             meta: {
                                 page: number;
                                 pageSize: number;
@@ -1592,6 +3461,8 @@ export interface components {
                 /** Format: date-time */
                 created_at: string;
             }[];
+            unpaid_holds: number;
+            payments_needing_attention: number;
         };
         SystemStatus: {
             environment: string;
@@ -1624,6 +3495,25 @@ export interface components {
             last_sign_in_at: string | null;
             locations_count: number;
             bookings_count: number;
+        };
+        AdminUserFullDetail: components["schemas"]["AdminUserDetail"] & {
+            /** @enum {string|null} */
+            team_role: "super_admin" | "moderator" | "support" | "finance" | null;
+            contact: {
+                phone: string | null;
+                address_line1: string | null;
+                address_line2: string | null;
+                address_city: string | null;
+                address_region: string | null;
+                address_country: string | null;
+                address_postal_code: string | null;
+            };
+            billing: {
+                company_name: string | null;
+                gst_number: string | null;
+                /** Format: date-time */
+                updated_at: string;
+            } | null;
         };
         CatalogRef: {
             /** Format: uuid */
@@ -1700,10 +3590,12 @@ export interface components {
                 id: string;
                 title: string;
                 city: string;
+                region: string | null;
                 timezone: string;
                 /** Format: uuid */
                 host_id: string;
                 host: components["schemas"]["NameRef"];
+                primary_media_url: string | null;
             };
             /** Format: uuid */
             booker_id: string;
@@ -1741,6 +3633,12 @@ export interface components {
             /** Format: uuid */
             cancelled_by: string | null;
             cancellation_reason: string | null;
+            /** Format: date-time */
+            hold_expired_at: string | null;
+        };
+        AdminBooking: components["schemas"]["BookingDetail"] & {
+            /** Format: date-time */
+            hold_expires_at: string | null;
         };
         AdminPaymentDetail: {
             /** Format: uuid */
@@ -1831,15 +3729,228 @@ export interface components {
             /** Format: uuid */
             admin_id: string;
             /** @enum {string} */
-            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND";
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS";
             /** @enum {string} */
-            target_type: "location" | "user" | "booking" | "payment";
+            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings";
             /** Format: uuid */
             target_id: string;
             reason: string | null;
             metadata: {
                 [key: string]: unknown;
             };
+            /** Format: date-time */
+            created_at: string;
+        };
+        AdminMe: {
+            /** Format: uuid */
+            user_id: string;
+            email: string | null;
+            first_name: string | null;
+            last_name: string | null;
+            /** @enum {string} */
+            team_role: "super_admin" | "moderator" | "support" | "finance";
+            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view")[];
+        };
+        TeamMember: {
+            /** Format: uuid */
+            user_id: string;
+            /** @enum {string} */
+            team_role: "super_admin" | "moderator" | "support" | "finance";
+            first_name: string | null;
+            last_name: string | null;
+            avatar_url: string | null;
+            status: string;
+            email: string | null;
+            /** Format: uuid */
+            created_by: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PlatformSettings: {
+            /** Format: uuid */
+            id: string;
+            platform_fee_bps: number;
+            tax_bps: number;
+            unpaid_hold_minutes: number | null;
+            /** Format: uuid */
+            updated_by: string | null;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        IntegrationSetting: {
+            key: string;
+            /** @enum {string} */
+            kind: "secret" | "identifier" | "public";
+            set: boolean;
+            display: string | null;
+        };
+        IntegrationStatus: {
+            id: string;
+            name: string;
+            purpose: string;
+            /** @enum {string} */
+            status: "ok" | "warning" | "error" | "disabled" | "unchecked";
+            detail: string;
+            latency_ms: number | null;
+            settings: components["schemas"]["IntegrationSetting"][];
+        };
+        IntegrationsReport: {
+            /** Format: date-time */
+            checked_at: string;
+            live_checks: boolean;
+            deployment: {
+                node_env: string;
+                vercel_env: string | null;
+                region: string | null;
+                commit_sha: string | null;
+                commit_ref: string | null;
+                commit_message: string | null;
+                deployment_url: string | null;
+            };
+            integrations: components["schemas"]["IntegrationStatus"][];
+        };
+        Analytics: {
+            range: {
+                from: string;
+                to: string;
+                bucket: string;
+                timezone: string;
+                currency: string;
+            };
+            totals: {
+                new_users: number;
+                new_listings: number;
+                published_listings: number;
+                bookings_created: number;
+                bookings_paid: number;
+                gmv_minor: number;
+                refunds_minor: number;
+                platform_fee_minor: number;
+                payment_success_rate: number | null;
+                cancellations: number;
+                expired_holds: number;
+                other_currency_payments: number;
+            };
+            series: {
+                bucket_start: string;
+                new_users: number;
+                bookings_created: number;
+                bookings_paid: number;
+                gmv_minor: number;
+            }[];
+            status_breakdown: {
+                [key: string]: number;
+            };
+            booking_type_breakdown: {
+                [key: string]: number;
+            };
+            top_locations: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                city: string;
+                paid_bookings: number;
+                gmv_minor: number;
+            }[];
+            top_cities: {
+                city: string;
+                bookings: number;
+            }[];
+        };
+        LocationSectionSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            location_id: string;
+            name: string;
+            description: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            cover: components["schemas"]["PublicMediaItem"] & unknown;
+            photo_count: number;
+        };
+        LocationGallery: {
+            general: components["schemas"]["PublicMediaItem"][];
+            sections: {
+                section: components["schemas"]["LocationSectionSummary"];
+                media: components["schemas"]["PublicMediaItem"][];
+            }[];
+        };
+        AdminCatalogItem: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: date-time */
+            created_at: string;
+            usage_count: number;
+        };
+        PaymentNeedingAttention: components["schemas"]["AdminPaymentDetail"] & {
+            booking_status: string;
+            hold_expired: boolean;
+            /** Format: date-time */
+            cancelled_at: string | null;
+            refunded_minor_units: number;
+        };
+        AdminConversationSummary: {
+            /** Format: uuid */
+            id: string;
+            booker: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
+            };
+            host: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
+            } | null;
+            location: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                city: string;
+            } | null;
+            /** Format: uuid */
+            booking_id: string | null;
+            message_count: number;
+            /** Format: date-time */
+            last_message_at: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        AdminConversationTranscript: {
+            conversation: components["schemas"]["AdminConversationSummary"];
+            messages: {
+                /** Format: uuid */
+                id: string;
+                /** Format: uuid */
+                sender_id: string;
+                /** @enum {string} */
+                sender_role: "booker" | "host" | "other";
+                body: string;
+                /** Format: date-time */
+                created_at: string;
+            }[];
+            truncated: boolean;
+            /** Format: uuid */
+            access_id: string;
+        };
+        MessageAccessLogEntry: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            admin_user_id: string;
+            admin: components["schemas"]["NameRef"];
+            /** Format: uuid */
+            conversation_id: string;
+            action: string;
+            reason: string;
             /** Format: date-time */
             created_at: string;
         };

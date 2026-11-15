@@ -9,7 +9,9 @@ import { StatusBadge } from "@/components/ui/Badge";
 import { Dialog } from "@/components/ui/Dialog";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Button } from "@/components/ui/Button";
 import { adminApi, unwrap } from "@/lib/api";
+import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 
 type AdminPaymentDetail = components["schemas"]["AdminPaymentDetail"];
@@ -35,6 +37,24 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
   const { data: payment, error, isLoading, mutate } = useSWR(`/v1/admin/payments/${id}`, () =>
     adminApi.GET("/payments/{id}", { params: { path: { id } } }).then(unwrap<AdminPaymentDetail>)
   );
+
+  const { can } = useAdminMe();
+  const [verifying, setVerifying] = useState(false);
+
+  // Asks Cashfree directly (the same guarded path the webhook uses) -- for a payment stuck in
+  // created/pending because a webhook never arrived. Audited.
+  async function handleVerify() {
+    setVerifying(true);
+    try {
+      const result = await adminApi.POST("/payments/{id}/verify", { params: { path: { id } }, body: {} }).then(unwrap<{ status: string }>);
+      toast.success(`Checked with the provider: ${result.status.replace(/_/g, " ")}.`);
+      await mutate();
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Could not check with the provider."));
+    } finally {
+      setVerifying(false);
+    }
+  }
 
   async function handleRefund() {
     setBusy(true);
@@ -128,8 +148,8 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
             </section>
           </div>
 
-          {REFUNDABLE.has(payment.status) && (
-            <div className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-2">
+            {REFUNDABLE.has(payment.status) && can("payments.refund") && (
               <button
                 type="button"
                 onClick={() => setRefundOpen(true)}
@@ -137,8 +157,13 @@ export default function PaymentDetailPage({ params }: { params: Promise<{ id: st
               >
                 Issue refund
               </button>
-            </div>
-          )}
+            )}
+            {can("payments.verify") && (
+              <Button onClick={handleVerify} disabled={verifying}>
+                {verifying ? "Checking…" : "Re-check with Cashfree"}
+              </Button>
+            )}
+          </div>
 
           <Dialog open={refundOpen} onOpenChange={setRefundOpen} title="Issue refund" description={payment.booking?.location?.title}>
             <div className="mb-3">

@@ -12,11 +12,13 @@ import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
 import { Pagination } from "@/components/ui/Pagination";
 import { Column, Table } from "@/components/ui/Table";
 import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton";
+import { Button } from "@/components/ui/Button";
+import { TEAM_ROLE_LABELS, useAdminMe } from "@/lib/useAdminMe";
 import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
 import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
 
-type AdminUserDetail = components["schemas"]["AdminUserDetail"];
+type AdminUserDetail = components["schemas"]["AdminUserFullDetail"];
 type LocationDetail = components["schemas"]["LocationDetail"];
 type BookingDetail = components["schemas"]["BookingDetail"];
 type AuditLogEntry = components["schemas"]["AuditLogEntry"];
@@ -38,6 +40,8 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
   const { id } = use(params);
   const [confirmAction, setConfirmAction] = useState<"suspend" | "restore" | null>(null);
   const [busy, setBusy] = useState(false);
+  const { can } = useAdminMe();
+  const [roleBusy, setRoleBusy] = useState(false);
 
   const { data: user, error, isLoading, mutate } = useSWR(`/v1/admin/users/${id}`, () =>
     adminApi.GET("/users/{id}", { params: { path: { id } } }).then(unwrap<AdminUserDetail>)
@@ -75,6 +79,21 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
     [id, auditPage]
   );
   const auditLog = useAdminList<AuditLogEntry>(`/v1/admin/audit-log?target_type=user&target_id=${id}&page=${auditPage}`, auditFetcher);
+
+  async function toggleRole(role: "booker" | "host", grant: boolean) {
+    setRoleBusy(true);
+    try {
+      const path = { params: { path: { id, role } } };
+      if (grant) await adminApi.POST("/users/{id}/roles/{role}", path).then(unwrap);
+      else await adminApi.DELETE("/users/{id}/roles/{role}", path).then(unwrap);
+      toast.success(grant ? `Granted the ${role} role.` : `Removed the ${role} role.`);
+      await mutate();
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Could not change roles."));
+    } finally {
+      setRoleBusy(false);
+    }
+  }
 
   async function handleConfirm(reason?: string) {
     if (!confirmAction || !user) return;
@@ -172,6 +191,18 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                   </dd>
                 </div>
                 <div className="flex justify-between">
+                  <dt className="text-slate-500">Admin team</dt>
+                  <dd>
+                    {user.team_role ? (
+                      <Link href="/team" className="underline hover:text-slate-900">
+                        {TEAM_ROLE_LABELS[user.team_role]}
+                      </Link>
+                    ) : (
+                      <span className="text-slate-400">not an admin</span>
+                    )}
+                  </dd>
+                </div>
+                <div className="flex justify-between">
                   <dt className="text-slate-500">Joined</dt>
                   <dd>{new Date(user.created_at).toLocaleDateString()}</dd>
                 </div>
@@ -192,7 +223,9 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
 
             <section className="rounded border border-slate-200 bg-white p-4">
               <h2 className="mb-3 text-sm font-semibold text-slate-700">Administrative actions</h2>
-              {user.status === "suspended" ? (
+              {!can("users.manage") ? (
+                <p className="text-sm text-slate-500">Your admin role can view this account but not change it.</p>
+              ) : user.status === "suspended" ? (
                 <button
                   type="button"
                   onClick={() => setConfirmAction("restore")}
@@ -209,6 +242,66 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                   Suspend
                 </button>
               )}
+              {can("users.manage") && (
+                <div className="mt-4 border-t border-slate-100 pt-3">
+                  <p className="mb-2 text-xs font-medium text-slate-500">Marketplace roles</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(["booker", "host"] as const).map((role) =>
+                      user.roles.includes(role) ? (
+                        <Button key={role} size="sm" variant="danger" disabled={roleBusy} onClick={() => toggleRole(role, false)}>
+                          Remove {role}
+                        </Button>
+                      ) : (
+                        <Button key={role} size="sm" disabled={roleBusy} onClick={() => toggleRole(role, true)}>
+                          Make {role}
+                        </Button>
+                      )
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500">Removing host keeps their listings; it only stops new ones. Admin access is managed on the Team page.</p>
+                </div>
+              )}
+              {can("messages.access") && (
+                <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-100 pt-3 text-sm">
+                  <Link href={`/conversations?booker_id=${id}`} className="underline hover:text-slate-900">
+                    Conversations as booker
+                  </Link>
+                  {user.roles.includes("host") && (
+                    <Link href={`/conversations?host_id=${id}`} className="underline hover:text-slate-900">
+                      Conversations as host
+                    </Link>
+                  )}
+                </div>
+              )}
+            </section>
+
+            <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
+              <h2 className="mb-3 text-sm font-semibold text-slate-700">Contact & billing</h2>
+              <dl className="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+                {[
+                  ["Phone", user.contact?.phone ?? "—"],
+                  [
+                    "Address",
+                    [
+                      user.contact?.address_line1,
+                      user.contact?.address_line2,
+                      user.contact?.address_city,
+                      user.contact?.address_region,
+                      user.contact?.address_postal_code,
+                      user.contact?.address_country,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "—",
+                  ],
+                  ["Company", user.billing?.company_name ?? "—"],
+                  ["GST number", user.billing?.gst_number ?? "—"],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-4">
+                    <dt className="shrink-0 text-slate-500">{label}</dt>
+                    <dd className="min-w-0 break-words text-right">{value}</dd>
+                  </div>
+                ))}
+              </dl>
             </section>
 
             {user.roles.includes("host") && (
