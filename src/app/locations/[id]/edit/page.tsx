@@ -1,0 +1,461 @@
+"use client";
+
+import { Suspense, use, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import useSWR from "swr";
+import { ArrowLeft, CheckCircle2, Circle, ExternalLink, ImageIcon } from "lucide-react";
+import { AdminShell } from "@/components/AdminShell";
+import { DetailsForm, detailsFromListing, detailsToBody, ListingDetails, validateDetails } from "@/components/listing/DetailsForm";
+import { PhotoManager } from "@/components/listing/PhotoManager";
+import { PricingEditor } from "@/components/listing/PricingEditor";
+import { SectionsEditor } from "@/components/listing/SectionsEditor";
+import { TimingsEditor } from "@/components/listing/TimingsEditor";
+import { useCatalogOptions } from "@/components/listing/useCatalogOptions";
+import { StatusBadge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { ChipSelect } from "@/components/ui/ChipSelect";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { TabPanel, Tabs } from "@/components/ui/Tabs";
+import { adminApi, unwrap } from "@/lib/api";
+import { cn } from "@/lib/cn";
+import { personName } from "@/lib/format";
+import { listingApi } from "@/lib/listingApi";
+import { useAdminMe } from "@/lib/useAdminMe";
+import type { components } from "@/types/admin-api";
+
+type LocationDetail = components["schemas"]["LocationDetail"];
+type Tab = "details" | "photos" | "pricing" | "timings" | "sections" | "tags" | "publish";
+const TABS: Tab[] = ["details", "photos", "pricing", "timings", "sections", "tags", "publish"];
+
+export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  return (
+    <Suspense
+      fallback={
+        <AdminShell>
+          <Skeleton className="h-96 w-full" />
+        </AdminShell>
+      }
+    >
+      <EditListing id={id} />
+    </Suspense>
+  );
+}
+
+function EditListing({ id }: { id: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as Tab | null;
+  const tab: Tab = tabParam && TABS.includes(tabParam) ? tabParam : "details";
+  const { can } = useAdminMe();
+  const canEdit = can("locations.moderate");
+
+  const {
+    data: location,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(`/v1/admin/locations/${id}`, () => adminApi.GET("/locations/{id}", { params: { path: { id } } }).then(unwrap<LocationDetail>));
+  const { data: host } = useSWR(location ? `/v1/admin/users/${location.host_id}` : null, () =>
+    adminApi.GET("/users/{id}", { params: { path: { id: location!.host_id } } }).then(unwrap),
+  );
+  const rules = useSWR(`/v1/locations/${id}/availability/rules`, () => listingApi.rules(id));
+
+  function setTab(next: Tab) {
+    const p = new URLSearchParams(searchParams.toString());
+    p.set("tab", next);
+    router.replace(`/locations/${id}/edit?${p.toString()}`, { scroll: false });
+  }
+
+  const checklist = useMemo(() => {
+    if (!location) return [];
+    return [
+      { key: "photos", label: "At least 3 photos (the first is the cover)", done: location.media.length >= 3, tab: "photos" as Tab },
+      { key: "price", label: "At least one price offered", done: location.booking_options.length > 0, tab: "pricing" as Tab },
+      { key: "hours", label: "Weekly opening hours", done: (rules.data ?? []).length > 0, tab: "timings" as Tab },
+      { key: "description", label: "A description of 80+ characters", done: location.description.trim().length >= 80, tab: "details" as Tab },
+      {
+        key: "coords",
+        label: "Map coordinates (for map search)",
+        done: location.latitude !== null && location.longitude !== null,
+        tab: "details" as Tab,
+      },
+      { key: "category", label: "At least one category", done: location.categories.length > 0, tab: "tags" as Tab },
+    ];
+  }, [location, rules.data]);
+  const missing = checklist.filter((c) => !c.done).length;
+
+  if (isLoading) {
+    return (
+      <AdminShell>
+        <Skeleton className="mb-4 h-10 w-80" />
+        <Skeleton className="h-96 w-full" />
+      </AdminShell>
+    );
+  }
+  if (error || !location) {
+    return (
+      <AdminShell>
+        <ErrorState message={extractErrorMessage(error, "Failed to load the listing.")} onRetry={() => mutate()} />
+      </AdminShell>
+    );
+  }
+
+  const cover = location.media[0];
+  const refresh = () => {
+    void mutate();
+    void rules.mutate();
+  };
+
+  return (
+    <AdminShell>
+      <Link href={`/locations/${id}`} className="mb-3 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+        <ArrowLeft aria-hidden className="h-4 w-4" /> Back to listing
+      </Link>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          <div className="flex h-14 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 sm:h-16 sm:w-24">
+            {cover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={cover.url} alt="Cover" className="h-full w-full object-cover" />
+            ) : (
+              <ImageIcon aria-hidden className="h-5 w-5 text-slate-400" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="line-clamp-2 break-words text-lg font-semibold text-slate-900 sm:text-xl">{location.title}</h1>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500">
+              <StatusBadge status={location.status} />
+              <span className="whitespace-nowrap">
+                {location.city}, {location.country}
+              </span>
+              <span aria-hidden className="hidden sm:inline">
+                ·
+              </span>
+              <span className="whitespace-nowrap">
+                Host:{" "}
+                <Link href={`/users/${location.host_id}`} className="underline hover:text-slate-800">
+                  {host ? personName(host as { first_name: string | null; last_name: string | null }) : "…"}
+                </Link>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {missing > 0 && location.status !== "published" && (
+            <Button onClick={() => setTab("publish")}>
+              {missing} item{missing === 1 ? "" : "s"} left
+            </Button>
+          )}
+          <Link
+            href={`/locations/${id}`}
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <ExternalLink aria-hidden className="h-3.5 w-3.5" /> Moderation & bookings
+          </Link>
+        </div>
+      </div>
+
+      {!canEdit && <p className="mb-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">Your role can view this listing but not edit it.</p>}
+
+      <Tabs<Tab>
+        label="Listing editor"
+        value={tab}
+        onChange={setTab}
+        items={[
+          { value: "details", label: "Details" },
+          { value: "photos", label: "Photos", badge: <Count n={location.media.length} /> },
+          { value: "pricing", label: "Pricing", badge: <Count n={location.booking_options.length} /> },
+          { value: "timings", label: "Timings" },
+          { value: "sections", label: "Sections" },
+          { value: "tags", label: "Categories & amenities" },
+          { value: "publish", label: "Publish", badge: missing > 0 ? <Count n={missing} warn /> : undefined },
+        ]}
+      />
+
+      {tab === "details" && (
+        <TabPanel value="details">
+          <DetailsTab location={location} canEdit={canEdit} onSaved={refresh} />
+        </TabPanel>
+      )}
+      {tab === "photos" && (
+        <TabPanel value="photos">
+          <Card title="Gallery" description="Drag photos to reorder. The first photo is the cover shown in search and in Collections.">
+            <PhotoManager locationId={id} canEdit={canEdit} onChanged={refresh} />
+          </Card>
+        </TabPanel>
+      )}
+      {tab === "pricing" && (
+        <TabPanel value="pricing">
+          <PricingEditor locationId={id} canEdit={canEdit} onChanged={refresh} />
+        </TabPanel>
+      )}
+      {tab === "timings" && (
+        <TabPanel value="timings">
+          <TimingsEditor locationId={id} timezone={location.timezone} canEdit={canEdit} onChanged={refresh} />
+        </TabPanel>
+      )}
+      {tab === "sections" && (
+        <TabPanel value="sections">
+          <SectionsEditor locationId={id} canEdit={canEdit} />
+        </TabPanel>
+      )}
+      {tab === "tags" && (
+        <TabPanel value="tags">
+          <TagsTab location={location} canEdit={canEdit} onSaved={refresh} />
+        </TabPanel>
+      )}
+      {tab === "publish" && (
+        <TabPanel value="publish">
+          <PublishTab location={location} checklist={checklist} canEdit={canEdit} onTab={setTab} onChanged={refresh} />
+        </TabPanel>
+      )}
+    </AdminShell>
+  );
+}
+
+function Count({ n, warn }: { n: number; warn?: boolean }) {
+  return (
+    <span className={cn("rounded-full px-1.5 text-[11px] font-semibold", warn ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600")}>
+      {n}
+    </span>
+  );
+}
+
+/** Shared bottom bar for tabs with a form: appears only when there is something to save. */
+function SaveBar({ dirty, busy, onSave, onReset }: { dirty: boolean; busy: boolean; onSave: () => void; onReset: () => void }) {
+  if (!dirty) return null;
+  return (
+    <div className="sticky bottom-4 z-20 mt-6 flex animate-fade-in items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-lg">
+      <span className="text-sm text-slate-600">You have unsaved changes.</span>
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={onReset} disabled={busy}>
+          Discard
+        </Button>
+        <Button variant="primary" onClick={onSave} disabled={busy}>
+          {busy ? "Saving…" : "Save changes"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function DetailsTab({ location, canEdit, onSaved }: { location: LocationDetail; canEdit: boolean; onSaved: () => void }) {
+  const initial = useMemo(() => detailsFromListing(location), [location]);
+  const [value, setValue] = useState<ListingDetails>(initial);
+  const [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<keyof ListingDetails, string>>>({});
+  useEffect(() => setValue(initial), [initial]);
+  const dirty = JSON.stringify(value) !== JSON.stringify(initial);
+
+  async function save() {
+    const found = validateDetails(value);
+    setErrors(found);
+    if (Object.keys(found).length > 0) {
+      toast.error("Fix the highlighted fields.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await adminApi.PATCH("/locations/{id}", { params: { path: { id: location.id } }, body: detailsToBody(value) as never }).then(unwrap);
+      toast.success("Details saved.");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <fieldset disabled={!canEdit} className="space-y-6">
+      <Card title="Basics">
+        <DetailsForm value={value} onChange={setValue} errors={errors} sections={["basics"]} />
+      </Card>
+      <Card title="Address & map">
+        <DetailsForm value={value} onChange={setValue} errors={errors} sections={["address"]} />
+      </Card>
+      <SaveBar dirty={dirty} busy={busy} onSave={save} onReset={() => setValue(initial)} />
+    </fieldset>
+  );
+}
+
+function TagsTab({ location, canEdit, onSaved }: { location: LocationDetail; canEdit: boolean; onSaved: () => void }) {
+  const categories = useCatalogOptions("categories");
+  const amenities = useCatalogOptions("amenities");
+  const useCases = useCatalogOptions("use-cases");
+  const initial = useMemo(
+    () => ({
+      category_ids: location.categories.map((c) => c.id),
+      amenity_ids: location.amenities.map((c) => c.id),
+      use_case_ids: location.use_cases.map((c) => c.id),
+    }),
+    [location],
+  );
+  const [value, setValue] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => setValue(initial), [initial]);
+  const dirty = JSON.stringify(value) !== JSON.stringify(initial);
+
+  async function save() {
+    setBusy(true);
+    try {
+      await adminApi.PATCH("/locations/{id}", { params: { path: { id: location.id } }, body: value }).then(unwrap);
+      toast.success("Categories & amenities saved.");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <fieldset disabled={!canEdit} className="space-y-6">
+      <Card>
+        <div className="space-y-6">
+          <ChipSelect
+            label="Categories"
+            options={categories.items}
+            selected={value.category_ids}
+            max={20}
+            onChange={(ids) => setValue({ ...value, category_ids: ids })}
+          />
+          <ChipSelect
+            label="Amenities"
+            options={amenities.items}
+            selected={value.amenity_ids}
+            max={30}
+            onChange={(ids) => setValue({ ...value, amenity_ids: ids })}
+          />
+          <ChipSelect
+            label="Good for"
+            options={useCases.items}
+            selected={value.use_case_ids}
+            max={10}
+            onChange={(ids) => setValue({ ...value, use_case_ids: ids })}
+          />
+        </div>
+      </Card>
+      <SaveBar dirty={dirty} busy={busy} onSave={save} onReset={() => setValue(initial)} />
+    </fieldset>
+  );
+}
+
+function PublishTab({
+  location,
+  checklist,
+  canEdit,
+  onTab,
+  onChanged,
+}: {
+  location: LocationDetail;
+  checklist: { key: string; label: string; done: boolean; tab: Tab }[];
+  canEdit: boolean;
+  onTab: (tab: Tab) => void;
+  onChanged: () => void;
+}) {
+  const [confirm, setConfirm] = useState<"publish" | "unpublish" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const missing = checklist.filter((c) => !c.done);
+  const published = location.status === "published";
+  const inReview = location.status === "submitted" || location.status === "under_review";
+
+  async function run() {
+    setBusy(true);
+    try {
+      if (confirm === "publish" && inReview) {
+        await adminApi.POST("/locations/{id}/approve", { params: { path: { id: location.id } }, body: {} }).then(unwrap);
+      } else {
+        await listingApi.setStatus(location.id, confirm === "publish" ? "published" : "draft");
+      }
+      toast.success(confirm === "publish" ? "Listing is live." : "Listing moved back to draft.");
+      setConfirm(null);
+      onChanged();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not change the status.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-3">
+      <Card
+        className="lg:col-span-2"
+        title="Ready to go live?"
+        description="Listings that tick every box get far more bookings. You can publish without them, though."
+      >
+        <ul className="divide-y divide-slate-100">
+          {checklist.map((item) => (
+            <li key={item.key} className="flex items-center justify-between gap-3 py-2.5">
+              <span className="flex items-center gap-2.5 text-sm">
+                {item.done ? (
+                  <CheckCircle2 aria-hidden className="h-5 w-5 text-green-600" />
+                ) : (
+                  <Circle aria-hidden className="h-5 w-5 text-slate-300" />
+                )}
+                <span className={item.done ? "text-slate-700" : "text-slate-900"}>
+                  {item.label}
+                  <span className="sr-only">{item.done ? " — done" : " — to do"}</span>
+                </span>
+              </span>
+              {!item.done && (
+                <Button size="sm" variant="ghost" onClick={() => onTab(item.tab)}>
+                  Fix
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Card>
+      <Card title="Status">
+        <div className="mb-4">
+          <StatusBadge status={location.status} />
+          <p className="mt-2 text-sm text-slate-600">
+            {published ? "Live: bookers can find and book it." : inReview ? "The host submitted it for review." : "Not visible to bookers yet."}
+          </p>
+        </div>
+        {canEdit &&
+          (published ? (
+            <Button variant="danger" onClick={() => setConfirm("unpublish")}>
+              Unpublish to draft
+            </Button>
+          ) : location.status === "suspended" ? (
+            <p className="text-sm text-slate-600">
+              Suspended listings are restored from the{" "}
+              <Link href={`/locations/${location.id}`} className="underline">
+                moderation page
+              </Link>
+              .
+            </p>
+          ) : (
+            <Button variant="brand" onClick={() => setConfirm("publish")}>
+              {inReview ? "Approve & publish" : "Publish now"}
+            </Button>
+          ))}
+      </Card>
+      <ConfirmDialog
+        open={confirm !== null}
+        onOpenChange={(o) => !o && setConfirm(null)}
+        title={confirm === "publish" ? "Publish this listing?" : "Unpublish this listing?"}
+        description={
+          confirm === "publish"
+            ? missing.length > 0
+              ? `${missing.length} checklist item(s) are still open. It will go live anyway.`
+              : "It becomes visible and bookable straight away."
+            : "It disappears from search. Existing bookings are not affected."
+        }
+        danger={confirm === "unpublish"}
+        busy={busy}
+        confirmLabel={confirm === "publish" ? "Publish" : "Unpublish"}
+        onConfirm={run}
+      />
+    </div>
+  );
+}

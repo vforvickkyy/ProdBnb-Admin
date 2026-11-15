@@ -22,8 +22,8 @@ type Bucket = "day" | "week" | "month";
 
 // Categorical slots 1-2 of the reference palette, validated on the console's white card surface
 // (dataviz validate_palette.js: all checks pass, worst adjacent CVD ΔE 24.7).
-const SERIES_1 = "#2a78d6";
-const SERIES_2 = "#eb6834";
+const SERIES_1 = "var(--viz-1)";
+const SERIES_2 = "var(--viz-2)";
 
 const RANGES: { value: Range; label: string; days: number; bucket: Bucket }[] = [
   { value: "7d", label: "Last 7 days", days: 7, bucket: "day" },

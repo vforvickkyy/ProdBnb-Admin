@@ -2,6 +2,226 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Theme variables (Admin Console 2). Light values are Tailwind's defaults; dark values are tuned per
+ * shade for WCAG AA text contrast on the dark surfaces. Generated from one table -- keep both blocks
+ * in step. `white` is the card/surface colour, so in dark mode it is the dark surface.
+ */
+:root {
+  color-scheme: light;
+  --white: 255 255 255;
+  --slate-50: 248 250 252;
+  --slate-100: 241 245 249;
+  --slate-200: 226 232 240;
+  --slate-300: 203 213 225;
+  --slate-400: 148 163 184;
+  --slate-500: 100 116 139;
+  --slate-600: 71 85 105;
+  --slate-700: 51 65 85;
+  --slate-800: 30 41 59;
+  --slate-900: 15 23 42;
+  --slate-950: 2 6 23;
+  --red-50: 254 242 242;
+  --red-100: 254 226 226;
+  --red-200: 254 202 202;
+  --red-300: 252 165 165;
+  --red-400: 248 113 113;
+  --red-500: 239 68 68;
+  --red-600: 220 38 38;
+  --red-700: 185 28 28;
+  --red-800: 153 27 27;
+  --red-900: 127 29 29;
+  --red-950: 69 10 10;
+  --green-50: 240 253 244;
+  --green-100: 220 252 231;
+  --green-200: 187 247 208;
+  --green-300: 134 239 172;
+  --green-400: 74 222 128;
+  --green-500: 34 197 94;
+  --green-600: 22 163 74;
+  --green-700: 21 128 61;
+  --green-800: 22 101 52;
+  --green-900: 20 83 45;
+  --green-950: 5 46 22;
+  --amber-50: 255 251 235;
+  --amber-100: 254 243 199;
+  --amber-200: 253 230 138;
+  --amber-300: 252 211 77;
+  --amber-400: 251 191 36;
+  --amber-500: 245 158 11;
+  --amber-600: 217 119 6;
+  --amber-700: 180 83 9;
+  --amber-800: 146 64 14;
+  --amber-900: 120 53 15;
+  --amber-950: 69 26 3;
+  --blue-50: 239 246 255;
+  --blue-100: 219 234 254;
+  --blue-200: 191 219 254;
+  --blue-300: 147 197 253;
+  --blue-400: 96 165 250;
+  --blue-500: 59 130 246;
+  --blue-600: 37 99 235;
+  --blue-700: 29 78 216;
+  --blue-800: 30 64 175;
+  --blue-900: 30 58 138;
+  --blue-950: 23 37 84;
+  --brand-50: 253 247 236;
+  --brand-100: 249 235 207;
+  --brand-200: 242 211 154;
+  --brand-300: 233 183 95;
+  --brand-400: 222 156 51;
+  --brand-500: 194 128 20;
+  --brand-600: 160 103 15;
+  --brand-700: 125 79 13;
+  --brand-800: 92 58 12;
+  --brand-900: 63 40 10;
+  --brand-950: 42 26 6;
+  --host-50: 236 248 248;
+  --host-100: 207 238 238;
+  --host-200: 163 220 221;
+  --host-300: 108 195 197;
+  --host-400: 58 166 169;
+  --host-500: 23 133 138;
+  --host-600: 18 107 111;
+  --host-700: 14 84 87;
+  --host-800: 11 63 65;
+  --host-900: 8 44 46;
+  --host-950: 4 26 27;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --white: 19 26 36;
+  --slate-50: 12 17 24;
+  --slate-100: 28 36 48;
+  --slate-200: 42 52 66;
+  --slate-300: 58 70 86;
+  --slate-400: 107 119 136;
+  --slate-500: 142 153 168;
+  --slate-600: 169 178 191;
+  --slate-700: 198 205 214;
+  --slate-800: 223 227 232;
+  --slate-900: 238 241 244;
+  --slate-950: 248 250 252;
+  --red-50: 50 32 40;
+  --red-100: 67 35 43;
+  --red-200: 94 40 47;
+  --red-300: 125 46 51;
+  --red-400: 248 113 113;
+  --red-500: 239 68 68;
+  --red-600: 248 113 113;
+  --red-700: 252 165 165;
+  --red-800: 254 202 202;
+  --red-900: 254 226 226;
+  --red-950: 254 242 242;
+  --green-50: 21 50 44;
+  --green-100: 22 64 49;
+  --green-200: 24 84 56;
+  --green-300: 26 108 64;
+  --green-400: 74 222 128;
+  --green-500: 34 197 94;
+  --green-600: 74 222 128;
+  --green-700: 134 239 172;
+  --green-800: 187 247 208;
+  --green-900: 220 252 231;
+  --green-950: 240 253 244;
+  --amber-50: 51 44 32;
+  --amber-100: 69 55 30;
+  --amber-200: 96 71 28;
+  --amber-300: 127 89 24;
+  --amber-400: 251 191 36;
+  --amber-500: 245 158 11;
+  --amber-600: 251 191 36;
+  --amber-700: 252 211 77;
+  --amber-800: 253 230 138;
+  --amber-900: 254 243 199;
+  --amber-950: 255 251 235;
+  --blue-50: 25 41 65;
+  --blue-100: 28 49 82;
+  --blue-200: 33 61 107;
+  --blue-300: 38 76 137;
+  --blue-400: 96 165 250;
+  --blue-500: 59 130 246;
+  --blue-600: 96 165 250;
+  --blue-700: 147 197 253;
+  --blue-800: 191 219 254;
+  --blue-900: 219 234 254;
+  --blue-950: 239 246 255;
+  --brand-50: 44 40 34;
+  --brand-100: 58 48 32;
+  --brand-200: 78 61 31;
+  --brand-300: 103 75 28;
+  --brand-400: 233 183 95;
+  --brand-500: 194 128 20;
+  --brand-600: 222 156 51;
+  --brand-700: 233 183 95;
+  --brand-800: 242 211 154;
+  --brand-900: 249 235 207;
+  --brand-950: 253 247 236;
+  --host-50: 20 41 50;
+  --host-100: 20 50 58;
+  --host-200: 20 62 71;
+  --host-300: 21 77 85;
+  --host-400: 108 195 197;
+  --host-500: 23 133 138;
+  --host-600: 58 166 169;
+  --host-700: 108 195 197;
+  --host-800: 163 220 221;
+  --host-900: 207 238 238;
+  --host-950: 236 248 248;
+}
+
+/*
+ * Chart tokens (dataviz palette, validated with its script for BOTH surfaces: light #2a78d6/#eb6834
+ * on #ffffff, dark #3987e5/#d95926 on #131a24 -- all checks pass). Charts reference these by role,
+ * never a raw hex, so the dark steps are selected rather than flipped.
+ */
+:root {
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-surface: #ffffff;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-muted: #6f6d68;
+  --viz-secondary: #52514e;
+}
+:root.dark {
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-surface: #131a24;
+  --viz-grid: #2a3442;
+  --viz-axis: #3a4656;
+  --viz-muted: #8e99a8;
+  --viz-secondary: #a9b2bf;
+}
+
 body {
-  @apply bg-slate-50 text-slate-900;
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+/* Theme switches are instant; everything else eases. */
+:root.theme-switching *,
+:root.theme-switching *::before,
+:root.theme-switching *::after {
+  transition: none !important;
+}
+
+::selection {
+  background: rgb(var(--brand-200));
+  color: rgb(var(--slate-900));
+}
+
+* {
+  scrollbar-color: rgb(var(--slate-300)) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

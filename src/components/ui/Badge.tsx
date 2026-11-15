@@ -52,6 +52,14 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   created: "warning",
   partially_refunded: "warning",
   refunded: "info",
+  // Messaging (Admin Console 2)
+  partial: "warning",
+  scheduled: "info",
+  sending: "warning",
+  no_devices: "neutral",
+  opted_out: "neutral",
+  unsubscribed: "neutral",
+  no_email: "neutral",
 };
 
 export function StatusBadge({ status }: { status: string }) {

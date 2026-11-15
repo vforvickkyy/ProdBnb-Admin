@@ -18,11 +18,11 @@ export interface LineSeries {
   values: number[];
 }
 
-const SURFACE = "#ffffff";
-const GRID = "#e1e0d9";
-const AXIS = "#c3c2b7";
-const MUTED = "#898781";
-const SECONDARY = "#52514e";
+const SURFACE = "var(--viz-surface)";
+const GRID = "var(--viz-grid)";
+const AXIS = "var(--viz-axis)";
+const MUTED = "var(--viz-muted)";
+const SECONDARY = "var(--viz-secondary)";
 
 function niceStep(max: number, ticks = 4): number {
   if (max <= 0) return 1;

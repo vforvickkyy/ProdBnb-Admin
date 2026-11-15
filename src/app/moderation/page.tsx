@@ -14,7 +14,7 @@ import { useAdminMe } from "@/lib/useAdminMe";
 import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
 import type { components } from "@/types/admin-api";
 
-type LocationDetail = components["schemas"]["LocationDetail"];
+type LocationDetail = components["schemas"]["AdminLocationListItem"];
 type Action = "approve" | "reject";
 
 // The two moderation-pending statuses merged client-side, oldest first --

@@ -10,6 +10,7 @@ test.describe("users", () => {
     await expect(page).toHaveURL(/\/users/);
 
     const firstView = page.getByRole("link", { name: "View" }).first();
+    await page.waitForLoadState("networkidle");
     test.skip((await firstView.count()) === 0, "No users exist on staging to exercise detail navigation.");
 
     await firstView.click();

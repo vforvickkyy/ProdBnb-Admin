@@ -13,6 +13,7 @@ test.describe("bookings", () => {
     // scope to this page's Table by its accessible caption to avoid
     // matching Pagination's Previous/Next buttons.
     const table = page.getByRole("table", { name: "Bookings" });
+    await page.waitForLoadState("networkidle");
     test.skip((await table.count()) === 0, "No bookings exist on staging to exercise detail navigation.");
 
     await table.getByRole("button").first().click();

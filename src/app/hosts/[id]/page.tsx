@@ -17,7 +17,7 @@ import { useAdminList } from "@/lib/useAdminList";
 import type { components } from "@/types/admin-api";
 
 type AdminUserDetail = components["schemas"]["AdminUserDetail"];
-type LocationDetail = components["schemas"]["LocationDetail"];
+type LocationDetail = components["schemas"]["AdminLocationListItem"];
 type BookingDetail = components["schemas"]["BookingDetail"];
 type AuditLogEntry = components["schemas"]["AuditLogEntry"];
 

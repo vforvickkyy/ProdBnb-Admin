@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import useSWR from "swr";
 import { AdminShell } from "@/components/AdminShell";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
@@ -13,6 +14,7 @@ import { adminApi, unwrap } from "@/lib/api";
 import { adminPublicConfig, VERCEL_LINKS } from "@/lib/config";
 import { formatDateTime } from "@/lib/format";
 import { getReadiness } from "@/lib/health";
+import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 
 type IntegrationsReport = components["schemas"]["IntegrationsReport"];
@@ -73,6 +75,22 @@ export default function SystemPage() {
     adminApi.GET("/system/integrations", { params: { query: { check: checked ? "true" : "false" } } }).then(unwrap<IntegrationsReport>)
   );
   const { data: readiness, isLoading: readinessLoading, mutate: recheckReadiness } = useSWR("/health/ready", getReadiness);
+  const { can } = useAdminMe();
+  const [corsBusy, setCorsBusy] = useState(false);
+
+  async function allowBrowserUploads() {
+    setCorsBusy(true);
+    try {
+      await adminApi.POST("/system/r2-cors").then(unwrap);
+      toast.success("Browser uploads allowed. Re-running checks…");
+      setChecked(true);
+      await mutate();
+    } catch (e) {
+      toast.error(extractErrorMessage(e, "Could not update the bucket."));
+    } finally {
+      setCorsBusy(false);
+    }
+  }
 
   function runChecks() {
     if (checked) {
@@ -87,7 +105,7 @@ export default function SystemPage() {
     <AdminShell>
       <PageHeader
         title="Integrations & health"
-        description="Every service ProdBnb depends on, the keys it is configured with, and whether it works. Secret values are never shown here — they stay in Vercel."
+        description="Every service ProdBnb depends on, the keys it is configured with, and whether it works. Secret values are never shown here — they stay in Vercel (or, for email and push, in Supabase Vault)."
         actions={
           <>
             <a href={VERCEL_LINKS.backendEnv} target="_blank" rel="noreferrer" className="text-sm text-slate-600 underline hover:text-slate-900">
@@ -165,6 +183,14 @@ export default function SystemPage() {
                   {integration.latency_ms !== null && <span className="text-slate-400"> · {integration.latency_ms} ms</span>}
                 </p>
                 <SettingsTable settings={integration.settings} />
+                {integration.id === "r2_cors" && can("settings.manage") && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="primary" disabled={corsBusy} onClick={allowBrowserUploads}>
+                      {corsBusy ? "Applying…" : "Allow browser uploads"}
+                    </Button>
+                    <span className="text-xs text-slate-500">Adds a CORS rule for these origins; existing rules are kept.</span>
+                  </div>
+                )}
               </Card>
             ))}
             <Card

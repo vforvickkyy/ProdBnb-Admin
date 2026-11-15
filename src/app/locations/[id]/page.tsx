@@ -336,7 +336,15 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
 
           <div className="mt-6 flex flex-wrap items-center gap-2">
             {can("locations.moderate") && (
-              <Button onClick={() => setEditOpen(true)}>Edit listing</Button>
+              <>
+                <Link
+                  href={`/locations/${id}/edit`}
+                  className="inline-flex items-center rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+                >
+                  Open full editor
+                </Link>
+                <Button onClick={() => setEditOpen(true)}>Quick edit</Button>
+              </>
             )}
             {can("messages.access") && (
               <Link href={`/conversations?location_id=${id}`} className="text-sm text-slate-600 underline hover:text-slate-900">

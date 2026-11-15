@@ -7,7 +7,7 @@ export function BarList({
   title,
   rows,
   formatValue,
-  color = "#2a78d6",
+  color = "var(--viz-1)",
   emptyText = "No data for this range.",
 }: {
   title: string;

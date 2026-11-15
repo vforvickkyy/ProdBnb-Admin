@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import * as RadixDialog from "@radix-ui/react-dialog";
+import { Menu as MenuIcon } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import type { AdminPermission } from "@/lib/useAdminMe";
 
@@ -21,16 +22,17 @@ export function MobileNav({ permissions }: { permissions?: readonly AdminPermiss
       <RadixDialog.Trigger asChild>
         <button
           type="button"
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 md:hidden"
+          aria-label="Menu"
+          className="rounded-md border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 md:hidden"
         >
-          Menu
+          <MenuIcon aria-hidden className="h-4 w-4" />
         </button>
       </RadixDialog.Trigger>
       <RadixDialog.Portal>
-        <RadixDialog.Overlay className="fixed inset-0 z-40 bg-slate-900/40" />
-        <RadixDialog.Content className="fixed inset-y-0 left-0 z-50 w-60 max-w-[80vw] overflow-y-auto bg-slate-950 shadow-lg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-500">
+        <RadixDialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[1px] animate-fade-in" />
+        <RadixDialog.Content className="fixed inset-y-0 left-0 z-50 w-60 max-w-[80vw] overflow-y-auto bg-ink-950 shadow-lg focus:outline-none">
           <RadixDialog.Title className="sr-only">Navigation</RadixDialog.Title>
-          <Sidebar navLabel="Admin sections (mobile menu)" permissions={permissions} />
+          <Sidebar navLabel="Admin sections (mobile menu)" permissions={permissions} onNavigate={() => setOpen(false)} />
         </RadixDialog.Content>
       </RadixDialog.Portal>
     </RadixDialog.Root>

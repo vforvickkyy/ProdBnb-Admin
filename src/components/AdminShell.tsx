@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { mutate } from "swr";
+import { LogOut, Search } from "lucide-react";
+import { CommandPalette } from "@/components/CommandPalette";
 import { MobileNav } from "@/components/MobileNav";
 import { Sidebar } from "@/components/Sidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/lib/supabase";
 import { useAdminGate } from "@/lib/useAdminGate";
 import { TEAM_ROLE_LABELS, useAdminMe } from "@/lib/useAdminMe";
@@ -50,7 +53,8 @@ const ENV_BADGE: Record<string, { label: string; className: string }> = {
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const status = useAdminGate();
   const router = useRouter();
-  const { me, permissions } = useAdminMe(status === "admin");
+  const pathname = usePathname();
+  const { me, permissions, can } = useAdminMe(status === "admin");
   const env = ENV_BADGE[consoleEnvironment()] ?? ENV_BADGE.unknown!;
 
   useEffect(() => {
@@ -61,7 +65,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   if (status === "checking" || status === "signed-out") {
     return (
-      <div className="flex min-h-screen items-center justify-center text-slate-500" role="status">
+      <div className="flex min-h-screen items-center justify-center gap-3 text-sm text-slate-500" role="status">
+        <span aria-hidden className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
         Checking session…
       </div>
     );
@@ -98,31 +103,63 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <Sidebar permissions={permissions} />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <MobileNav permissions={permissions} />
             <span className="font-semibold md:hidden">ProdBnb Admin</span>
-            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset", env.className)}>{env.label}</span>
+            <span className={cn("hidden rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset sm:inline-flex", env.className)}>{env.label}</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("prodbnb:open-palette"))}
+              className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 lg:flex lg:w-72"
+            >
+              <Search aria-hidden className="h-4 w-4" />
+              <span className="flex-1 text-left">Search or jump to…</span>
+              <kbd className="rounded border border-slate-200 bg-white px-1.5 text-[10px] font-medium text-slate-500">⌘K</kbd>
+            </button>
           </div>
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              aria-label="Search or jump to"
+              onClick={() => window.dispatchEvent(new Event("prodbnb:open-palette"))}
+              className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 lg:hidden"
+            >
+              <Search aria-hidden className="h-4 w-4" />
+            </button>
+            <ThemeToggle />
             {me && (
-              <div className="hidden min-w-0 text-right sm:block">
-                <div className="truncate text-sm font-medium text-slate-800">
-                  {[me.first_name, me.last_name].filter(Boolean).join(" ") || me.email || "Admin"}
+              <div className="hidden min-w-0 items-center gap-2 sm:flex">
+                <span
+                  aria-hidden
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold uppercase text-brand-800"
+                >
+                  {(me.first_name?.[0] ?? me.email?.[0] ?? "A") + (me.last_name?.[0] ?? "")}
+                </span>
+                <div className="min-w-0 text-left">
+                  <div className="truncate text-sm font-medium leading-tight text-slate-800">
+                    {[me.first_name, me.last_name].filter(Boolean).join(" ") || me.email || "Admin"}
+                  </div>
+                  <div className="text-xs leading-tight text-slate-500">{TEAM_ROLE_LABELS[me.team_role]}</div>
                 </div>
-                <div className="text-xs text-slate-500">{TEAM_ROLE_LABELS[me.team_role]}</div>
               </div>
             )}
             <button
               type="button"
-              className="rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+              aria-label="Sign out"
+              title="Sign out"
+              className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
               onClick={() => signOutAndRedirect(router)}
             >
-              Sign out
+              <LogOut aria-hidden className="h-4 w-4" />
             </button>
           </div>
         </header>
-        <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        {/* Keyed by path so each page eases in on navigation (disabled under prefers-reduced-motion). */}
+        <main key={pathname} id="main-content" className="mx-auto w-full max-w-7xl flex-1 animate-page-in px-4 py-6 sm:px-6 sm:py-8">
+          {children}
+        </main>
+        <CommandPalette permissions={permissions} can={can} />
       </div>
     </div>
   );

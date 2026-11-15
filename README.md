@@ -159,7 +159,34 @@ current staging projects). None of these are secrets.
 
 ## Status
 
-**Admin Console** (current): every page is permission-aware — the sidebar and controls follow the
+**Admin Console 2** (current):
+
+- **Light / dark / system theme** — toggle in the header; remembered per browser, applied before
+  first paint (nonce'd init script). Every palette is a CSS variable with a tuned dark value
+  (`src/app/globals.css`, `tailwind.config.ts`), checked for WCAG AA contrast; charts use the
+  dataviz palette's dark steps, validated against the dark surface.
+- **Smoother UX** — ⌘K / Ctrl+K command palette (jump to any page, quick actions, search, paste an
+  id to open it), icon sidebar, sticky header, page transitions (off under reduced motion),
+  skeletons everywhere, grid/table view for listings.
+- **Listings** — create a listing for a host (`/locations/new`: host picker with optional host-role
+  grant → basics → address with paste-coordinates → tags → review); full editor
+  (`/locations/[id]/edit`): details, photos (multi-upload with progress and in-browser resizing,
+  drag or keyboard reorder, make cover, remove), pricing per booking type with fee/tax preview,
+  weekly hours with presets, date exceptions, blocked periods, sections with their own photos,
+  categories/amenities, and a publish checklist. Covers, host and starting price in the list.
+- **Catalog & Collections** — cover image and description per category / amenity / use case, and
+  add / remove listings in each; curated collections with cover, ordered listings (drag or
+  arrows) and publish toggle.
+- **Announcements / Email / Push** — compose once, deliver in-app, by push (iOS / Android / web)
+  and email to everyone, a role, app users on chosen platforms, or specific people; audience
+  preview, live preview, test to yourself, schedule, progress and per-recipient outcomes.
+  Connect SMTP (with provider presets), APNs, FCM and Web Push in the dashboard — secrets go to
+  Supabase Vault and are never shown again — each with a test and a step-by-step guide.
+- **Platforms & Releases** — status, live / latest / minimum version, update prompts and
+  maintenance mode per platform; feature flags per platform and minimum version; incidents with a
+  timeline (public ones are shown in the apps); release board; versions in use.
+
+**Admin Console**: every page is permission-aware — the sidebar and controls follow the
 signed-in admin's team role from `GET /v1/admin/me` (Super admin / Moderator / Support / Finance;
 the backend enforces the same permissions on every call regardless of what renders). Added:
 

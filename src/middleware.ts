@@ -26,6 +26,7 @@ export function middleware(request: NextRequest) {
   const csp = buildCsp(nonce, {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+    dev: process.env.NODE_ENV === "development",
   });
 
   // Next reads the nonce from the *request's* CSP header and stamps it on its own scripts.
