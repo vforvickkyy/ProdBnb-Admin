@@ -58,7 +58,7 @@ export function ConfirmDialog({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
-            className="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-card focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
             autoFocus
           />
         </div>
@@ -67,7 +67,7 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={() => handleOpenChange(false)}
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-800 shadow-card transition-colors hover:bg-slate-50"
         >
           Cancel
         </button>
@@ -77,8 +77,8 @@ export function ConfirmDialog({
           disabled={!canConfirm || busy}
           className={
             danger
-              ? "rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-              : "rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              ? "h-8 rounded-lg bg-[#dc2626] px-3 text-[13px] font-medium text-snow shadow-sm transition-colors hover:bg-[#b91c1c] disabled:cursor-not-allowed disabled:opacity-50"
+              : "h-8 rounded-lg bg-accent-500 px-3 text-[13px] font-medium text-snow shadow-sm transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
           }
         >
           {busy ? "Working…" : confirmLabel}

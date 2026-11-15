@@ -1,184 +1,364 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Activity,
-  BellRing,
-  CalendarCheck,
-  CreditCard,
-  Home,
-  Layers,
-  LayoutDashboard,
-  LineChart,
-  Mail,
-  MapPin,
-  Megaphone,
-  MessagesSquare,
-  MonitorSmartphone,
-  ScrollText,
-  Settings,
-  ShieldCheck,
-  Tags,
-  UserCog,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Check, LogOut, Monitor, Moon, PanelLeft, Sun, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
-import type { AdminPermission } from "@/lib/useAdminMe";
+import { findActive, sectionHref, sectionItems, visibleSections, type NavSection } from "@/lib/nav";
+import { SIDEBAR_MODE_OPTIONS, useSidebarMode, type SidebarMode } from "@/lib/sidebarMode";
+import type { ThemeChoice } from "@/lib/theme";
+import { TEAM_ROLE_LABELS, type AdminMe, type AdminPermission } from "@/lib/useAdminMe";
+import { useEffectiveUrl } from "./NavigationProvider";
+import { useTheme } from "./ThemeProvider";
 
-export interface NavItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  /** Hidden when the signed-in admin's team role lacks this. UI only -- the API enforces it too. */
-  permission?: AdminPermission;
-  /** Extra words the command palette matches on. */
-  keywords?: string;
+const RAIL_COLLAPSED = "w-14";
+const RAIL_EXPANDED = "w-[212px]";
+
+function useActive(permissions?: readonly AdminPermission[]) {
+  const { pathname, search } = useEffectiveUrl();
+  const sections = visibleSections(permissions);
+  return { sections, active: findActive(pathname, search, sections) };
 }
 
-// Grouped by job, ordered by operational priority within each group (the moderation queue and the
-// money that needs attention are the most actionable lists day to day).
-export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
-  {
-    label: "Overview",
-    items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, keywords: "home overview" },
-      { href: "/analytics", label: "Analytics", icon: LineChart, permission: "analytics.view", keywords: "revenue gmv charts" },
-    ],
-  },
-  {
-    label: "Marketplace",
-    items: [
-      { href: "/moderation", label: "Moderation Queue", icon: ShieldCheck, permission: "locations.view", keywords: "approve review" },
-      { href: "/locations", label: "Locations", icon: MapPin, permission: "locations.view", keywords: "listings properties" },
-      { href: "/catalog", label: "Catalog", icon: Tags, permission: "locations.view", keywords: "categories amenities use cases" },
-      { href: "/collections", label: "Collections", icon: Layers, permission: "locations.view", keywords: "curated featured" },
-    ],
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/bookings", label: "Bookings", icon: CalendarCheck, permission: "bookings.view" },
-      { href: "/payments", label: "Payments", icon: CreditCard, permission: "payments.view", keywords: "refunds" },
-      { href: "/conversations", label: "Disputes & Messages", icon: MessagesSquare, permission: "messages.access", keywords: "chat" },
-    ],
-  },
-  {
-    label: "Engagement",
-    items: [
-      { href: "/messaging", label: "Announcements", icon: Megaphone, permission: "campaigns.view", keywords: "notifications broadcast campaign" },
-      { href: "/messaging/email", label: "Email", icon: Mail, permission: "campaigns.view", keywords: "smtp" },
-      { href: "/messaging/push", label: "Push notifications", icon: BellRing, permission: "campaigns.view", keywords: "apns fcm web push" },
-    ],
-  },
-  {
-    label: "People",
-    items: [
-      { href: "/users", label: "Users", icon: Users, permission: "users.view" },
-      { href: "/hosts", label: "Hosts", icon: Home, permission: "users.view" },
-      { href: "/team", label: "Admin Team", icon: UserCog, keywords: "roles staff" },
-    ],
-  },
-  {
-    label: "Platform",
-    items: [
-      {
-        href: "/platforms",
-        label: "Platforms & Releases",
-        icon: MonitorSmartphone,
-        permission: "platforms.view",
-        keywords: "ios android web versions feature flags incidents",
-      },
-      { href: "/settings", label: "Settings", icon: Settings, permission: "settings.view", keywords: "fees tax" },
-      { href: "/system", label: "Integrations & Health", icon: Activity, permission: "system.view", keywords: "secrets status" },
-      { href: "/audit-log", label: "Audit Log", icon: ScrollText, permission: "audit.view" },
-    ],
-  },
+export function Logo({ text = "show" }: { text?: "show" | "hover" | "hidden" }) {
+  return (
+    <span className="flex min-w-0 items-center gap-2.5">
+      {/* The ProdBnb mark keeps the brand amber shared with the iOS app. */}
+      <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#c28014] text-[13px] font-bold text-snow">
+        P
+      </span>
+      <span
+        className={cn(
+          "flex min-w-0 items-center gap-1.5 whitespace-nowrap transition-opacity duration-150",
+          text === "hover" && "opacity-0 group-hover/rail:opacity-100 group-has-[:focus-visible]/rail:opacity-100",
+          text === "hidden" && "sr-only",
+        )}
+      >
+        <span className="text-[15px] font-semibold tracking-tight text-slate-900">ProdBnb</span>
+        <span className="rounded-md border border-slate-200 px-1.5 py-px text-2xs font-medium text-slate-500">Admin</span>
+      </span>
+    </span>
+  );
+}
+
+/** Menu chrome shared by the rail's two dropdowns. */
+const MENU_CONTENT =
+  "z-50 min-w-[220px] animate-scale-in rounded-xl border border-slate-200 bg-white p-1 text-sm text-slate-700 shadow-pop focus:outline-none";
+const MENU_ITEM =
+  "relative flex h-8 cursor-pointer select-none items-center gap-2 rounded-md px-2 outline-none data-[highlighted]:bg-slate-100 data-[highlighted]:text-slate-900";
+const MENU_LABEL = "px-2 pb-1 pt-1.5 text-2xs font-medium uppercase tracking-wider text-slate-400";
+
+function RailRow({
+  icon: Icon,
+  label,
+  labelsVisible,
+  hoverReveal,
+  active,
+  tooltip,
+}: {
+  icon: LucideIcon;
+  label: React.ReactNode;
+  labelsVisible: boolean;
+  hoverReveal: boolean;
+  active?: boolean;
+  tooltip?: string;
+}) {
+  return (
+    <>
+      <Icon aria-hidden className={cn("h-[18px] w-[18px] shrink-0 transition-colors", active ? "text-slate-900" : "text-slate-500 group-hover/item:text-slate-900")} />
+      <span
+        className={cn(
+          "min-w-0 truncate whitespace-nowrap transition-opacity duration-150",
+          labelsVisible ? "opacity-100" : hoverReveal ? "opacity-0 group-hover/rail:opacity-100 group-has-[:focus-visible]/rail:opacity-100" : "opacity-0",
+        )}
+      >
+        {label}
+      </span>
+      {tooltip && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white opacity-0 shadow-pop transition-opacity group-hover/item:opacity-100"
+        >
+          {tooltip}
+        </span>
+      )}
+    </>
+  );
+}
+
+const RAIL_ITEM =
+  "group/item relative flex h-9 items-center gap-3 rounded-lg px-[9px] text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400";
+
+function SectionLink({ section, active, mode, hoverReveal, onClick }: { section: NavSection; active: boolean; mode: SidebarMode; hoverReveal: boolean; onClick?: () => void }) {
+  return (
+    <Link
+      href={sectionHref(section)}
+      onClick={onClick}
+      aria-current={active ? "true" : undefined}
+      className={cn(RAIL_ITEM, active ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900")}
+    >
+      <RailRow
+        icon={section.icon}
+        label={section.label}
+        labelsVisible={mode === "expanded"}
+        hoverReveal={hoverReveal}
+        active={active}
+        tooltip={mode === "collapsed" ? section.label : undefined}
+      />
+    </Link>
+  );
+}
+
+function SidebarModeMenu({ mode, hoverReveal }: { mode: SidebarMode; hoverReveal: boolean }) {
+  const [, setMode] = useSidebarMode();
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button type="button" aria-label="Sidebar control" className={cn(RAIL_ITEM, "w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900")}>
+          <RailRow
+            icon={PanelLeft}
+            label="Sidebar"
+            labelsVisible={mode === "expanded"}
+            hoverReveal={hoverReveal}
+            tooltip={mode === "collapsed" ? "Sidebar control" : undefined}
+          />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content side="right" align="end" sideOffset={10} className={MENU_CONTENT}>
+          <DropdownMenu.Label className={MENU_LABEL}>Sidebar control</DropdownMenu.Label>
+          <DropdownMenu.RadioGroup value={mode} onValueChange={(value) => setMode(value as SidebarMode)}>
+            {SIDEBAR_MODE_OPTIONS.map((option) => (
+              <DropdownMenu.RadioItem key={option.value} value={option.value} className={MENU_ITEM}>
+                <span className="flex w-4 justify-center">
+                  <DropdownMenu.ItemIndicator>
+                    <Check aria-hidden className="h-3.5 w-3.5" />
+                  </DropdownMenu.ItemIndicator>
+                </span>
+                {option.label}
+              </DropdownMenu.RadioItem>
+            ))}
+          </DropdownMenu.RadioGroup>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+const THEME_OPTIONS: { value: ThemeChoice; label: string; Icon: typeof Sun }[] = [
+  { value: "dark", label: "Dark", Icon: Moon },
+  { value: "light", label: "Light", Icon: Sun },
+  { value: "system", label: "System", Icon: Monitor },
 ];
 
-export function visibleNavGroups(permissions?: readonly AdminPermission[]) {
-  return NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => !item.permission || !permissions || permissions.includes(item.permission)),
-  })).filter((group) => group.items.length > 0);
+function initials(me?: AdminMe) {
+  if (!me) return "A";
+  return ((me.first_name?.[0] ?? me.email?.[0] ?? "A") + (me.last_name?.[0] ?? "")).toUpperCase();
 }
 
-/** The most specific nav item matching the path, so /messaging/email does not also light up /messaging. */
-function activeHref(pathname: string | null): string | null {
-  if (!pathname) return null;
-  let best: string | null = null;
-  for (const group of NAV_GROUPS) {
-    for (const item of group.items) {
-      if ((pathname === item.href || pathname.startsWith(`${item.href}/`)) && (!best || item.href.length > best.length)) {
-        best = item.href;
-      }
-    }
-  }
-  return best;
+export function displayName(me?: AdminMe) {
+  return (me && ([me.first_name, me.last_name].filter(Boolean).join(" ") || me.email)) || "Admin";
 }
 
+function AccountMenu({ me, mode, hoverReveal, onSignOut }: { me?: AdminMe; mode: SidebarMode; hoverReveal: boolean; onSignOut: () => void }) {
+  const { choice, setChoice } = useTheme();
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button type="button" aria-label="Account menu" className={cn(RAIL_ITEM, "w-full px-[6px] text-slate-700 hover:bg-slate-50")}>
+          <span
+            aria-hidden
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-400 to-accent-600 text-2xs font-semibold text-snow"
+          >
+            {initials(me)}
+          </span>
+          <span
+            className={cn(
+              "min-w-0 text-left transition-opacity duration-150",
+              mode === "expanded" ? "opacity-100" : hoverReveal ? "opacity-0 group-hover/rail:opacity-100 group-has-[:focus-visible]/rail:opacity-100" : "opacity-0",
+            )}
+          >
+            <span className="block truncate text-[13px] font-medium leading-tight text-slate-900">{displayName(me)}</span>
+            {me && <span className="block truncate text-2xs leading-tight text-slate-500">{TEAM_ROLE_LABELS[me.team_role]}</span>}
+          </span>
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content side="right" align="end" sideOffset={10} className={MENU_CONTENT}>
+          <div className="px-2 py-2">
+            <div className="truncate font-medium text-slate-900">{displayName(me)}</div>
+            {me?.email && <div className="truncate text-xs text-slate-500">{me.email}</div>}
+          </div>
+          <DropdownMenu.Separator className="my-1 h-px bg-slate-200" />
+          <DropdownMenu.Label className={MENU_LABEL}>Theme</DropdownMenu.Label>
+          <DropdownMenu.RadioGroup value={choice} onValueChange={(value) => setChoice(value as ThemeChoice)}>
+            {THEME_OPTIONS.map(({ value, label, Icon }) => (
+              <DropdownMenu.RadioItem key={value} value={value} className={MENU_ITEM}>
+                <Icon aria-hidden className="h-4 w-4 text-slate-500" />
+                <span className="flex-1">{label}</span>
+                <DropdownMenu.ItemIndicator>
+                  <Check aria-hidden className="h-3.5 w-3.5" />
+                </DropdownMenu.ItemIndicator>
+              </DropdownMenu.RadioItem>
+            ))}
+          </DropdownMenu.RadioGroup>
+          <DropdownMenu.Separator className="my-1 h-px bg-slate-200" />
+          <DropdownMenu.Item onSelect={onSignOut} className={cn(MENU_ITEM, "text-red-700 data-[highlighted]:text-red-700")}>
+            <LogOut aria-hidden className="h-4 w-4" />
+            Sign out
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+/** The selected section's own menu -- grouped, Supabase-style, no icons. */
+function SectionMenu({ section, currentHref }: { section: NavSection; currentHref: string | null }) {
+  return (
+    <nav aria-label={`${section.label} menu`} className="flex h-full w-[220px] shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-canvas px-3 pb-6">
+      <div className="flex h-12 shrink-0 items-center px-2">
+        <h2 className="truncate text-[15px] font-semibold tracking-tight text-slate-900">{section.label}</h2>
+      </div>
+      <div className="space-y-5 pt-2">
+        {section.groups.map((group, index) => (
+          <div key={group.label ?? index}>
+            {group.label && <div className="mb-1 px-2 text-2xs font-medium uppercase tracking-wider text-slate-400">{group.label}</div>}
+            <ul className="space-y-px">
+              {group.items.map((item) => {
+                const active = item.href === currentHref;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "flex h-8 items-center rounded-md px-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
+                        active ? "bg-slate-100 font-medium text-slate-900" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
+                      )}
+                    >
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+/**
+ * Desktop navigation: a rail of sections (expanded, collapsed, or expanding over the page on
+ * hover -- the admin's choice) and, beside it, the selected section's own grouped menu. Both follow
+ * a click instantly, before the new page has loaded.
+ */
 export function Sidebar({
-  navLabel = "Admin sections",
   permissions,
-  onNavigate,
+  me,
+  onSignOut,
 }: {
-  navLabel?: string;
   /** Omitted (e.g. while /me loads) = show every item; the API is the real gate either way. */
   permissions?: readonly AdminPermission[];
-  onNavigate?: () => void;
+  me?: AdminMe;
+  onSignOut?: () => void;
 } = {}) {
-  const pathname = usePathname();
-  const current = activeHref(pathname);
+  const [mode] = useSidebarMode();
+  const { sections, active } = useActive(permissions);
+  // In "expand on hover", a click collapses the rail at once so the section menu it opens is not
+  // left covered; it expands again once the pointer has left and come back.
+  const [settled, setSettled] = useState(false);
+  const hoverReveal = mode === "hover" && !settled;
+  const settle = mode === "hover" ? () => setSettled(true) : undefined;
+  const main = sections.filter((s) => !s.bottom);
+  const bottom = sections.filter((s) => s.bottom);
+  const showSectionMenu = active && sectionItems(active.section).length > 1;
 
-  // `ink`/`snow` never flip with the theme: the sidebar is dark in both.
   return (
-    <nav
-      aria-label={navLabel}
-      className="flex h-full w-60 shrink-0 flex-col gap-5 overflow-y-auto border-r border-ink-800 bg-ink-950 px-3 py-5 text-ink-300"
-    >
-      <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-2 px-2">
-        <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-md bg-[#c28014] text-sm font-bold text-snow">
-          P
-        </span>
-        <span className="text-base font-semibold text-snow">
-          Prod<span className="text-[#de9c33]">.</span>Bnb
-        </span>
-        <span className="rounded bg-ink-800 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-300">Admin</span>
-      </Link>
-      {visibleNavGroups(permissions).map((group) => (
-        <div key={group.label}>
-          <div className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-ink-500">{group.label}</div>
-          <ul className="space-y-0.5">
-            {group.items.map((item) => {
-              const active = item.href === current;
-              const Icon = item.icon;
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#de9c33]",
-                      active ? "bg-ink-800 text-snow" : "text-ink-400 hover:bg-ink-900 hover:text-snow",
-                    )}
-                  >
-                    <Icon
-                      aria-hidden
-                      className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-[#de9c33]" : "text-ink-500 group-hover:text-ink-300")}
-                    />
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
+    <div className="flex h-full">
+      <div className={cn("relative h-full shrink-0 transition-[width] duration-200", mode === "expanded" ? RAIL_EXPANDED : RAIL_COLLAPSED)}>
+        <nav
+          aria-label="Admin sections"
+          className={cn(
+            "group/rail absolute inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-canvas px-2 transition-[width,box-shadow] duration-200 ease-out",
+            mode === "expanded" ? RAIL_EXPANDED : RAIL_COLLAPSED,
+            // Collapsed keeps overflow visible so the hover tooltips can sit outside the rail.
+            mode !== "collapsed" && "overflow-hidden",
+            hoverReveal && "delay-75 hover:w-[212px] hover:shadow-pop has-[:focus-visible]:w-[212px] has-[:focus-visible]:shadow-pop",
+          )}
+          onPointerLeave={() => setSettled(false)}
+        >
+          <Link href="/dashboard" className="flex h-12 shrink-0 items-center rounded-lg px-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400" aria-label="ProdBnb Admin home">
+            <Logo text={mode === "expanded" ? "show" : hoverReveal ? "hover" : "hidden"} />
+          </Link>
+          <ul className="mt-2 space-y-1">
+            {main.map((section) => (
+              <li key={section.id}>
+                <SectionLink section={section} active={active?.section.id === section.id} mode={mode} hoverReveal={hoverReveal} onClick={settle} />
+              </li>
+            ))}
           </ul>
-        </div>
-      ))}
-      <div className="mt-auto px-2 text-[11px] text-ink-500">
-        Press <kbd className="rounded border border-ink-700 px-1 font-sans text-ink-400">⌘K</kbd> to jump anywhere
+          <div className="mt-auto space-y-1 border-t border-slate-200 pb-3 pt-3">
+            {bottom.map((section) => (
+              <SectionLink key={section.id} section={section} active={active?.section.id === section.id} mode={mode} hoverReveal={hoverReveal} onClick={settle} />
+            ))}
+            <SidebarModeMenu mode={mode} hoverReveal={hoverReveal} />
+            {onSignOut && <AccountMenu me={me} mode={mode} hoverReveal={hoverReveal} onSignOut={onSignOut} />}
+          </div>
+        </nav>
       </div>
+      {showSectionMenu && <SectionMenu section={active.section} currentHref={active.item.href} />}
+    </div>
+  );
+}
+
+/** The whole tree at once, for the mobile drawer (sections as headings, their pages beneath). */
+export function NavTree({
+  permissions,
+  onNavigate,
+  navLabel = "Admin sections (mobile menu)",
+}: {
+  permissions?: readonly AdminPermission[];
+  onNavigate?: () => void;
+  navLabel?: string;
+}) {
+  const { sections, active } = useActive(permissions);
+  return (
+    <nav aria-label={navLabel} className="space-y-5">
+      {sections.map((section) => {
+        const Icon = section.icon;
+        return (
+          <div key={section.id}>
+            <div className="mb-1 flex items-center gap-2 px-2 text-2xs font-medium uppercase tracking-wider text-slate-400">
+              <Icon aria-hidden className="h-3.5 w-3.5" />
+              {section.label}
+            </div>
+            <ul className="space-y-px">
+              {sectionItems(section).map((item) => {
+                const current = active?.item.href === item.href;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      aria-current={current ? "page" : undefined}
+                      className={cn(
+                        "flex h-9 items-center rounded-md px-2 text-sm transition-colors",
+                        current ? "bg-slate-100 font-medium text-slate-900" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </nav>
   );
 }

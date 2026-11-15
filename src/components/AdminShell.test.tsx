@@ -26,6 +26,7 @@ vi.mock("swr", () => ({ mutate: mutateMock }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   usePathname: () => "/dashboard",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 describe("AdminShell", () => {
@@ -86,7 +87,8 @@ describe("AdminShell", () => {
       </AdminShell>
     );
 
-    await user.click(screen.getByRole("button", { name: "Sign out" }));
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
 
     await waitFor(() => {
       expect(signOutMock).toHaveBeenCalled();
@@ -94,5 +96,54 @@ describe("AdminShell", () => {
       expect(mutateMock).toHaveBeenCalledWith(expect.any(Function), undefined, { revalidate: false });
       expect(replaceMock).toHaveBeenCalledWith("/login");
     });
+  });
+});
+
+describe("AdminShell (Console 3)", () => {
+  it("shows where the admin is as a breadcrumb", () => {
+    useAdminGateMock.mockReturnValue("admin");
+    render(
+      <AdminShell>
+        <p>Page content</p>
+      </AdminShell>
+    );
+    expect(screen.getByRole("list", { name: "Breadcrumb" })).toHaveTextContent("Overview");
+  });
+
+  it("responds to a click at once: progress status and a skeleton while the next page loads", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    useAdminGateMock.mockReturnValue("admin");
+    render(
+      <AdminShell>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- a plain anchor stands in for next/link here */}
+        <a href="/users">Go to users</a>
+        <p>Page content</p>
+      </AdminShell>
+    );
+    const link = screen.getByRole("link", { name: "Go to users" });
+    link.addEventListener("click", (e) => e.preventDefault()); // stand-in for Next's client-side Link
+    link.click();
+    expect(await screen.findByText("Loading page…")).toBeInTheDocument();
+    await vi.advanceTimersByTimeAsync(200);
+    expect(screen.getByRole("status", { name: "Loading page" })).toBeInTheDocument();
+    expect(screen.getByText("Page content")).not.toBeVisible();
+    // The highlight has already moved to the destination.
+    expect(screen.getByRole("list", { name: "Breadcrumb" })).toHaveTextContent("Users");
+    vi.useRealTimers();
+  });
+});
+
+describe("AdminShell when the server cannot be reached", () => {
+  it("keeps the admin signed in and offers a retry instead of bouncing to /login", () => {
+    useAdminGateMock.mockReturnValue("unreachable");
+    replaceMock.mockClear();
+    render(
+      <AdminShell>
+        <p>Page content</p>
+      </AdminShell>
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Can't reach ProdBnb right now");
+    expect(screen.getByRole("button", { name: "Retry now" })).toBeInTheDocument();
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 });

@@ -22,10 +22,10 @@ export function Sheet({
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
-        <RadixDialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/50 backdrop-blur-[1px]" />
+        <RadixDialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/60 backdrop-blur-[2px]" />
         <RadixDialog.Content
           aria-describedby={description ? undefined : undefined}
-          className={`fixed inset-y-0 right-0 z-50 flex w-full ${width} animate-fade-in flex-col border-l border-slate-200 bg-white shadow-2xl focus:outline-none`}
+          className={`fixed inset-y-0 right-0 z-50 flex w-full ${width} animate-fade-in flex-col border-l border-slate-200 bg-white shadow-pop focus:outline-none`}
         >
           <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
             <div className="min-w-0">

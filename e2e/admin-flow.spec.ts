@@ -34,12 +34,23 @@ test.describe("admin login and moderation flow", () => {
     await page.getByRole("button", { name: "Sign in" }).click();
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible();
 
-    for (const label of ["Moderation Queue", "Locations", "Bookings", "Payments", "Users", "Audit Log"]) {
-      await page.getByRole("link", { name: label, exact: true }).click();
+    // Console 3: each rail section opens its first page and its own menu.
+    const rail = page.getByRole("navigation", { name: "Admin sections" });
+    for (const [section, path] of [
+      ["Listings", /\/moderation/],
+      ["Bookings", /\/bookings/],
+      ["Payments", /\/payments/],
+      ["People", /\/users/],
+      ["Settings", /\/settings/],
+    ] as const) {
+      await rail.getByRole("link", { name: section, exact: true }).click();
+      await expect(page).toHaveURL(path);
       await expect(page.locator("main")).not.toContainText("This account does not have admin access.");
     }
+    await page.getByRole("navigation", { name: "Settings menu" }).getByRole("link", { name: "Audit log" }).click();
+    await expect(page).toHaveURL(/\/audit-log/);
   });
 
   test("a non-admin account is shown the access-denied state, never admin data", async ({ page, context }) => {
@@ -60,7 +71,8 @@ test.describe("admin login and moderation flow", () => {
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await page.getByRole("button", { name: "Account menu" }).click();
+    await page.getByRole("menuitem", { name: "Sign out" }).click();
     await expect(page).toHaveURL(/\/login/);
 
     await page.goto("/dashboard");

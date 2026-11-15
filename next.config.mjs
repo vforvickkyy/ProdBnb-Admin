@@ -7,6 +7,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // Console 3: re-opening a page visited in the last 30s reuses its (data-free) page shell from the
+    // client router cache instead of waiting on the server again. Every page fetches its own data
+    // client-side through SWR, so nothing stale is shown -- the page still revalidates on mount.
+    staleTimes: { dynamic: 30 },
+  },
   async headers() {
     return [
       {

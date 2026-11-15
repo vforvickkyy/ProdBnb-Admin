@@ -27,8 +27,8 @@ export function Switch({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          "relative mt-0.5 inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-50",
-          checked ? "bg-brand-500" : "bg-slate-300",
+          "relative mt-0.5 inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 disabled:cursor-not-allowed disabled:opacity-50",
+          checked ? "bg-accent-500" : "bg-slate-300",
         )}
       >
         <span
@@ -37,7 +37,7 @@ export function Switch({
         />
       </button>
       <label htmlFor={id} className="cursor-pointer text-sm">
-        <span className="font-medium text-slate-800">{label}</span>
+        <span className="font-medium text-slate-900">{label}</span>
         {description && <span className="block text-xs text-slate-500">{description}</span>}
       </label>
     </div>

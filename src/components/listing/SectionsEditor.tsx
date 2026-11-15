@@ -89,7 +89,7 @@ export function SectionsEditor({ locationId, canEdit }: { locationId: string; ca
 
       {canEdit &&
         (creating ? (
-          <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
             <TextField label="Section name" value={name} maxLength={200} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rooftop" />
             <TextAreaField
               label="Description (optional)"

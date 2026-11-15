@@ -57,3 +57,23 @@ export async function firstAvailableAction(
 export function horizontalOverflow(page: Page): Promise<number> {
   return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 }
+
+/**
+ * Console 3 navigation: click a section in the rail, then (optionally) a page in that section's own
+ * menu -- the way an admin gets anywhere from the sidebar.
+ */
+export async function openFromNav(page: Page, section: string, item?: string) {
+  const sectionLink = page.getByRole("navigation", { name: "Admin sections" }).getByRole("link", { name: section, exact: true });
+  await clickAndLand(page, sectionLink);
+  if (item) {
+    await clickAndLand(page, page.getByRole("navigation", { name: `${section} menu` }).getByRole("link", { name: item, exact: true }));
+  }
+}
+
+/** Click an in-app link and wait until its page has really loaded (not just the instant skeleton). */
+async function clickAndLand(page: Page, link: ReturnType<Page["getByRole"]>) {
+  const href = (await link.getAttribute("href")) ?? "";
+  await link.click();
+  await page.waitForURL((url) => `${url.pathname}${url.search}` === href);
+  await expect(page.getByRole("status", { name: "Loading page" })).toHaveCount(0);
+}

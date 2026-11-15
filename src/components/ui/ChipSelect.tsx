@@ -41,8 +41,8 @@ export function ChipSelect({
                 disabled={!on && atMax}
                 onClick={() => onChange(on ? selected.filter((id) => id !== option.id) : [...selected, option.id])}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-40",
-                  on ? "border-brand-500 bg-brand-50 text-brand-800" : "border-slate-300 bg-white text-slate-700 hover:border-slate-400",
+                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 disabled:cursor-not-allowed disabled:opacity-40",
+                  on ? "border-accent-500 bg-accent-50 text-accent-700" : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
                 )}
               >
                 {on && <Check aria-hidden className="h-3.5 w-3.5" />}

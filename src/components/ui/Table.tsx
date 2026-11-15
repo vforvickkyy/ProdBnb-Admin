@@ -21,23 +21,23 @@ interface TableProps<T> {
 // readers; nothing about the visual design changes.
 export function Table<T>({ columns, rows, rowKey, onRowClick, caption }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-card">
       <table className="w-full min-w-[640px] border-collapse text-sm">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-slate-100 text-left text-slate-600">
+        <thead className="border-b border-slate-200 text-left text-xs text-slate-500">
           <tr>
             {columns.map((col) => (
-              <th key={col.key} scope="col" className={cn("px-4 py-2 font-medium", col.className)}>
+              <th key={col.key} scope="col" className={cn("h-10 px-4 font-medium", col.className)}>
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200">
+        <tbody className="divide-y divide-slate-200 text-slate-700">
           {rows.map((row) => (
             <tr
               key={rowKey(row)}
-              className={cn(onRowClick && "cursor-pointer hover:bg-slate-50")}
+              className={cn("transition-colors", onRowClick && "cursor-pointer hover:bg-slate-50 focus:bg-slate-50 focus:outline-none")}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               tabIndex={onRowClick ? 0 : undefined}
               role={onRowClick ? "button" : undefined}
@@ -53,7 +53,7 @@ export function Table<T>({ columns, rows, rowKey, onRowClick, caption }: TablePr
               }
             >
               {columns.map((col) => (
-                <td key={col.key} className={cn("px-4 py-2", col.className)}>
+                <td key={col.key} className={cn("px-4 py-3", col.className)}>
                   {col.render(row)}
                 </td>
               ))}

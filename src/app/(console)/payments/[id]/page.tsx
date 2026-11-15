@@ -1,0 +1,218 @@
+"use client";
+
+import { use, useState } from "react";
+import Link from "next/link";
+import { toast } from "sonner";
+import useSWR from "swr";
+import { StatusBadge } from "@/components/ui/Badge";
+import { Dialog } from "@/components/ui/Dialog";
+import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Button } from "@/components/ui/Button";
+import { adminApi, unwrap } from "@/lib/api";
+import { useAdminMe } from "@/lib/useAdminMe";
+import type { components } from "@/types/admin-api";
+
+type AdminPaymentDetail = components["schemas"]["AdminPaymentDetail"];
+
+function name(n: { first_name: string | null; last_name: string | null } | null | undefined): string {
+  if (!n) return "—";
+  return [n.first_name, n.last_name].filter(Boolean).join(" ") || "(no name)";
+}
+
+function formatAmount(minorUnits: number, currency: string): string {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency, maximumFractionDigits: 2 }).format(minorUnits / 100);
+}
+
+const REFUNDABLE = new Set(["success", "partially_refunded"]);
+
+export default function PaymentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const [refundOpen, setRefundOpen] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const { data: payment, error, isLoading, mutate } = useSWR(`/v1/admin/payments/${id}`, () =>
+    adminApi.GET("/payments/{id}", { params: { path: { id } } }).then(unwrap<AdminPaymentDetail>)
+  );
+
+  const { can } = useAdminMe();
+  const [verifying, setVerifying] = useState(false);
+
+  // Asks Cashfree directly (the same guarded path the webhook uses) -- for a payment stuck in
+  // created/pending because a webhook never arrived. Audited.
+  async function handleVerify() {
+    setVerifying(true);
+    try {
+      const result = await adminApi.POST("/payments/{id}/verify", { params: { path: { id } }, body: {} }).then(unwrap<{ status: string }>);
+      toast.success(`Checked with the provider: ${result.status.replace(/_/g, " ")}.`);
+      await mutate();
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Could not check with the provider."));
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  async function handleRefund() {
+    setBusy(true);
+    try {
+      const amountMinorUnits = amount.trim() ? Math.round(Number(amount) * 100) : undefined;
+      await adminApi
+        .POST("/payments/{id}/refunds", {
+          params: { path: { id } },
+          body: { amount_minor_units: amountMinorUnits, reason: reason.trim() || undefined },
+        })
+        .then(unwrap);
+      toast.success("Refund issued.");
+      setRefundOpen(false);
+      setAmount("");
+      setReason("");
+      await mutate();
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Failed to issue refund."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <Link href="/payments" className="mb-4 inline-block text-sm text-slate-500 hover:text-slate-800">
+        ← Back to payments
+      </Link>
+
+      {isLoading ? (
+        <div className="space-y-3" role="status" aria-label="Loading">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      ) : error || !payment ? (
+        <ErrorState message={extractErrorMessage(error, "Failed to load this payment.")} onRetry={() => mutate()} />
+      ) : (
+        <>
+          <div className="mb-6 flex items-start justify-between">
+            <div className="min-w-0">
+              <h1 className="break-words text-xl font-semibold">{payment.booking?.location?.title ?? "Payment"}</h1>
+              <p className="break-words text-sm text-slate-500">
+                {payment.provider} · {payment.provider_order_id}
+              </p>
+            </div>
+            <StatusBadge status={payment.status} />
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <section className="rounded border border-slate-200 bg-white p-4">
+              <h2 className="mb-3 text-sm font-semibold text-slate-700">Details</h2>
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Booker</dt>
+                  <dd className="min-w-0 break-words text-right">{name(payment.booking?.booker)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Amount</dt>
+                  <dd>{formatAmount(payment.amount_minor_units, payment.currency)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Created</dt>
+                  <dd>{new Date(payment.created_at).toLocaleString()}</dd>
+                </div>
+                {payment.failure_reason && (
+                  <div className="flex justify-between">
+                    <dt className="text-slate-500">Failure reason</dt>
+                    <dd className="min-w-0 break-words text-right text-red-700">{payment.failure_reason}</dd>
+                  </div>
+                )}
+                {payment.booking && (
+                  <div className="flex justify-between">
+                    <dt className="text-slate-500">Booking</dt>
+                    <dd>
+                      <Link href={`/bookings/${payment.booking.id}`} className="underline hover:text-slate-900">
+                        View booking →
+                      </Link>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+
+            <section className="rounded border border-amber-200 bg-amber-50 p-4">
+              <h2 className="mb-2 text-sm font-semibold text-amber-900">Operational notes</h2>
+              <ul className="list-disc space-y-1 pl-4 text-sm text-amber-800">
+                <li>Refunds are issued through the same PaymentProvider architecture as any other refund — never a direct Cashfree call.</li>
+                <li>Omitting an amount refunds the full remaining, unrefunded balance.</li>
+                <li>Every refund here is audit-logged automatically.</li>
+              </ul>
+            </section>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {REFUNDABLE.has(payment.status) && can("payments.refund") && (
+              <button
+                type="button"
+                onClick={() => setRefundOpen(true)}
+                className="h-8 rounded-lg bg-accent-500 px-3 text-[13px] font-medium text-snow shadow-sm transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Issue refund
+              </button>
+            )}
+            {can("payments.verify") && (
+              <Button onClick={handleVerify} disabled={verifying}>
+                {verifying ? "Checking…" : "Re-check with Cashfree"}
+              </Button>
+            )}
+          </div>
+
+          <Dialog open={refundOpen} onOpenChange={setRefundOpen} title="Issue refund" description={payment.booking?.location?.title}>
+            <div className="mb-3">
+              <label htmlFor="refund-amount" className="mb-1 block text-sm text-slate-600">
+                Amount (leave blank for full remaining balance)
+              </label>
+              <input
+                id="refund-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={`Up to ${formatAmount(payment.amount_minor_units, payment.currency)}`}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="refund-reason" className="mb-1 block text-sm text-slate-600">
+                Reason (optional)
+              </label>
+              <textarea
+                id="refund-reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={2}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
+              />
+            </div>
+            <p className="mb-4 text-xs text-amber-700">This action is irreversible.</p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRefundOpen(false)}
+                className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-800 shadow-card transition-colors hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRefund}
+                disabled={busy}
+                className="h-8 rounded-lg bg-[#dc2626] px-3 text-[13px] font-medium text-snow shadow-sm transition-colors hover:bg-[#b91c1c] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {busy ? "Issuing…" : "Issue refund"}
+              </button>
+            </div>
+          </Dialog>
+        </>
+      )}
+    </>
+  );
+}

@@ -178,7 +178,7 @@ export function PhotoManager({
           }}
           className={cn(
             "mb-4 flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors",
-            dropActive ? "border-brand-500 bg-brand-50" : "border-slate-300 bg-slate-50",
+            dropActive ? "border-accent-500 bg-accent-50" : "border-slate-300 bg-slate-50",
           )}
         >
           <UploadCloud aria-hidden className="h-6 w-6 text-slate-400" />
@@ -237,7 +237,7 @@ export function PhotoManager({
               }}
               className={cn(
                 "group relative overflow-hidden rounded-lg border bg-white shadow-sm transition-all",
-                overIndex === index && dragIndex !== index ? "border-brand-500 ring-2 ring-brand-500" : "border-slate-200",
+                overIndex === index && dragIndex !== index ? "border-accent-500 ring-2 ring-accent-500" : "border-slate-200",
                 dragIndex === index && "opacity-50",
               )}
             >
@@ -301,7 +301,7 @@ export function PhotoManager({
                   {u.error ? null : <Loader2 aria-hidden className="h-6 w-6 animate-spin text-slate-600" />}
                 </div>
                 <div className="absolute inset-x-0 bottom-0 h-1 bg-slate-200">
-                  <div className="h-full bg-brand-500 transition-[width]" style={{ width: `${Math.round(u.progress * 100)}%` }} />
+                  <div className="h-full bg-accent-500 transition-[width]" style={{ width: `${Math.round(u.progress * 100)}%` }} />
                 </div>
               </div>
               <div className="px-2 py-1.5 text-xs">
@@ -360,7 +360,7 @@ function IconButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "rounded p-1 text-slate-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-30",
+        "rounded p-1 text-slate-500 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 disabled:opacity-30",
         danger ? "hover:bg-red-50 hover:text-red-700" : "hover:bg-slate-100 hover:text-slate-900",
       )}
     >

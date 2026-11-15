@@ -61,7 +61,7 @@ export function PeoplePicker({ value, onChange }: { value: Person[]; onChange: (
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Add people by name or email…"
           aria-label="Search people to add"
-          className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
         />
       </div>
       {results.length > 0 && (

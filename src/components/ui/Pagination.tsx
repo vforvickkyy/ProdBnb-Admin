@@ -22,7 +22,7 @@ export function Pagination({ page, pageSize, total, onPageChange, label }: Pagin
   const to = Math.min(page * pageSize, total);
 
   const content = (
-    <div className="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+    <div className="flex items-center justify-between gap-3 px-1 py-3 text-[13px] text-slate-500">
       <span>
         {total === 0 ? "No results" : `Showing ${from}–${to} of ${total}`}
       </span>
@@ -31,7 +31,7 @@ export function Pagination({ page, pageSize, total, onPageChange, label }: Pagin
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="rounded border border-slate-300 px-3 py-1 font-medium hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-7 rounded-lg border border-slate-200 bg-white px-2.5 font-medium text-slate-700 shadow-card transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Previous
         </button>
@@ -42,7 +42,7 @@ export function Pagination({ page, pageSize, total, onPageChange, label }: Pagin
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="rounded border border-slate-300 px-3 py-1 font-medium hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-7 rounded-lg border border-slate-200 bg-white px-2.5 font-medium text-slate-700 shadow-card transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next
         </button>

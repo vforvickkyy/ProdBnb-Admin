@@ -136,7 +136,7 @@ function PriceRow({
       <div className="flex flex-wrap items-end gap-3">
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-600">Amount (INR) {meta.unit}</span>
-          <span className="flex items-center rounded-md border border-slate-300 bg-white focus-within:border-slate-500 focus-within:ring-1 focus-within:ring-slate-500">
+          <span className="flex items-center rounded-lg border border-slate-200 bg-white focus-within:border-accent-500 focus-within:ring-2 focus-within:ring-accent-500/25">
             <span className="pl-3 text-sm text-slate-500">₹</span>
             <input
               inputMode="decimal"
@@ -156,7 +156,7 @@ function PriceRow({
               value={hours}
               disabled={!canEdit || busy}
               onChange={(e) => setHours(e.target.value.replace(/[^\d]/g, ""))}
-              className="w-20 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="w-20 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
             />
           </label>
         )}

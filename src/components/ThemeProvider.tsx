@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { applyTheme, readStoredTheme, resolveTheme, ResolvedTheme, storeTheme, ThemeChoice } from "@/lib/theme";
+import { applyTheme, DEFAULT_THEME, readStoredTheme, resolveTheme, ResolvedTheme, storeTheme, ThemeChoice } from "@/lib/theme";
 
 interface ThemeContextValue {
   choice: ThemeChoice;
@@ -9,11 +9,11 @@ interface ThemeContextValue {
   setChoice: (choice: ThemeChoice) => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue>({ choice: "system", resolved: "light", setChoice: () => undefined });
+const ThemeContext = createContext<ThemeContextValue>({ choice: DEFAULT_THEME, resolved: "dark", setChoice: () => undefined });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [choice, setChoiceState] = useState<ThemeChoice>("system");
-  const [resolved, setResolved] = useState<ResolvedTheme>("light");
+  const [choice, setChoiceState] = useState<ThemeChoice>(DEFAULT_THEME);
+  const [resolved, setResolved] = useState<ResolvedTheme>("dark");
 
   useEffect(() => {
     const stored = readStoredTheme();

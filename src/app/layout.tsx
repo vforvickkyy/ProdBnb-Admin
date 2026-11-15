@@ -4,6 +4,7 @@ import { Providers } from "@/components/Providers";
 import { ThemedToaster } from "@/components/ThemedToaster";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import "@fontsource-variable/inter";
 import "./globals.css";
 
 // Every page renders per request so it can carry that request's CSP nonce (src/middleware.ts) -- a

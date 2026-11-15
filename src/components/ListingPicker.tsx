@@ -59,7 +59,7 @@ export function ListingPicker({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search listings by title…"
           aria-label="Search listings to add"
-          className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
         />
       </div>
       <ul className="mt-2 max-h-72 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200" aria-busy={loading}>
@@ -73,7 +73,7 @@ export function ListingPicker({
                 role="checkbox"
                 aria-checked={on}
                 onClick={() => setPicked(on ? picked.filter((p) => p !== r.id) : [...picked, r.id])}
-                className={cn("flex w-full items-center gap-3 px-3 py-2 text-left text-sm", on ? "bg-brand-50" : "hover:bg-slate-50")}
+                className={cn("flex w-full items-center gap-3 px-3 py-2 text-left text-sm", on ? "bg-accent-50" : "hover:bg-slate-50")}
               >
                 <span className="flex h-9 w-12 shrink-0 items-center justify-center overflow-hidden rounded bg-slate-100">
                   {r.cover_url ? (
@@ -92,7 +92,7 @@ export function ListingPicker({
                 <StatusBadge status={r.status} />
                 <span
                   aria-hidden
-                  className={cn("flex h-5 w-5 items-center justify-center rounded border", on ? "border-brand-500 bg-brand-500 text-snow" : "border-slate-300")}
+                  className={cn("flex h-5 w-5 items-center justify-center rounded border", on ? "border-accent-500 bg-accent-500 text-snow" : "border-slate-300")}
                 >
                   {on && <Check className="h-3.5 w-3.5" />}
                 </span>

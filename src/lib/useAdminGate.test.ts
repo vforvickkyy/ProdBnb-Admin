@@ -51,10 +51,20 @@ describe("useAdminGate", () => {
     await waitFor(() => expect(result.current).toBe("admin"));
   });
 
-  it("treats a failed /v1/me call the same as signed-out, not a crash", async () => {
+  it("treats a 401 from /v1/me the same as signed-out, not a crash", async () => {
     getSessionMock.mockResolvedValue({ data: { session: { access_token: "t" } } });
-    getMeMock.mockRejectedValue(new Error("401"));
+    getMeMock.mockRejectedValue(Object.assign(new Error("Unauthorized"), { status: 401 }));
     const { result } = renderGate();
     await waitFor(() => expect(result.current).toBe("signed-out"));
+  });
+
+  it("does not sign the admin out over a network failure, rate limit or server error", async () => {
+    getSessionMock.mockResolvedValue({ data: { session: { access_token: "t" } } });
+    for (const failure of [new TypeError("Failed to fetch"), Object.assign(new Error("Too many requests"), { status: 429 }), Object.assign(new Error("Bad gateway"), { status: 502 })]) {
+      getMeMock.mockRejectedValue(failure);
+      const { result, unmount } = renderGate();
+      await waitFor(() => expect(result.current).toBe("unreachable"));
+      unmount();
+    }
   });
 });

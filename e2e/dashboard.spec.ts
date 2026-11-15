@@ -6,7 +6,7 @@ test.describe("dashboard", () => {
 
   test("loads and renders at least one numeric stat", async ({ page }) => {
     await login(page);
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Overview" })).toBeVisible();
 
     const totalUsers = page.getByRole("link", { name: /Total users/ });
     await expect(totalUsers).toBeVisible();

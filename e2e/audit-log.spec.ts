@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { hasCredentials, login } from "./helpers";
+import { hasCredentials, login, openFromNav } from "./helpers";
 
 test.describe("audit log", () => {
   test.skip(!hasCredentials, "E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set.");
 
   test("page loads and remains functional after applying a filter", async ({ page }) => {
     await login(page);
-    await page.getByRole("link", { name: "Audit Log", exact: true }).click();
+    await openFromNav(page, "Settings", "Audit log");
     await expect(page).toHaveURL(/\/audit-log/);
     await expect(page.getByRole("heading", { name: "Audit Log" })).toBeVisible();
 

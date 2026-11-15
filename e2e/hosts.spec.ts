@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { firstAvailableAction, hasCredentials, login, verifyDialogWithoutConfirming } from "./helpers";
+import { firstAvailableAction, hasCredentials, login, openFromNav, verifyDialogWithoutConfirming } from "./helpers";
 
 test.describe("hosts", () => {
   test.skip(!hasCredentials, "E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set.");
@@ -8,10 +8,10 @@ test.describe("hosts", () => {
     page,
   }) => {
     await login(page);
-    await page.getByRole("link", { name: "Hosts", exact: true }).click();
+    await openFromNav(page, "People", "Hosts");
     await expect(page).toHaveURL(/\/hosts/);
 
-    const firstView = page.getByRole("link", { name: "View" }).first();
+    const firstView = page.getByRole("link", { name: "View", exact: true }).first();
     await page.waitForLoadState("networkidle");
     test.skip((await firstView.count()) === 0, "No hosts exist on staging to exercise detail navigation.");
 

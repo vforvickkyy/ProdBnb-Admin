@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 
 // Debounces locally, then reports the settled value up -- callers never see
 // a fetch fire on every keystroke. 350ms matches typical typing-pause
@@ -31,15 +32,16 @@ export function SearchInput({
   }, [draft]);
 
   return (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="relative flex flex-col gap-1 text-sm">
       <span className="sr-only">{label}</span>
+      <Search aria-hidden className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
       <input
         type="search"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         placeholder={placeholder}
         aria-label={label}
-        className="w-full min-w-[200px] rounded border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+        className="h-8 w-full min-w-[220px] rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-[13px] text-slate-900 shadow-card transition-colors placeholder:text-slate-400 hover:border-slate-300 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25"
       />
     </label>
   );

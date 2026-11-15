@@ -1,7 +1,10 @@
+import Link from "next/link";
+
 /**
- * Ranked horizontal bars (a "meter list"): a name, a bar and a figure per row, bars sharing one
- * baseline so parts compare exactly. One hue; 10px bars with a rounded data end; the value is
- * printed at every row (this form labels each row by design), in text ink, not the bar colour.
+ * Ranked horizontal bars (a "meter list", Framer/Plausible style): each row's bar sits behind its
+ * name as a soft wash of one hue, all bars growing from the same left baseline so parts compare
+ * exactly; 24px bars with a rounded data end; the value printed at every row in text ink, never the
+ * bar colour.
  */
 export function BarList({
   title,
@@ -9,37 +12,58 @@ export function BarList({
   formatValue,
   color = "var(--viz-1)",
   emptyText = "No data for this range.",
+  valueHeader,
 }: {
-  title: string;
-  rows: { label: string; value: number; href?: string }[];
+  /** Omit when the surrounding card already names the list (e.g. under pill tabs). */
+  title?: string;
+  rows: { label: string; value: number; href?: string; hint?: string }[];
   formatValue: (v: number) => string;
   color?: string;
   emptyText?: string;
+  /** Small right-aligned column heading, e.g. "Bookings". */
+  valueHeader?: string;
 }) {
   const max = Math.max(0, ...rows.map((r) => r.value));
   return (
     <div>
-      <h3 className="mb-3 text-sm font-semibold text-slate-800">{title}</h3>
+      {title && <h3 className="mb-3 text-sm font-semibold text-slate-900">{title}</h3>}
       {rows.length === 0 ? (
-        <p className="text-sm text-slate-400">{emptyText}</p>
+        <p className="py-6 text-center text-sm text-slate-400">{emptyText}</p>
       ) : (
-        <ul className="space-y-2.5">
-          {rows.map((row) => (
-            // Fixed name and value columns, so every bar track is the same length and all bars share one baseline.
-            <li key={row.label} className="grid grid-cols-[minmax(0,9rem)_1fr_4.5rem] items-center gap-3 text-sm" title={`${row.label}: ${formatValue(row.value)}`}>
-              <span className="truncate text-slate-700">{row.label}</span>
-              <span className="h-2.5 rounded-r bg-slate-100">
-                <span
-                  className="block h-2.5 rounded-r"
-                  style={{ width: max > 0 ? `${Math.max(2, (row.value / max) * 100)}%` : "0%", background: color }}
-                />
-              </span>
-              <span className="text-right text-slate-800" style={{ fontVariantNumeric: "tabular-nums" }}>
-                {formatValue(row.value)}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <>
+          {valueHeader && (
+            <div className="mb-1.5 flex justify-end px-1 text-2xs font-medium uppercase tracking-wider text-slate-400">{valueHeader}</div>
+          )}
+          <ul className="space-y-1">
+            {rows.map((row) => {
+              const name = row.href ? (
+                <Link href={row.href} className="truncate hover:underline">
+                  {row.label}
+                </Link>
+              ) : (
+                <span className="truncate">{row.label}</span>
+              );
+              return (
+                <li key={row.label} className="flex items-center gap-3 text-[13px]" title={`${row.label}: ${formatValue(row.value)}`}>
+                  <div className="relative flex h-7 min-w-0 flex-1 items-center">
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-0.5 left-0 rounded-r-[4px]"
+                      style={{ width: max > 0 ? `${Math.max(1.5, (row.value / max) * 100)}%` : "0%", background: color, opacity: 0.22 }}
+                    />
+                    <span className="relative flex min-w-0 items-baseline gap-2 px-2.5 text-slate-800">
+                      {name}
+                      {row.hint && <span className="shrink-0 text-xs text-slate-500">{row.hint}</span>}
+                    </span>
+                  </div>
+                  <span className="w-16 shrink-0 text-right font-medium text-slate-900" style={{ fontVariantNumeric: "tabular-nums" }}>
+                    {formatValue(row.value)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </div>
   );

@@ -3,12 +3,15 @@ import { cn } from "@/lib/cn";
 
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "brand";
 
+// Console 3: one blue primary (accent fills keep white text at AA in both themes), quiet bordered
+// secondary, red-text danger, borderless ghost. `brand` is kept as an alias of primary for callers.
+const PRIMARY = "bg-accent-500 text-snow shadow-sm hover:bg-accent-600 focus-visible:ring-accent-400";
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-500",
-  brand: "bg-brand-500 text-white hover:bg-brand-600 focus-visible:ring-brand-400",
-  secondary: "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400",
-  danger: "border border-red-300 bg-white text-red-700 hover:bg-red-50 focus-visible:ring-red-400",
-  ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-slate-400",
+  primary: PRIMARY,
+  brand: PRIMARY,
+  secondary: "border border-slate-200 bg-white text-slate-800 shadow-card hover:border-slate-300 hover:bg-slate-50 focus-visible:ring-accent-400",
+  danger: "border border-red-200 bg-white text-red-700 shadow-card hover:border-red-300 hover:bg-red-50 focus-visible:ring-red-400",
+  ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-accent-400",
 };
 
 export const Button = forwardRef<
@@ -20,8 +23,8 @@ export const Button = forwardRef<
       ref={ref}
       type={type}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors focus:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
-        size === "sm" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm",
+        "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg font-medium transition-[color,background-color,border-color,box-shadow] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:opacity-50",
+        size === "sm" ? "h-7 px-2.5 text-xs" : "h-8 px-3 text-[13px]",
         VARIANTS[variant],
         className
       )}

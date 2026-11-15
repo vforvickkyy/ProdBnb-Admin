@@ -1,12 +1,12 @@
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="rounded border border-red-200 bg-red-50 px-6 py-8 text-center">
+    <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-6 py-8 text-center">
       <p className="text-sm font-medium text-red-800">{message}</p>
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-3 rounded border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400"
+          className="mt-3 h-8 rounded-lg border border-red-200 bg-white px-3 text-[13px] font-medium text-red-700 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
         >
           Retry
         </button>

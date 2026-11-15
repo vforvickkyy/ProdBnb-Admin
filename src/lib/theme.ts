@@ -1,5 +1,6 @@
 /**
- * Light / dark / system theme (Admin Console 2).
+ * Light / dark / system theme (Admin Console 2). Console 3 opens in dark (the Framer-style reference
+ * design) until the admin picks something else; the choice is remembered per browser.
  *
  * The choice lives in localStorage (a per-browser convenience -- nothing server-side needs it).
  * `THEME_INIT_SCRIPT` runs in <head> before first paint, carrying the request's CSP nonce, so a dark
@@ -9,13 +10,14 @@ export type ThemeChoice = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "prodbnb-admin-theme";
+export const DEFAULT_THEME: ThemeChoice = "dark";
 
 export function readStoredTheme(): ThemeChoice {
   try {
     const value = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return value === "light" || value === "dark" || value === "system" ? value : "system";
+    return value === "light" || value === "dark" || value === "system" ? value : DEFAULT_THEME;
   } catch {
-    return "system";
+    return DEFAULT_THEME;
   }
 }
 
@@ -44,4 +46,4 @@ export function applyTheme(resolved: ResolvedTheme): void {
   window.setTimeout(() => root.classList.remove("theme-switching"), 0);
 }
 
-export const THEME_INIT_SCRIPT = `(function(){try{var c=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});var d=c==="dark"||((c===null||c==="system")&&window.matchMedia("(prefers-color-scheme: dark)").matches);var r=document.documentElement;if(d){r.classList.add("dark")}r.style.colorScheme=d?"dark":"light"}catch(e){}})();`;
+export const THEME_INIT_SCRIPT = `(function(){try{var c=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});var d=c==="dark"||(c!=="light"&&c!=="system")||(c==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);var r=document.documentElement;if(d){r.classList.add("dark")}r.style.colorScheme=d?"dark":"light"}catch(e){}})();`;

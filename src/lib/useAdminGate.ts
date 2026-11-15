@@ -5,7 +5,7 @@ import useSWR, { useSWRConfig } from "swr";
 import { getMe } from "./api";
 import { supabase } from "./supabase";
 
-export type GateStatus = "checking" | "signed-out" | "not-admin" | "admin";
+export type GateStatus = "checking" | "signed-out" | "not-admin" | "admin" | "unreachable";
 
 const ME_KEY = "/v1/me";
 
@@ -22,6 +22,11 @@ const ME_KEY = "/v1/me";
  * whole app for its default window, and `mutate` below forces a real
  * re-check exactly when auth state actually changes (sign-in/sign-out),
  * not on a timer.
+ *
+ * Console 3: only a real auth rejection (401/403) means "signed out". A network failure, a rate
+ * limit or a server error used to bounce the admin to /login as well -- on a slow or flaky
+ * connection that looked like being logged out at random. Now it is "unreachable" (SWR keeps
+ * retrying in the background), and an admin already confirmed stays in on a failed re-check.
  */
 export function useAdminGate(): GateStatus {
   const [hasSession, setHasSession] = useState<boolean | null>(null);
@@ -50,9 +55,17 @@ export function useAdminGate(): GateStatus {
     revalidateOnFocus: false,
   });
 
-  if (hasSession === null || (hasSession && isLoading)) return "checking";
+  if (hasSession === null || (hasSession && isLoading && !data)) return "checking";
   if (!hasSession) return "signed-out";
-  if (error) return "signed-out"; // a 401/500 from /v1/me is treated the same as no session
-  const roles: string[] = data?.data.roles ?? [];
-  return roles.includes("admin") ? "admin" : "not-admin";
+  if (error && isAuthRejection(error)) return "signed-out";
+  if (data) {
+    const roles: string[] = data.data.roles ?? [];
+    return roles.includes("admin") ? "admin" : "not-admin";
+  }
+  return error ? "unreachable" : "checking";
+}
+
+function isAuthRejection(error: unknown): boolean {
+  const status = (error as { status?: unknown } | null)?.status;
+  return status === 401 || status === 403;
 }

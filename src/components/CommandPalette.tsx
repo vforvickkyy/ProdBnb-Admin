@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import * as RadixDialog from "@radix-ui/react-dialog";
 import { ArrowRight, CornerDownLeft, Hash, Moon, Plus, Search, Sun, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { AdminPermission } from "@/lib/useAdminMe";
-import { visibleNavGroups } from "./Sidebar";
+import { sectionItems, visibleSections } from "@/lib/nav";
 import { useTheme } from "./ThemeProvider";
 
 interface PaletteItem {
@@ -104,33 +104,6 @@ export function CommandPalette({ permissions, can }: { permissions?: readonly Ad
 
     const actions: (PaletteItem & { permission?: AdminPermission; keywords: string })[] = [
       {
-        id: "new-listing",
-        label: "New listing for a host",
-        icon: Plus,
-        group: "Actions",
-        keywords: "create location add",
-        permission: "locations.create",
-        run: () => go("/locations/new"),
-      },
-      {
-        id: "new-announcement",
-        label: "New announcement",
-        icon: Plus,
-        group: "Actions",
-        keywords: "notify broadcast push email campaign",
-        permission: "campaigns.send",
-        run: () => go("/messaging/new"),
-      },
-      {
-        id: "new-direct",
-        label: "Message specific users",
-        icon: Plus,
-        group: "Actions",
-        keywords: "direct notify email push",
-        permission: "campaigns.send",
-        run: () => go("/messaging/new?kind=direct"),
-      },
-      {
         id: "new-collection",
         label: "New collection",
         icon: Plus,
@@ -157,10 +130,11 @@ export function CommandPalette({ permissions, can }: { permissions?: readonly Ad
       }
     }
 
-    for (const group of visibleNavGroups(permissions)) {
-      for (const item of group.items) {
-        if (!q || matches(`${item.label} ${group.label} ${item.keywords ?? ""}`, q)) {
-          out.push({ id: item.href, label: item.label, hint: group.label, icon: item.icon, group: "Go to", run: () => go(item.href) });
+    for (const section of visibleSections(permissions)) {
+      for (const item of sectionItems(section)) {
+        if (item.permission && !can(item.permission)) continue;
+        if (!q || matches(`${item.label} ${section.label} ${item.keywords ?? ""}`, q)) {
+          out.push({ id: item.href, label: item.label, hint: section.label, icon: section.icon, group: "Go to", run: () => go(item.href) });
         }
       }
     }

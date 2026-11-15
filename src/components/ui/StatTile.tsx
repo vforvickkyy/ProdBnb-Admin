@@ -2,8 +2,8 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 /**
- * Stat tile: label (sentence case), value (semibold, proportional figures), optional hint.
- * `tone="attention"` marks a number that needs someone to act on it -- always paired with the hint
+ * Stat tile: label (sentence case), value (semibold, tabular figures), optional hint.
+ * `tone="attention"` marks a number that needs someone to act on it -- an amber dot plus the hint
  * text, never colour alone.
  */
 export function StatTile({
@@ -21,15 +21,17 @@ export function StatTile({
 }) {
   const body = (
     <>
-      <div className="text-sm text-slate-500">{label}</div>
-      <div className="mt-1 text-2xl font-semibold text-slate-900">{value}</div>
-      {hint && <div className={cn("mt-1 text-xs", tone === "attention" ? "font-medium text-brand-700" : "text-slate-500")}>{hint}</div>}
+      <div className="flex items-center gap-1.5 text-[13px] text-slate-500">
+        {tone === "attention" && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
+        {label}
+      </div>
+      <div className="mt-2 text-[26px] font-semibold leading-none tracking-tight text-slate-900 tabular-nums">{value}</div>
+      {hint && <div className={cn("mt-2 text-xs", tone === "attention" ? "font-medium text-amber-700" : "text-slate-500")}>{hint}</div>}
     </>
   );
   const className = cn(
-    "block rounded-lg border bg-white p-4 shadow-sm",
-    tone === "attention" ? "border-brand-300 ring-1 ring-brand-200" : "border-slate-200",
-    href && "transition-colors hover:border-slate-300 hover:bg-slate-50"
+    "block rounded-xl border border-slate-200 bg-white p-5 shadow-card",
+    href && "transition-colors hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
   );
   return href ? (
     <Link href={href} className={className}>

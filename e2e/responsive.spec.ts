@@ -8,7 +8,7 @@ test.use({ viewport: { width: 390, height: 844 } });
 test.describe("responsive (390x844)", () => {
   test.skip(!hasCredentials, "E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set.");
 
-  test("mobile navigation drawer opens and closes; Dashboard and Users have no horizontal overflow", async ({ page }) => {
+  test("mobile navigation drawer opens and closes; Overview and Users have no horizontal overflow", async ({ page }) => {
     await login(page);
 
     const menuButton = page.getByRole("button", { name: "Menu" });
@@ -17,7 +17,7 @@ test.describe("responsive (390x844)", () => {
 
     const drawerNav = page.getByRole("navigation", { name: "Admin sections (mobile menu)" });
     await expect(drawerNav).toBeVisible();
-    await expect(drawerNav.getByRole("link", { name: "Dashboard" })).toBeVisible();
+    await expect(drawerNav.getByRole("link", { name: "Overview" })).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(drawerNav).toBeHidden();

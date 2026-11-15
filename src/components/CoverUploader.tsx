@@ -70,7 +70,7 @@ export function CoverUploader({
         )}
         {progress !== null && (
           <div className="absolute inset-x-0 bottom-0 h-1 bg-slate-200" aria-live="polite" aria-label={`Uploading ${Math.round(progress * 100)}%`}>
-            <div className="h-full bg-brand-500 transition-[width]" style={{ width: `${Math.round(progress * 100)}%` }} />
+            <div className="h-full bg-accent-500 transition-[width]" style={{ width: `${Math.round(progress * 100)}%` }} />
           </div>
         )}
       </div>

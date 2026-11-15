@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { hasCredentials, login } from "./helpers";
+import { hasCredentials, login, openFromNav } from "./helpers";
 
 test.describe("integrations & health", () => {
   test.skip(!hasCredentials, "E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set.");
 
   test("shows readiness, deployment and every integration's keys without secret values", async ({ page }) => {
     await login(page);
-    await page.getByRole("link", { name: "Integrations & Health", exact: true }).click();
+    await openFromNav(page, "Settings", "Integrations & health");
     await expect(page).toHaveURL(/\/system/);
 
     await expect(page.getByRole("heading", { name: "Integrations & health" })).toBeVisible();

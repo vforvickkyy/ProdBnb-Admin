@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { setSessionHint } from "@/lib/sessionHint";
+import { INPUT_CLASS } from "@/components/ui/Field";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,17 +47,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-2">
-          <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-500 text-sm font-bold text-white">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4">
+      {/* A faint grid and glow behind the card -- the only decoration in the console. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(rgb(var(--slate-200))_1px,transparent_1px),linear-gradient(90deg,rgb(var(--slate-200))_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"
+      />
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-500/10 blur-3xl" />
+      <form onSubmit={handleSubmit} className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-pop">
+        <div className="mb-7">
+          <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#c28014] text-sm font-bold text-snow">
             P
           </span>
-          <h1 className="text-lg font-semibold">
-            Prod<span className="text-brand-500">.</span>Bnb Admin
-          </h1>
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-slate-900">Sign in to ProdBnb Admin</h1>
+          <p className="mt-1 text-sm text-slate-500">Use your ProdBnb admin account.</p>
         </div>
-        <label htmlFor="login-email" className="mb-1 block text-sm text-slate-600">
+        <label htmlFor="login-email" className="mb-1.5 block text-[13px] font-medium text-slate-700">
           Email
         </label>
         <input
@@ -66,9 +72,9 @@ export default function LoginPage() {
           autoComplete="username"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className={`mb-4 h-9 ${INPUT_CLASS}`}
         />
-        <label htmlFor="login-password" className="mb-1 block text-sm text-slate-600">
+        <label htmlFor="login-password" className="mb-1.5 block text-[13px] font-medium text-slate-700">
           Password
         </label>
         <input
@@ -78,23 +84,23 @@ export default function LoginPage() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+          className={`mb-5 h-9 ${INPUT_CLASS}`}
         />
         {error && (
-          <p role="alert" className="mb-4 text-sm text-red-700">
+          <p role="alert" className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
           </p>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-slate-900 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-9 w-full rounded-lg bg-accent-500 text-sm font-medium text-snow shadow-sm transition-colors hover:bg-accent-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>
-        <p className="mt-4 text-xs text-slate-500">
-          Only an account holding the ProdBnb <code>admin</code> role can access anything past this
-          screen — everything else is enforced server-side.
+        <p className="mt-5 text-xs leading-5 text-slate-500">
+          Only an account holding the ProdBnb <code className="rounded bg-slate-100 px-1 py-px text-slate-700">admin</code> role can access
+          anything past this screen — everything else is enforced server-side.
         </p>
       </form>
     </div>

@@ -24,7 +24,7 @@ const WEEKDAYS: DayOfWeek[] = ["monday", "tuesday", "wednesday", "thursday", "fr
 const hhmm = (t: string | null) => (t ? t.slice(0, 5) : "");
 
 const TIME_INPUT =
-  "rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500";
+  "rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/25";
 
 export function TimingsEditor({
   locationId,

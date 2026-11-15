@@ -6,21 +6,26 @@ import { cn } from "@/lib/cn";
 export type BadgeTone = "neutral" | "success" | "warning" | "danger" | "info";
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
-  neutral: "bg-slate-100 text-slate-700 ring-slate-200",
-  success: "bg-green-50 text-green-700 ring-green-200",
-  warning: "bg-amber-50 text-amber-800 ring-amber-200",
-  danger: "bg-red-50 text-red-700 ring-red-200",
-  info: "bg-blue-50 text-blue-700 ring-blue-200",
+  neutral: "bg-slate-100 text-slate-600",
+  success: "bg-green-50 text-green-700",
+  warning: "bg-amber-50 text-amber-700",
+  danger: "bg-red-50 text-red-700",
+  info: "bg-accent-50 text-accent-700",
 };
 
-export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; children: React.ReactNode }) {
+const DOT_CLASSES: Record<BadgeTone, string> = {
+  neutral: "bg-slate-400",
+  success: "bg-green-500",
+  warning: "bg-amber-500",
+  danger: "bg-red-500",
+  info: "bg-accent-500",
+};
+
+/** A quiet tinted pill (Console 3); `dot` adds the "● Set" status dot. */
+export function Badge({ tone = "neutral", dot = false, children }: { tone?: BadgeTone; dot?: boolean; children: React.ReactNode }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset",
-        TONE_CLASSES[tone]
-      )}
-    >
+    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium", TONE_CLASSES[tone])}>
+      {dot && <span aria-hidden className={cn("h-1.5 w-1.5 shrink-0 rounded-full", DOT_CLASSES[tone])} />}
       {children}
     </span>
   );
@@ -63,5 +68,9 @@ const STATUS_TONE: Record<string, BadgeTone> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  return <Badge tone={STATUS_TONE[status] ?? "neutral"}>{status.replace(/_/g, " ")}</Badge>;
+  return (
+    <Badge tone={STATUS_TONE[status] ?? "neutral"} dot>
+      {status.replace(/_/g, " ")}
+    </Badge>
+  );
 }

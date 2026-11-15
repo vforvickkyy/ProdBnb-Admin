@@ -22,9 +22,9 @@ export function Dialog({
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
-        <RadixDialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[1px] animate-fade-in" />
-        <RadixDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-500">
-          <RadixDialog.Title className="text-lg font-semibold text-slate-900">{title}</RadixDialog.Title>
+        <RadixDialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/60 backdrop-blur-[2px]" />
+        <RadixDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 animate-scale-in rounded-2xl border border-slate-200 bg-white p-6 shadow-pop focus:outline-none">
+          <RadixDialog.Title className="text-base font-semibold tracking-tight text-slate-900">{title}</RadixDialog.Title>
           {description && <RadixDialog.Description className="mt-1 text-sm text-slate-500">{description}</RadixDialog.Description>}
           <div className="mt-4">{children}</div>
         </RadixDialog.Content>

@@ -79,18 +79,22 @@ self-service way to grant it, deliberately).
 ```
 middleware.ts     Basic session-presence check (see "Route protection" above)
 src/
-  app/            One folder per route (App Router):
-                    dashboard, moderation (queue), locations, bookings (+ [id]),
-                    payments (+ [id], refunds), users, audit-log, login
+  app/            One folder per route (App Router). Every signed-in page lives in the
+                    (console) route group, whose layout renders the shell once and keeps it
+                    mounted across navigations; (console)/loading.tsx is the instant skeleton.
+                    login and the root redirect sit outside it.
   components/
-    AdminShell.tsx  Sidebar + header + the client-side admin gate
-    Sidebar.tsx     Navigation
+    AdminShell.tsx  Rail + section menu + header (breadcrumb, refresh) + the client-side admin gate
+    Sidebar.tsx     Section rail (expanded / collapsed / expand on hover) and section menus
+    NavigationProvider.tsx  Instant navigation feedback: progress bar, optimistic highlight, skeleton
     ui/             Shared primitives: Table, Badge, Dialog, ConfirmDialog, Pagination,
                     SearchInput, Skeleton, EmptyState, ErrorState
   lib/
     supabase.ts     Sign-in only — never used to query Supabase tables directly
     api.ts          Typed client for /v1/admin/* (openapi-fetch + generated types),
                     unwrap()/unwrapPaginated() envelope helpers, authorizedFetch() for /v1/me
+    nav.ts          The navigation model (sections → groups → pages) used by every nav surface
+    navigation.ts   `useRouter` that announces navigations (use it instead of next/navigation's)
     useAdminGate.ts UI-only "is this session an admin" check, backed by SWR
     useAdminList.ts Shared paginated-list data-fetching hook
     sessionHint.ts  The middleware marker cookie described above
@@ -159,7 +163,26 @@ current staging projects). None of these are secrets.
 
 ## Status
 
-**Admin Console 2** (current):
+**Admin Console 3** (current) — Framer-style redesign:
+
+- **Design language** — near-black dark theme by default (light and system still available), neutral
+  greys, one blue accent for actions and selection, Inter (self-hosted), 12px-radius cards with
+  hairline borders, quiet tinted status pills with a dot, Framer-style charts (soft area wash,
+  dashed previous-period line, meter-list bars behind their labels).
+- **Navigation** — a short rail of sections (Overview, Listings, Bookings, Payments, People,
+  Messaging, Platforms, Settings) with each section's own grouped menu beside it, Supabase-style,
+  so the sidebar never scrolls. Sidebar control: Expanded, Collapsed (icons + tooltips) or Expand
+  on hover (the default) — from the rail's menu or Settings → General; remembered per browser.
+- **Never looks hung** — a click updates the sidebar, breadcrumb and a top progress bar at once
+  and shows a page skeleton until the new page arrives; visited pages re-open from the router
+  cache for 30s; a network failure, rate limit or server error shows "Can't reach ProdBnb" with
+  automatic retry instead of signing the admin out (only a real 401/403 does that).
+- **Overview** — headline figures that double as tabs over one chart (this period vs the one
+  before, with change %), "Needs attention", recent activity, top places and booking breakdowns.
+- **Charges & taxes** — platform fee and tax moved out of Settings into Payments → Charges &
+  taxes; Settings → General keeps the booking rules (unpaid-hold expiry) and appearance.
+
+**Admin Console 2**:
 
 - **Light / dark / system theme** — toggle in the header; remembered per browser, applied before
   first paint (nonce'd init script). Every palette is a CSS variable with a tuned dark value
@@ -198,7 +221,8 @@ the backend enforces the same permissions on every call regardless of what rende
 - **Disputes & Messages** — find a conversation by booker, host, listing or booking (metadata
   only), read it only after recording a reason, and the permanent access log.
 - **Admin Team** — add by email, change team role, remove; last super admin is protected.
-- **Settings** — platform fee %, tax %, unpaid-hold expiry, with a live price preview.
+- **Settings** — platform fee %, tax %, unpaid-hold expiry, with a live price preview (Console 3
+  moved fee and tax to Payments → Charges & taxes).
 - **Integrations & Health** — every backend key per service (set/missing; identifiers masked;
   secret values never shown), live checks, deployment info, links to Vercel to edit keys.
 - Bookings: paid / unpaid / unpaid-holds views with hold countdowns; confirm, reject, complete and
