@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { extractErrorMessage } from "@/components/ui/ErrorState";
@@ -50,7 +50,7 @@ export function SerpPreview({ title, description, url, noindex }: { title: strin
         <p className="text-sm text-slate-500">Hidden from search engines — this page won&apos;t appear in results.</p>
       ) : (
         <>
-          <div className="truncate text-xs text-slate-500">{url}</div>
+          <div className="truncate text-xs text-slate-500" title={url}>{url}</div>
           <div className="mt-1 text-[17px] leading-snug text-[#1a0dab] dark:text-[#8ab4f8]">{shown || "Untitled"}</div>
           <p className="mt-1 line-clamp-2 text-[13px] leading-5 text-slate-600">{snippet(description) || "No description yet."}</p>
         </>
@@ -77,6 +77,7 @@ export function SeoEditor({
   onSaved?: () => void;
 }) {
   const siteUrl = useSiteUrl();
+  const { mutate: mutateAll } = useSWRConfig();
   const { data, isLoading, mutate } = useSeoOverride(type, entityKey);
   const initial = useMemo(
     () => ({
@@ -118,6 +119,8 @@ export function SeoEditor({
       toast.success("SEO saved. The website picks it up within a few minutes.");
       setReason("");
       await mutate();
+      // Lists of overrides (Website → SEO) show Custom / Automatic badges: refresh them too.
+      await mutateAll((key) => typeof key === "string" && key.startsWith("/v1/admin/site/seo?"));
       onSaved?.();
     } catch (err) {
       toast.error(extractErrorMessage(err, "Could not save SEO."));
@@ -129,7 +132,7 @@ export function SeoEditor({
   if (isLoading) return <div className="h-64 animate-pulse rounded-lg bg-slate-100" />;
 
   return (
-    <fieldset disabled={!canEdit || busy} className="space-y-5">
+    <fieldset disabled={!canEdit || busy} className="min-w-0 space-y-5">
       <SerpPreview title={title} description={description} url={url} noindex={value.noindex} />
 
       <div>
