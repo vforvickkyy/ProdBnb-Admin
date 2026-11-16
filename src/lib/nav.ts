@@ -101,6 +101,7 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         items: [
           { href: "/payments", label: "Payments", permission: "payments.view", keywords: "money transactions cashfree" },
+          { href: "/payments/refund-requests", label: "Refund requests", permission: "payments.view", keywords: "refund approve decline cancel money back booker" },
           { href: "/payments/refunds", label: "Refunds", permission: "payments.view", keywords: "money back" },
         ],
       },
@@ -119,6 +120,7 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { href: "/users", label: "Users", permission: "users.view", keywords: "bookers accounts" },
           { href: "/hosts", label: "Hosts", permission: "users.view", keywords: "owners" },
+          { href: "/users/deletion-requests", label: "Deletion requests", permission: "users.view", keywords: "delete account privacy gdpr dpdp erase" },
         ],
       },
     ],

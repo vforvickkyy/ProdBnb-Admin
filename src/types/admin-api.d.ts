@@ -1646,10 +1646,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo";
+                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request";
                     target_id?: string;
                     admin_id?: string;
-                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO";
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION";
                     created_after?: string;
                     created_before?: string;
                     page?: number;
@@ -8366,6 +8366,498 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/refund-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Refund requests from bookers (payments.view). Pending ones oldest first */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "pending" | "approved" | "declined" | "withdrawn";
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminRefundRequest"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/refund-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve a refund request (payments.refund): refunds through the provider, full or partial */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        amount_minor_units?: number;
+                        note?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["RefundRequest"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Already decided, or being decided */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/refund-requests/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline a refund request with a note the booker sees (payments.refund) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        note: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["RefundRequest"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Already decided, or being decided */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/deletion-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Account deletion requests (users.view), with what still blocks each one */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "pending" | "completed" | "declined" | "withdrawn";
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminDeletionRequest"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/deletion-requests/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete a deletion (users.manage): anonymise the profile, archive listings, lock sign-in. Records are kept */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        note?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                user_id: string;
+                                reason: string | null;
+                                /** @enum {string} */
+                                status: "pending" | "completed" | "declined" | "withdrawn";
+                                decided_at: string | null;
+                                decision_note: string | null;
+                                created_at: string;
+                                updated_at: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Upcoming bookings, or already decided */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/deletion-requests/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline a deletion request with a note (users.manage) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        note: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                /** Format: uuid */
+                                id: string;
+                                /** Format: uuid */
+                                user_id: string;
+                                reason: string | null;
+                                /** @enum {string} */
+                                status: "pending" | "completed" | "declined" | "withdrawn";
+                                decided_at: string | null;
+                                decision_note: string | null;
+                                created_at: string;
+                                updated_at: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -8712,9 +9204,9 @@ export interface components {
             /** Format: uuid */
             admin_id: string;
             /** @enum {string} */
-            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO";
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION";
             /** @enum {string} */
-            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo";
+            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request";
             /** Format: uuid */
             target_id: string;
             reason: string | null;
@@ -9368,6 +9860,83 @@ export interface components {
             /** Format: uuid */
             updated_by: string | null;
             updated_at: string;
+        };
+        RefundRequest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            booking_id: string;
+            /** Format: uuid */
+            payment_id: string;
+            /** @enum {string} */
+            source: "booker" | "cancellation" | "rejection";
+            reason: string | null;
+            /** @enum {string} */
+            status: "pending" | "approved" | "declined" | "withdrawn";
+            approved_amount_minor_units: number | null;
+            /** Format: uuid */
+            refund_id: string | null;
+            decided_at: string | null;
+            decision_note: string | null;
+            created_at: string;
+            updated_at: string;
+        };
+        AdminRefundRequest: components["schemas"]["RefundRequest"] & {
+            booking: {
+                /** Format: uuid */
+                id: string;
+                status: string;
+                start_at: string;
+                end_at: string;
+                cancellation_reason: string | null;
+                location: {
+                    /** Format: uuid */
+                    id: string;
+                    title: string;
+                    city: string | null;
+                } | null;
+                booker: {
+                    /** Format: uuid */
+                    id: string;
+                    first_name: string | null;
+                    last_name: string | null;
+                } | null;
+            } | null;
+            payment: {
+                /** Format: uuid */
+                id: string;
+                amount_minor_units: number;
+                currency: string;
+                status: string;
+                method: string | null;
+            } | null;
+            refunded_minor_units: number;
+            remaining_minor_units: number;
+        };
+        AdminDeletionRequest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            reason: string | null;
+            /** @enum {string} */
+            status: "pending" | "completed" | "declined" | "withdrawn";
+            decided_at: string | null;
+            decision_note: string | null;
+            created_at: string;
+            updated_at: string;
+            user: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
+                status: string;
+            } | null;
+            email: string | null;
+            blockers: {
+                upcoming_bookings: number;
+                upcoming_hosted_bookings: number;
+            } | null;
         };
     };
     responses: never;
