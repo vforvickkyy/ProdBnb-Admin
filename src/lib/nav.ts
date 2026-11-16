@@ -103,6 +103,7 @@ export const NAV_SECTIONS: NavSection[] = [
           { href: "/payments", label: "Payments", permission: "payments.view", keywords: "money transactions cashfree" },
           { href: "/payments/refund-requests", label: "Refund requests", permission: "payments.view", keywords: "refund approve decline cancel money back booker" },
           { href: "/payments/refunds", label: "Refunds", permission: "payments.view", keywords: "money back" },
+          { href: "/payments/payouts", label: "Host payouts", permission: "payments.view", keywords: "payout pay host bank transfer earnings utr settlement" },
         ],
       },
       {
