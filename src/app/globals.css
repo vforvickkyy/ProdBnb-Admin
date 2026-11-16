@@ -297,3 +297,44 @@ h3 {
     scroll-behavior: auto !important;
   }
 }
+
+/* Website page preview (Website → Pages): a compact version of the website's article styles. */
+@layer components {
+  .page-prose {
+    @apply text-sm leading-6 text-slate-700;
+  }
+  .page-prose h2 {
+    @apply mb-2 mt-6 text-base font-semibold text-slate-900;
+  }
+  .page-prose h3 {
+    @apply mb-1.5 mt-4 text-sm font-semibold text-slate-900;
+  }
+  .page-prose p,
+  .page-prose ul,
+  .page-prose ol,
+  .page-prose table {
+    @apply mb-3;
+  }
+  .page-prose ul {
+    @apply list-disc pl-5;
+  }
+  .page-prose ol {
+    @apply list-decimal pl-5;
+  }
+  .page-prose a {
+    @apply text-accent-700 underline;
+  }
+  .page-prose table {
+    @apply w-full border-collapse text-[13px];
+  }
+  .page-prose th,
+  .page-prose td {
+    @apply border border-slate-200 px-2 py-1.5 text-left;
+  }
+  .page-prose th {
+    @apply bg-slate-50 font-medium;
+  }
+  .page-prose > :first-child {
+    @apply mt-0;
+  }
+}

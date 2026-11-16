@@ -172,6 +172,13 @@ export const NAV_SECTIONS: NavSection[] = [
           { href: "/website/maps", label: "Google Maps", permission: "site.view", keywords: "maps places api key location search" },
         ],
       },
+      {
+        label: "Content",
+        items: [
+          { href: "/website/pages", label: "Pages", permission: "site.view", keywords: "privacy terms refund policy about contact footer legal" },
+          { href: "/website/seo", label: "SEO", permission: "site.view", keywords: "meta title description search google noindex share image" },
+        ],
+      },
     ],
   },
   {

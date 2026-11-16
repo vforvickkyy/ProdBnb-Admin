@@ -5,6 +5,9 @@
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
+/** The product's public name, as the website shows it (same variable as the website's). */
+export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME?.trim() || "ProdBnb";
+
 export type ConsoleEnvironment = "local" | "staging" | "production" | "unknown";
 
 /** Which backend this build talks to, inferred from its base URL (for the header badge). */

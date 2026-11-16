@@ -13,6 +13,7 @@ import { PricingEditor } from "@/components/listing/PricingEditor";
 import { SectionsEditor } from "@/components/listing/SectionsEditor";
 import { TimingsEditor } from "@/components/listing/TimingsEditor";
 import { useCatalogOptions } from "@/components/listing/useCatalogOptions";
+import { SeoEditor } from "@/components/website/SeoEditor";
 import { StatusBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -25,12 +26,13 @@ import { adminApi, unwrap } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { personName } from "@/lib/format";
 import { listingApi } from "@/lib/listingApi";
+import { autoListingDescription, autoListingTitle, locationPath } from "@/lib/seo";
 import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 
 type LocationDetail = components["schemas"]["LocationDetail"];
-type Tab = "details" | "photos" | "pricing" | "timings" | "sections" | "tags" | "publish";
-const TABS: Tab[] = ["details", "photos", "pricing", "timings", "sections", "tags", "publish"];
+type Tab = "details" | "photos" | "pricing" | "timings" | "sections" | "tags" | "seo" | "publish";
+const TABS: Tab[] = ["details", "photos", "pricing", "timings", "sections", "tags", "seo", "publish"];
 
 export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -54,6 +56,7 @@ function EditListing({ id }: { id: string }) {
   const tab: Tab = tabParam && TABS.includes(tabParam) ? tabParam : "details";
   const { can } = useAdminMe();
   const canEdit = can("locations.moderate");
+  const canEditSeo = can("content.manage");
 
   const {
     data: location,
@@ -174,6 +177,7 @@ function EditListing({ id }: { id: string }) {
           { value: "timings", label: "Timings" },
           { value: "sections", label: "Sections" },
           { value: "tags", label: "Categories & amenities" },
+          { value: "seo", label: "SEO" },
           { value: "publish", label: "Publish", badge: missing > 0 ? <Count n={missing} warn /> : undefined },
         ]}
       />
@@ -208,6 +212,37 @@ function EditListing({ id }: { id: string }) {
       {tab === "tags" && (
         <TabPanel value="tags">
           <TagsTab location={location} canEdit={canEdit} onSaved={refresh} />
+        </TabPanel>
+      )}
+      {tab === "seo" && (
+        <TabPanel value="seo">
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Card
+              className="lg:col-span-2"
+              title="Search & sharing"
+              description="How this listing appears in Google and when its link is shared. Empty fields are written from the listing's title, city and description."
+            >
+              <SeoEditor
+                type="location"
+                entityKey={location.id}
+                canEdit={canEditSeo}
+                auto={{
+                  title: autoListingTitle(location),
+                  description: autoListingDescription(location),
+                  path: locationPath(location),
+                  image: location.media[0]?.url ?? null,
+                }}
+              />
+            </Card>
+            <Card title="Tips">
+              <ul className="list-disc space-y-2 pl-4 text-[13px] leading-5 text-slate-600">
+                <li>Lead with what people search for: the kind of space, the area and the shoot type — “Sunlit rooftop in Bandra for music videos”.</li>
+                <li>Keep titles under 60 characters and descriptions under 155 so Google doesn&apos;t cut them off.</li>
+                <li>A strong, landscape cover photo is used when the link is shared. Change it in Photos, or set a share image here.</li>
+                <li>Only hide a listing from search if it shouldn&apos;t be found — a draft does that already.</li>
+              </ul>
+            </Card>
+          </div>
         </TabPanel>
       )}
       {tab === "publish" && (
