@@ -12,7 +12,15 @@ vi.mock("@/lib/api", async () => {
   return { ...actual, adminApi: { GET: getMock, PATCH: patchMock } };
 });
 
-const settings = { id: "s1", platform_fee_bps: 500, tax_bps: 1800, unpaid_hold_minutes: null, updated_by: null, updated_at: "2026-11-15T10:00:00Z" };
+const settings = {
+  id: "s1",
+  platform_fee_bps: 500,
+  tax_bps: 1800,
+  unpaid_hold_minutes: null,
+  availability_requires_login: true,
+  updated_by: null,
+  updated_at: "2026-11-15T10:00:00Z",
+};
 
 function renderPage() {
   return render(
@@ -55,5 +63,18 @@ describe("General settings page", () => {
     renderPage();
     expect(await screen.findByText("Only a super admin can change platform settings.")).toBeInTheDocument();
     expect(screen.getByRole("switch", { name: /Cancel unpaid bookings automatically/ })).toBeDisabled();
+  });
+
+  it("turns the login-to-see-availability rule off and saves only that field", async () => {
+    getMock.mockImplementation((path: string) => (path === "/me" ? jsonOk(me("super_admin", ["settings.view", "settings.manage"])) : jsonOk(settings)));
+    patchMock.mockImplementation(() => jsonOk({ ...settings, availability_requires_login: false }));
+    const user = userEvent.setup();
+    renderPage();
+
+    const toggle = await screen.findByRole("switch", { name: /Require login to check availability/ });
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+    await user.click(toggle);
+    await user.click(screen.getByRole("button", { name: "Save booking rules" }));
+    expect(patchMock).toHaveBeenCalledWith("/settings", { body: { availability_requires_login: false } });
   });
 });

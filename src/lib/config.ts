@@ -3,7 +3,7 @@
  * values the app already ships, or a plain link -- never a credential.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 export type ConsoleEnvironment = "local" | "staging" | "production" | "unknown";
 

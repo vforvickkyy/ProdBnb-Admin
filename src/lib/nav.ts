@@ -1,6 +1,7 @@
 import {
   CalendarCheck,
   CreditCard,
+  Globe,
   LayoutDashboard,
   MapPin,
   Megaphone,
@@ -155,6 +156,20 @@ export const NAV_SECTIONS: NavSection[] = [
           { href: "/platforms?tab=releases", label: "Releases", permission: "platforms.view", keywords: "updates versions ship" },
           { href: "/platforms?tab=flags", label: "Feature flags", permission: "platforms.view", keywords: "features rollout" },
           { href: "/platforms?tab=versions", label: "App versions", permission: "platforms.view", keywords: "devices adoption" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "website",
+    label: "Website",
+    icon: Globe,
+    groups: [
+      {
+        label: "Setup",
+        items: [
+          { href: "/website/domains", label: "Domains", permission: "site.view", keywords: "domain dns custom url vercel primary" },
+          { href: "/website/maps", label: "Google Maps", permission: "site.view", keywords: "maps places api key location search" },
         ],
       },
     ],

@@ -30,6 +30,7 @@ function BookingRules() {
   const { data, error, isLoading, mutate } = useSWR("/v1/admin/settings", () => adminApi.GET("/settings").then(unwrap<PlatformSettings>));
   const [holdsOn, setHoldsOn] = useState(false);
   const [holdMinutes, setHoldMinutes] = useState("30");
+  const [availabilityLogin, setAvailabilityLogin] = useState(true);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -37,17 +38,22 @@ function BookingRules() {
     if (!data) return;
     setHoldsOn(data.unpaid_hold_minutes !== null);
     setHoldMinutes(String(data.unpaid_hold_minutes ?? 30));
+    setAvailabilityLogin(data.availability_requires_login);
   }, [data]);
 
   const minutes = Number(holdMinutes);
   const invalid = holdsOn && (!Number.isInteger(minutes) || minutes < 5 || minutes > 10080);
-  const dirty = useMemo(() => Boolean(data) && (holdsOn ? minutes : null) !== data!.unpaid_hold_minutes, [data, holdsOn, minutes]);
+  const holdsDirty = Boolean(data) && (holdsOn ? minutes : null) !== data!.unpaid_hold_minutes;
+  const loginDirty = Boolean(data) && availabilityLogin !== data!.availability_requires_login;
+  const dirty = useMemo(() => holdsDirty || loginDirty, [holdsDirty, loginDirty]);
 
   async function save() {
     if (!data) return;
     setBusy(true);
     try {
-      const body: SettingsPatch = { unpaid_hold_minutes: holdsOn ? minutes : null };
+      const body: SettingsPatch = {};
+      if (holdsDirty) body.unpaid_hold_minutes = holdsOn ? minutes : null;
+      if (loginDirty) body.availability_requires_login = availabilityLogin;
       if (reason.trim()) body.reason = reason.trim();
       await adminApi.PATCH("/settings", { body }).then(unwrap);
       toast.success("Booking rules saved. They apply to bookings made from now on.");
@@ -64,7 +70,15 @@ function BookingRules() {
   if (error || !data) return <ErrorState message={extractErrorMessage(error, "Failed to load settings.")} onRetry={() => mutate()} />;
 
   return (
-    <Card title="Unpaid-hold expiry" description="A booking reserves its slot as soon as it's made. This frees slots nobody pays for.">
+    <Card title="Booking rules" description="How booking works for everyone, on the website and in the apps.">
+      <Switch
+        checked={availabilityLogin}
+        onChange={setAvailabilityLogin}
+        disabled={!editable}
+        label="Require login to check availability"
+        description="Anyone can browse listings and prices; open dates and times are shown only after signing in. Enforced by the API, so it applies to every app version — turn it off temporarily if an older app version can't sign people in from its availability screen."
+      />
+      <div className="my-5 border-t border-slate-200" />
       <Switch
         checked={holdsOn}
         onChange={setHoldsOn}
@@ -89,7 +103,8 @@ function BookingRules() {
       <div className="mt-5 border-t border-slate-200 pt-4">
         <KeyValues
           items={[
-            { label: "Currently", value: data.unpaid_hold_minutes === null ? "Off" : `${data.unpaid_hold_minutes} min` },
+            { label: "Availability", value: data.availability_requires_login ? "Signed-in people only" : "Everyone" },
+            { label: "Unpaid-hold expiry", value: data.unpaid_hold_minutes === null ? "Off" : `${data.unpaid_hold_minutes} min` },
             { label: "Last changed", value: formatDateTime(data.updated_at) },
           ]}
         />

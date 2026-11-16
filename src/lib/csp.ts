@@ -19,6 +19,13 @@
  */
 export const R2_UPLOAD_ORIGIN = "https://*.r2.cloudflarestorage.com";
 
+/**
+ * Console 3: the Website → Google Maps page shows a live map with the saved browser key, so the
+ * Maps JavaScript API may fetch from Google's map hosts and load its fonts. Its script is injected
+ * by the console's own (nonce-trusted) code, which 'strict-dynamic' already allows.
+ */
+export const GOOGLE_MAPS_ORIGINS = ["https://maps.googleapis.com", "https://*.googleapis.com", "https://*.gstatic.com"];
+
 function originOf(url: string | undefined): string | null {
   if (!url) return null;
   try {
@@ -29,15 +36,17 @@ function originOf(url: string | undefined): string | null {
 }
 
 export function buildCsp(nonce: string, env: { supabaseUrl?: string; apiBaseUrl?: string; dev?: boolean } = {}): string {
-  const connectSrc = ["'self'", originOf(env.supabaseUrl), originOf(env.apiBaseUrl), R2_UPLOAD_ORIGIN].filter(Boolean);
+  const connectSrc = ["'self'", originOf(env.supabaseUrl), originOf(env.apiBaseUrl), R2_UPLOAD_ORIGIN, ...GOOGLE_MAPS_ORIGINS].filter(Boolean);
   return [
     "default-src 'self'",
     // `next dev` (never a production build) needs eval for React Refresh -- Next's documented pattern.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${env.dev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
-    "font-src 'self'",
+    "font-src 'self' https://fonts.gstatic.com",
     `connect-src ${connectSrc.join(" ")}`,
+    // Google Maps (Website → Google Maps preview) draws tiles in a blob: worker.
+    "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

@@ -1646,10 +1646,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release";
+                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site";
                     target_id?: string;
                     admin_id?: string;
-                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE";
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN";
                     created_after?: string;
                     created_before?: string;
                     page?: number;
@@ -2042,7 +2042,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Platform fee, tax and unpaid-hold window */
+        /** Platform fee, tax, unpaid-hold window and whether availability needs a login */
         get: {
             parameters: {
                 query?: never;
@@ -2112,6 +2112,7 @@ export interface paths {
                         platform_fee_bps?: number;
                         tax_bps?: number;
                         unpaid_hold_minutes?: number | null;
+                        availability_requires_login?: boolean;
                         reason?: string;
                     };
                 };
@@ -6958,6 +6959,752 @@ export interface paths {
         };
         trace?: never;
     };
+    "/site/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Website integrations (Google Maps, Vercel): status and safe configuration only, never secrets */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteIntegrationStatus"][];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/integrations/google_maps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Connect Google Maps. The browser key is public by design; the optional server key goes to Vault */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        browser_key: string;
+                        map_id?: string | null;
+                        server_key?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteIntegrationStatus"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/integrations/vercel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Connect the website's Vercel project (token goes to Vault; checked against the project first) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        project_id: string;
+                        team_id?: string | null;
+                        token?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteIntegrationStatus"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/integrations/{provider}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test a website integration */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    provider: "google_maps" | "vercel";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                ok: boolean;
+                                detail: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/integrations/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Disconnect a website integration and delete its secret from Vault */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    provider: "google_maps" | "vercel";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                removed: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/domains": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The website's domains, their status and the DNS records each still needs */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteDomainsOverview"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** Add a domain to the website (optionally redirecting to another of its domains) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        redirect_to?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteDomain"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/domains/{domain}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a domain from the website (not the primary one, not the platform address) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    domain: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                removed: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Set or clear a domain's redirect */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    domain: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        redirect_to: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteDomain"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/site/domains/{domain}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Re-check a domain's ownership verification and DNS */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    domain: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteDomain"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/site/primary-domain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Choose the primary domain (canonical URLs, sitemaps). Must be verified, configured and not redirecting */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        domain: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SiteDomainsOverview"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -7304,9 +8051,9 @@ export interface components {
             /** Format: uuid */
             admin_id: string;
             /** @enum {string} */
-            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE";
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN";
             /** @enum {string} */
-            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release";
+            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site";
             /** Format: uuid */
             target_id: string;
             reason: string | null;
@@ -7324,7 +8071,7 @@ export interface components {
             last_name: string | null;
             /** @enum {string} */
             team_role: "super_admin" | "moderator" | "support" | "finance";
-            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "locations.create" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view" | "campaigns.view" | "campaigns.send" | "channels.manage" | "platforms.view" | "platforms.manage" | "incidents.manage")[];
+            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "locations.create" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view" | "campaigns.view" | "campaigns.send" | "channels.manage" | "platforms.view" | "platforms.manage" | "incidents.manage" | "site.view" | "site.manage")[];
         };
         TeamMember: {
             /** Format: uuid */
@@ -7349,6 +8096,7 @@ export interface components {
             platform_fee_bps: number;
             tax_bps: number;
             unpaid_hold_minutes: number | null;
+            availability_requires_login: boolean;
             /** Format: uuid */
             updated_by: string | null;
             /** Format: date-time */
@@ -7877,6 +8625,48 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+        };
+        SiteIntegrationStatus: {
+            /** @enum {string} */
+            provider: "google_maps" | "vercel";
+            connected: boolean;
+            config: {
+                [key: string]: unknown;
+            };
+            has_secret: boolean;
+            /** Format: date-time */
+            last_tested_at: string | null;
+            last_test_ok: boolean | null;
+            last_test_error: string | null;
+            /** Format: date-time */
+            updated_at: string | null;
+        };
+        DnsRecord: {
+            /** @enum {string} */
+            type: "A" | "CNAME" | "TXT";
+            name: string;
+            value: string;
+            /** @enum {string} */
+            purpose: "point" | "verify";
+        };
+        SiteDomain: {
+            name: string;
+            apex_name: string;
+            is_apex: boolean;
+            is_platform_domain: boolean;
+            is_primary: boolean;
+            verified: boolean;
+            redirect_to: string | null;
+            configured: boolean | null;
+            configured_by: string | null;
+            dns_records: components["schemas"]["DnsRecord"][];
+            /** @enum {string} */
+            status: "active" | "redirect" | "pending_dns" | "pending_verification";
+        };
+        SiteDomainsOverview: {
+            vercel_connected: boolean;
+            primary_domain: string | null;
+            domains: components["schemas"]["SiteDomain"][];
         };
     };
     responses: never;

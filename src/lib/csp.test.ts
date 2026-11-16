@@ -10,8 +10,10 @@ describe("buildCsp", () => {
     expect(csp).not.toContain("'unsafe-eval'");
   });
 
-  it("limits connections to this app, Supabase, the backend and R2 uploads (origins only)", () => {
-    expect(csp).toContain("connect-src 'self' https://x.supabase.co https://api.example.com https://*.r2.cloudflarestorage.com");
+  it("limits connections to this app, Supabase, the backend, R2 uploads and Google Maps (origins only)", () => {
+    expect(csp).toContain(
+      "connect-src 'self' https://x.supabase.co https://api.example.com https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://*.googleapis.com https://*.gstatic.com"
+    );
   });
 
   it("keeps framing and plugins locked down", () => {
