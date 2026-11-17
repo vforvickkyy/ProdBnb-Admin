@@ -33,10 +33,11 @@ function ReceiptsInner() {
   const { data, error, isLoading, mutate } = useSWR(`/v1/admin/receipts?page=${page}`, () =>
     adminApi.GET("/receipts", { params: { query: { page, pageSize: PAGE_SIZE } } }).then(unwrapPaginated<Receipt>),
   );
+  const { data: settings } = useSWR("/v1/admin/invoice-settings", () => adminApi.GET("/invoice-settings").then(unwrap));
   const name = (r: Receipt) => `RCPT-${r.payment_id.slice(0, 8).toUpperCase()}.pdf`;
 
   const columns: Column<Receipt>[] = [
-    { key: "receipt", header: "Receipt", render: (r) => <span className="font-mono font-semibold text-slate-900">RCPT-{r.payment_id.slice(0, 8).toUpperCase()}</span> },
+    { key: "receipt", header: "Receipt", render: (r) => <span className="whitespace-nowrap font-mono font-semibold text-slate-900">RCPT-{r.payment_id.slice(0, 8).toUpperCase()}</span> },
     { key: "paid", header: "Paid", render: (r) => formatDateTime(r.paid_at) },
     {
       key: "booker",
@@ -70,7 +71,7 @@ function ReceiptsInner() {
         </Badge>
       ),
     },
-    { key: "invoice", header: "Invoice", render: (r) => (r.invoice_number ? <span className="font-mono text-xs">{r.invoice_number}</span> : <span className="text-slate-400">Not issued</span>) },
+    { key: "invoice", header: "Invoice", render: (r) => (r.invoice_number ? <span className="whitespace-nowrap font-mono text-xs">{r.invoice_number}</span> : <span className="text-slate-400">Not issued</span>) },
     { key: "sent", header: "Last emailed", render: (r) => (r.last_sent_at ? formatDateTime(r.last_sent_at) : <span className="text-slate-400">Never</span>) },
     {
       key: "actions",
@@ -86,7 +87,7 @@ function ReceiptsInner() {
             <Download aria-hidden className="h-3.5 w-3.5" />
           </Button>
           {can("invoices.manage") && (
-            <Button size="sm" onClick={() => setSending(r)}>
+            <Button size="sm" onClick={() => setSending(r)} disabled={settings ? !settings.email_connected : false} title={settings && !settings.email_connected ? "Connect email first" : undefined}>
               Email
             </Button>
           )}

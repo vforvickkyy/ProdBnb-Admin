@@ -18,6 +18,8 @@ describe("buildCsp", () => {
 
   it("keeps framing and plugins locked down", () => {
     expect(csp).toContain("frame-ancestors 'none'");
+    // Only the invoice preview PDF (a blob: URL) may be framed.
+    expect(csp).toContain("frame-src 'self' blob:");
     expect(csp).toContain("object-src 'none'");
   });
 

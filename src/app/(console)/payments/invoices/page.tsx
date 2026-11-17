@@ -34,7 +34,7 @@ function download(inv: Pick<Invoice, "id" | "number">) {
   downloadAdminFile(`/invoices/${inv.id}/pdf`, pdfName(inv.number)).catch((err) => toast.error(extractErrorMessage(err, "Couldn't download the PDF.")));
 }
 
-function InvoiceSheet({ id, onClose, onSend, canSend }: { id: string | null; onClose: () => void; onSend: (inv: Invoice) => void; canSend: boolean }) {
+function InvoiceSheet({ id, onClose, onSend, canSend, emailConnected }: { id: string | null; onClose: () => void; onSend: (inv: Invoice) => void; canSend: boolean; emailConnected: boolean }) {
   const { data, error } = useSWR(id ? `/v1/admin/invoices/${id}` : null, () => adminApi.GET("/invoices/{id}", { params: { path: { id: id! } } }).then(unwrap));
   const badge = data ? deliveryBadge(data) : null;
   return (
@@ -59,7 +59,7 @@ function InvoiceSheet({ id, onClose, onSend, canSend }: { id: string | null; onC
               <Download aria-hidden className="h-4 w-4" /> Download PDF
             </Button>
             {canSend && (
-              <Button variant="primary" onClick={() => onSend(data)}>
+              <Button variant="primary" onClick={() => onSend(data)} disabled={!emailConnected} title={emailConnected ? undefined : "Connect email first"}>
                 <Mail aria-hidden className="h-4 w-4" /> {data.delivery_status === "sent" ? "Resend" : "Send now"}
               </Button>
             )}
@@ -178,7 +178,7 @@ function InvoicesInner() {
       key: "number",
       header: "Invoice",
       render: (i) => (
-        <button type="button" onClick={() => setOpenId(i.id)} className="font-mono font-semibold text-slate-900 underline-offset-2 hover:underline">
+        <button type="button" onClick={() => setOpenId(i.id)} className="whitespace-nowrap font-mono font-semibold text-slate-900 underline-offset-2 hover:underline">
           {i.number}
         </button>
       ),
@@ -220,7 +220,7 @@ function InvoicesInner() {
             <Download aria-hidden className="h-3.5 w-3.5" />
           </Button>
           {canManage && (
-            <Button size="sm" onClick={() => setSending(i)}>
+            <Button size="sm" onClick={() => setSending(i)} disabled={settings ? !settings.email_connected : false} title={settings && !settings.email_connected ? "Connect email first" : undefined}>
               {i.delivery_status === "sent" ? "Resend" : "Send"}
             </Button>
           )}
@@ -332,7 +332,7 @@ function InvoicesInner() {
         )}
       </div>
 
-      <InvoiceSheet id={openId} onClose={() => setOpenId(null)} onSend={setSending} canSend={canManage} />
+      <InvoiceSheet id={openId} onClose={() => setOpenId(null)} onSend={setSending} canSend={canManage} emailConnected={settings?.email_connected ?? true} />
       <SendDialog
         open={Boolean(sending)}
         onOpenChange={(o) => !o && setSending(null)}

@@ -47,6 +47,9 @@ export function buildCsp(nonce: string, env: { supabaseUrl?: string; apiBaseUrl?
     `connect-src ${connectSrc.join(" ")}`,
     // Google Maps (Website → Google Maps preview) draws tiles in a blob: worker.
     "worker-src 'self' blob:",
+    // Payments → Invoice template shows the preview PDF (fetched with the admin's token, then
+    // handed to the browser's PDF viewer as a blob: URL). Nothing else may be framed.
+    "frame-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
