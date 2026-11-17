@@ -105,6 +105,9 @@ export const NAV_SECTIONS: NavSection[] = [
           { href: "/payments/refunds", label: "Refunds", permission: "payments.view", keywords: "money back" },
           { href: "/payments/payouts", label: "Host payouts", permission: "payments.view", keywords: "payout pay host bank transfer earnings utr settlement" },
           { href: "/payments/coupons", label: "Coupons & offers", permission: "payments.view", keywords: "coupon offer discount promo code voucher" },
+          { href: "/payments/invoices", label: "Invoices", permission: "payments.view", keywords: "invoice gst tax bill pending sent resend email pdf" },
+          { href: "/payments/receipts", label: "Receipts", permission: "payments.view", keywords: "receipt proof of payment pdf" },
+          { href: "/payments/invoice-template", label: "Invoice template", permission: "payments.view", keywords: "invoice template gstin company address prefix numbering" },
         ],
       },
       {

@@ -1646,10 +1646,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon";
+                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon" | "invoice";
                     target_id?: string;
                     admin_id?: string;
-                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON";
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON" | "ADMIN_UPDATED_INVOICE_SETTINGS" | "ADMIN_ISSUED_INVOICES" | "ADMIN_SENT_INVOICE" | "ADMIN_SENT_RECEIPT";
                     created_after?: string;
                     created_before?: string;
                     page?: number;
@@ -9614,6 +9614,888 @@ export interface paths {
         };
         trace?: never;
     };
+    "/invoice-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The invoice template: company details, numbering, tax, notes (payments.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["InvoiceSettings"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the invoice template (invoices.manage). Audited; issued invoices keep their details */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        legal_name?: string | null;
+                        trade_name?: string | null;
+                        gstin?: string | null;
+                        pan?: string | null;
+                        address_line1?: string | null;
+                        address_line2?: string | null;
+                        city?: string | null;
+                        state?: string | null;
+                        state_code?: string | null;
+                        postal_code?: string | null;
+                        country?: string;
+                        email?: string | null;
+                        phone?: string | null;
+                        website?: string | null;
+                        number_prefix?: string;
+                        sac_code?: string | null;
+                        tax_label?: string;
+                        notes?: string | null;
+                        terms?: string | null;
+                        signatory?: string | null;
+                        auto_send?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["InvoiceSettings"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/invoice-settings/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A sample invoice PDF with the saved template plus unsaved edits (payments.view) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        legal_name?: string | null;
+                        trade_name?: string | null;
+                        gstin?: string | null;
+                        pan?: string | null;
+                        address_line1?: string | null;
+                        address_line2?: string | null;
+                        city?: string | null;
+                        state?: string | null;
+                        state_code?: string | null;
+                        postal_code?: string | null;
+                        country?: string;
+                        email?: string | null;
+                        phone?: string | null;
+                        website?: string | null;
+                        number_prefix?: string;
+                        sac_code?: string | null;
+                        tax_label?: string;
+                        notes?: string | null;
+                        terms?: string | null;
+                        signatory?: string | null;
+                        auto_send?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description A PDF file */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/pdf": string;
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invoices, filtered by delivery: pending, sent automatically, sent manually, failed (payments.view) */
+        get: {
+            parameters: {
+                query?: {
+                    filter?: "all" | "pending" | "sent_auto" | "sent_manual" | "failed";
+                    search?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Invoice"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                                counts: {
+                                    all: number;
+                                    pending: number;
+                                    sent_auto: number;
+                                    sent_manual: number;
+                                    failed: number;
+                                    /** @description Paid bookings with no invoice yet */
+                                    waiting: number;
+                                };
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An invoice with its history (issued, sent, failed) (payments.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Invoice"] & {
+                                events: components["schemas"]["InvoiceEvent"][];
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download the invoice PDF (payments.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A PDF file */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/pdf": string;
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/{id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email the invoice to the booker, or to another address (invoices.manage). Audited */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: email */
+                        to?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Invoice"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/issue-missing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue invoices for paid bookings that have none; they wait to be sent (invoices.manage). Audited */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                issued: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invoices/send-pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email every invoice that's pending or failed (invoices.manage). Audited */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                sent: number;
+                                failed: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Payment receipts: every settled payment (payments.view) */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Receipt"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/receipts/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download a payment receipt PDF (payments.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A PDF file */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/pdf": string;
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/receipts/{id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Email a payment receipt to the booker (invoices.manage). Audited */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: email */
+                        to?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                to: string;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -9960,9 +10842,9 @@ export interface components {
             /** Format: uuid */
             admin_id: string;
             /** @enum {string} */
-            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON";
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON" | "ADMIN_UPDATED_INVOICE_SETTINGS" | "ADMIN_ISSUED_INVOICES" | "ADMIN_SENT_INVOICE" | "ADMIN_SENT_RECEIPT";
             /** @enum {string} */
-            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon";
+            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon" | "invoice";
             /** Format: uuid */
             target_id: string;
             reason: string | null;
@@ -10826,6 +11708,122 @@ export interface components {
                 first_name: string | null;
                 last_name: string | null;
             } | null;
+        };
+        InvoiceSettings: {
+            /** Format: uuid */
+            id: string;
+            legal_name: string | null;
+            trade_name: string | null;
+            gstin: string | null;
+            pan: string | null;
+            address_line1: string | null;
+            address_line2: string | null;
+            city: string | null;
+            state: string | null;
+            state_code: string | null;
+            postal_code: string | null;
+            country: string;
+            email: string | null;
+            phone: string | null;
+            website: string | null;
+            number_prefix: string;
+            sac_code: string | null;
+            tax_label: string;
+            notes: string | null;
+            terms: string | null;
+            signatory: string | null;
+            auto_send: boolean;
+            updated_at: string;
+            /** @description What's still needed before invoices can be issued */
+            missing: string[];
+            email_connected: boolean;
+        };
+        InvoiceParty: {
+            name: string;
+            legal_name?: string | null;
+            company?: string | null;
+            gstin?: string | null;
+            pan?: string | null;
+            address: string[];
+            state?: string | null;
+            state_code?: string | null;
+            email?: string | null;
+            phone?: string | null;
+            website?: string | null;
+        };
+        Invoice: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            fy: string;
+            /** Format: uuid */
+            booking_id: string;
+            /** Format: uuid */
+            payment_id: string | null;
+            /** Format: uuid */
+            user_id: string | null;
+            issued_at: string;
+            seller: components["schemas"]["InvoiceParty"];
+            billed_to: components["schemas"]["InvoiceParty"];
+            details: {
+                booking_ref: string;
+                listing: string;
+                city: string | null;
+                booking_type: string;
+                when: string;
+                payment_ref: string | null;
+                payment_method: string | null;
+                paid_at: string | null;
+            };
+            currency: string;
+            subtotal_minor_units: number;
+            discount_minor_units: number;
+            coupon_code: string | null;
+            service_fee_minor_units: number;
+            tax_minor_units: number;
+            tax_rate_bps: number | null;
+            total_minor_units: number;
+            tax_label: string;
+            sac_code: string | null;
+            /** @enum {string} */
+            delivery_status: "pending" | "sent" | "failed";
+            /** @enum {string|null} */
+            sent_via: "auto" | "manual" | null;
+            sent_at: string | null;
+            sent_to: string | null;
+            send_count: number;
+            last_error: string | null;
+        };
+        InvoiceEvent: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "issued" | "sent_auto" | "sent_manual" | "failed" | "receipt_sent";
+            to_email: string | null;
+            error: string | null;
+            created_at: string;
+            actor: components["schemas"]["NameRef"];
+        };
+        Receipt: {
+            /** Format: uuid */
+            payment_id: string;
+            /** Format: uuid */
+            booking_id: string;
+            amount_minor_units: number;
+            refunded_minor_units: number;
+            currency: string;
+            status: string;
+            method: string | null;
+            paid_at: string;
+            booker: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
+            } | null;
+            listing: string | null;
+            invoice_number: string | null;
+            last_sent_at: string | null;
         };
     };
     responses: never;

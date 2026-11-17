@@ -121,3 +121,34 @@ export interface MeResponse {
 export function getMe(): Promise<MeResponse> {
   return authorizedFetch<MeResponse>("/v1/me");
 }
+
+/** Fetches a file (e.g. an invoice PDF) from the admin API with the session token. */
+export async function fetchAdminFile(path: string, init?: RequestInit): Promise<Blob> {
+  const token = await getAccessToken();
+  const res = await fetch(`${API_BASE_URL}/v1/admin${path}`, {
+    ...init,
+    headers: {
+      ...(init?.headers ?? {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+    },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(res.status, body?.error?.message ?? `Request failed (${res.status}).`, body?.error?.code);
+  }
+  return res.blob();
+}
+
+/** Downloads an admin API file to the viewer's computer under `filename`. */
+export async function downloadAdminFile(path: string, filename: string): Promise<void> {
+  const blob = await fetchAdminFile(path);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
