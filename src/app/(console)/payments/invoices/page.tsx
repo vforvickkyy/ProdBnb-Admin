@@ -74,7 +74,9 @@ function InvoiceSheet({ id, onClose, onSend, canSend, emailConnected }: { id: st
             <dt className="text-slate-500">Email</dt>
             <dd className="text-slate-900">{data.billed_to.email ?? "—"}</dd>
             <dt className="text-slate-500">Location</dt>
-            <dd className="text-slate-900">{[data.details.listing, data.details.city].filter(Boolean).join(", ")}</dd>
+            <dd className="text-slate-900">
+              {data.details.city && !data.details.listing.toLowerCase().includes(data.details.city.toLowerCase()) ? `${data.details.listing}, ${data.details.city}` : data.details.listing}
+            </dd>
             <dt className="text-slate-500">When</dt>
             <dd className="text-slate-900">{data.details.when}</dd>
             <dt className="text-slate-500">Booking</dt>
