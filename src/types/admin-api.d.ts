@@ -1646,10 +1646,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout";
+                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon";
                     target_id?: string;
                     admin_id?: string;
-                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT";
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON";
                     created_after?: string;
                     created_before?: string;
                     page?: number;
@@ -9239,6 +9239,381 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/coupons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every coupon (ProdBnb's and hosts'), with status and uses (payments.view) */
+        get: {
+            parameters: {
+                query?: {
+                    owner?: "platform" | "host" | "all";
+                    status?: "active" | "scheduled" | "ended" | "inactive" | "all";
+                    host_id?: string;
+                    search?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Coupon"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** Create a ProdBnb coupon, or one on a host's behalf (coupons.manage). Audited */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        code: string;
+                        title: string;
+                        description?: string | null;
+                        /** @enum {string} */
+                        discount_type: "percent" | "fixed";
+                        percent_off?: number | null;
+                        amount_off_minor_units?: number | null;
+                        max_discount_minor_units?: number | null;
+                        min_booking_minor_units?: number | null;
+                        booking_types?: ("hourly" | "half_day" | "day" | "multi_day")[] | null;
+                        /** Format: date-time */
+                        starts_at?: string | null;
+                        /** Format: date-time */
+                        ends_at?: string | null;
+                        usage_limit?: number | null;
+                        per_user_limit?: number | null;
+                        first_booking_only?: boolean;
+                        is_public?: boolean;
+                        is_active?: boolean;
+                        location_ids?: string[];
+                        /**
+                         * @default platform
+                         * @enum {string}
+                         */
+                        owner_type?: "platform" | "host";
+                        /** Format: uuid */
+                        host_id?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Coupon"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Code already taken */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/coupons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A coupon with every booking that used it (payments.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Coupon"] & {
+                                redemptions: components["schemas"]["CouponRedemption"][];
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete a coupon nobody has used (coupons.manage). Audited */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                deleted: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Already used: turn it off instead */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Edit, pause or resume a coupon (coupons.manage). Audited; bookings keep their discount */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        code?: string;
+                        title?: string;
+                        description?: string | null;
+                        /** @enum {string} */
+                        discount_type?: "percent" | "fixed";
+                        percent_off?: number | null;
+                        amount_off_minor_units?: number | null;
+                        max_discount_minor_units?: number | null;
+                        min_booking_minor_units?: number | null;
+                        booking_types?: ("hourly" | "half_day" | "day" | "multi_day")[] | null;
+                        /** Format: date-time */
+                        starts_at?: string | null;
+                        /** Format: date-time */
+                        ends_at?: string | null;
+                        usage_limit?: number | null;
+                        per_user_limit?: number | null;
+                        first_booking_only?: boolean;
+                        is_public?: boolean;
+                        is_active?: boolean;
+                        location_ids?: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["Coupon"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -9585,9 +9960,9 @@ export interface components {
             /** Format: uuid */
             admin_id: string;
             /** @enum {string} */
-            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT";
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON";
             /** @enum {string} */
-            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout";
+            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon";
             /** Format: uuid */
             target_id: string;
             reason: string | null;
@@ -9605,7 +9980,7 @@ export interface components {
             last_name: string | null;
             /** @enum {string} */
             team_role: "super_admin" | "moderator" | "support" | "finance";
-            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "locations.create" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view" | "campaigns.view" | "campaigns.send" | "channels.manage" | "platforms.view" | "platforms.manage" | "incidents.manage" | "site.view" | "site.manage" | "content.manage")[];
+            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "locations.create" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view" | "campaigns.view" | "campaigns.send" | "channels.manage" | "platforms.view" | "platforms.manage" | "incidents.manage" | "site.view" | "site.manage" | "content.manage" | "coupons.manage" | "invoices.manage")[];
         };
         TeamMember: {
             /** Format: uuid */
@@ -10377,6 +10752,7 @@ export interface components {
             end_at: string;
             currency: string;
             listing_price_minor_units: number;
+            host_discount_minor_units: number;
             paid_minor_units: number;
             refunded_minor_units: number;
             net_minor_units: number;
@@ -10387,6 +10763,68 @@ export interface components {
                 id: string;
                 paid_at: string;
                 reference: string;
+            } | null;
+        };
+        Coupon: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            /** @enum {string} */
+            owner_type: "platform" | "host";
+            /** Format: uuid */
+            host_id: string | null;
+            host: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
+            } | null;
+            title: string;
+            description: string | null;
+            /** @enum {string} */
+            discount_type: "percent" | "fixed";
+            percent_off: number | null;
+            amount_off_minor_units: number | null;
+            max_discount_minor_units: number | null;
+            min_booking_minor_units: number | null;
+            booking_types: string[] | null;
+            starts_at: string | null;
+            ends_at: string | null;
+            usage_limit: number | null;
+            per_user_limit: number | null;
+            first_booking_only: boolean;
+            is_public: boolean;
+            is_active: boolean;
+            location_ids: string[];
+            /** @enum {string} */
+            status: "active" | "scheduled" | "ended" | "inactive" | "used_up";
+            uses: number;
+            discount_given_minor_units: number;
+            created_at: string;
+            updated_at: string;
+        };
+        CouponRedemption: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            booking_id: string;
+            discount_minor_units: number;
+            /** @enum {string} */
+            funded_by: "platform" | "host";
+            created_at: string;
+            booking: {
+                status: string;
+                start_at: string;
+                paid: boolean;
+                location: {
+                    /** Format: uuid */
+                    id: string;
+                    title: string;
+                } | null;
+            } | null;
+            booker: {
+                first_name: string | null;
+                last_name: string | null;
             } | null;
         };
     };
