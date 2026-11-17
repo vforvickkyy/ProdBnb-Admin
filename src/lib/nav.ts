@@ -141,6 +141,7 @@ export const NAV_SECTIONS: NavSection[] = [
           { href: "/messaging", label: "Sent & scheduled", permission: "campaigns.view", keywords: "announcements campaigns history" },
           { href: "/messaging/new", label: "New announcement", permission: "campaigns.send", keywords: "notify broadcast campaign" },
           { href: "/messaging/new?kind=direct", label: "Message users", permission: "campaigns.send", keywords: "direct notify specific" },
+          { href: "/messaging/templates", label: "Templates", permission: "campaigns.view", keywords: "notification template new listing offer variables first name" },
         ],
       },
       {

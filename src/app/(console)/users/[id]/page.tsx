@@ -303,6 +303,31 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
               </dl>
             </section>
 
+            {user.preferences && (
+              <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
+                <h2 className="mb-3 text-sm font-semibold text-slate-700">About them (from sign-up)</h2>
+                {user.preferences.professions.length === 0 && !user.preferences.onboarding_completed_at ? (
+                  <p className="text-sm text-slate-500">They haven&apos;t told us about themselves yet.</p>
+                ) : (
+                  <dl className="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
+                    {[
+                      ["What they do", user.preferences.professions.map((p) => p.charAt(0).toUpperCase() + p.slice(1).replace(/_/g, " ")).join(", ") || "—"],
+                      ["Company", user.preferences.company ?? "—"],
+                      ["Cities", user.preferences.cities.join(", ") || "—"],
+                      ["New-listing alerts", user.preferences.new_listing_alerts ? "On" : "Off"],
+                      ["Heard about us", user.preferences.heard_from ? user.preferences.heard_from.charAt(0).toUpperCase() + user.preferences.heard_from.slice(1) : "—"],
+                      ["Finished sign-up", user.preferences.onboarding_completed_at ? new Date(user.preferences.onboarding_completed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not yet"],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex justify-between gap-4">
+                        <dt className="shrink-0 text-slate-500">{label}</dt>
+                        <dd className="min-w-0 break-words text-right">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </section>
+            )}
+
             {user.roles.includes("host") && (
               <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
                 <h2 className="mb-3 text-sm font-semibold text-slate-700">Locations</h2>

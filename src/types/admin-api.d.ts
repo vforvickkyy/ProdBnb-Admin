@@ -1646,10 +1646,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon" | "invoice";
+                    target_type?: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon" | "invoice" | "notification_template";
                     target_id?: string;
                     admin_id?: string;
-                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON" | "ADMIN_UPDATED_INVOICE_SETTINGS" | "ADMIN_ISSUED_INVOICES" | "ADMIN_SENT_INVOICE" | "ADMIN_SENT_RECEIPT";
+                    action?: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON" | "ADMIN_UPDATED_INVOICE_SETTINGS" | "ADMIN_ISSUED_INVOICES" | "ADMIN_SENT_INVOICE" | "ADMIN_SENT_RECEIPT" | "ADMIN_CREATED_NOTIFICATION_TEMPLATE" | "ADMIN_UPDATED_NOTIFICATION_TEMPLATE" | "ADMIN_DELETED_NOTIFICATION_TEMPLATE";
                     created_after?: string;
                     created_before?: string;
                     page?: number;
@@ -5404,12 +5404,29 @@ export interface paths {
                         } | {
                             /** @enum {string} */
                             type: "platform_users";
+                        } | {
+                            /** @enum {string} */
+                            type: "segment";
+                            /** @enum {string} */
+                            role?: "booker" | "host";
+                            professions?: ("producer" | "director" | "cinematographer" | "photographer" | "production_house" | "ad_agency" | "content_creator" | "art_director" | "location_manager" | "student" | "location_owner" | "other")[];
+                            cities?: string[];
+                            use_case_ids?: string[];
+                            /** @enum {string} */
+                            booked?: "yes" | "no";
+                            new_listing_alerts?: boolean;
                         };
                         title: string;
                         body: string;
                         link_url?: string | null;
                         email_subject?: string | null;
                         email_body?: string | null;
+                        /** Format: uuid */
+                        location_id?: string | null;
+                        /** Format: uuid */
+                        coupon_id?: string | null;
+                        /** Format: uuid */
+                        template_id?: string | null;
                     };
                 };
             };
@@ -5496,6 +5513,17 @@ export interface paths {
                         } | {
                             /** @enum {string} */
                             type: "platform_users";
+                        } | {
+                            /** @enum {string} */
+                            type: "segment";
+                            /** @enum {string} */
+                            role?: "booker" | "host";
+                            professions?: ("producer" | "director" | "cinematographer" | "photographer" | "production_house" | "ad_agency" | "content_creator" | "art_director" | "location_manager" | "student" | "location_owner" | "other")[];
+                            cities?: string[];
+                            use_case_ids?: string[];
+                            /** @enum {string} */
+                            booked?: "yes" | "no";
+                            new_listing_alerts?: boolean;
                         };
                         /**
                          * @default [
@@ -5590,6 +5618,10 @@ export interface paths {
                         link_url?: string | null;
                         email_subject?: string | null;
                         email_body?: string | null;
+                        /** Format: uuid */
+                        location_id?: string | null;
+                        /** Format: uuid */
+                        coupon_id?: string | null;
                     };
                 };
             };
@@ -5798,12 +5830,29 @@ export interface paths {
                         } | {
                             /** @enum {string} */
                             type: "platform_users";
+                        } | {
+                            /** @enum {string} */
+                            type: "segment";
+                            /** @enum {string} */
+                            role?: "booker" | "host";
+                            professions?: ("producer" | "director" | "cinematographer" | "photographer" | "production_house" | "ad_agency" | "content_creator" | "art_director" | "location_manager" | "student" | "location_owner" | "other")[];
+                            cities?: string[];
+                            use_case_ids?: string[];
+                            /** @enum {string} */
+                            booked?: "yes" | "no";
+                            new_listing_alerts?: boolean;
                         };
                         title?: string;
                         body?: string;
                         link_url?: string | null;
                         email_subject?: string | null;
                         email_body?: string | null;
+                        /** Format: uuid */
+                        location_id?: string | null;
+                        /** Format: uuid */
+                        coupon_id?: string | null;
+                        /** Format: uuid */
+                        template_id?: string | null;
                     };
                 };
             };
@@ -10496,6 +10545,586 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/notification-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Notification templates (built-in and the team's own) (campaigns.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["NotificationTemplate"][];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** Create a template (campaigns.send). Unknown {variables} are refused. Audited */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        /**
+                         * @default custom
+                         * @enum {string}
+                         */
+                        category?: "new_listing" | "new_offer" | "casual" | "reminder" | "host" | "custom";
+                        description?: string | null;
+                        /** @enum {string|null} */
+                        needs?: "listing" | "offer" | null;
+                        title: string;
+                        body: string;
+                        email_subject?: string | null;
+                        email_body?: string | null;
+                        /**
+                         * @default [
+                         *       "in_app",
+                         *       "push"
+                         *     ]
+                         */
+                        channels?: ("in_app" | "push" | "email")[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["NotificationTemplate"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notification-templates/{templateId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One template (campaigns.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    templateId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["NotificationTemplate"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete one of the team's templates (campaigns.send). Built-in ones can't be deleted. Audited */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    templateId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                deleted: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Built-in template */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Edit a template, built-in ones included (campaigns.send). Audited */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    templateId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                        /** @enum {string} */
+                        category?: "new_listing" | "new_offer" | "casual" | "reminder" | "host" | "custom";
+                        description?: string | null;
+                        /** @enum {string|null} */
+                        needs?: "listing" | "offer" | null;
+                        title?: string;
+                        body?: string;
+                        email_subject?: string | null;
+                        email_body?: string | null;
+                        channels?: ("in_app" | "push" | "email")[];
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["NotificationTemplate"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/notification-variables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Variables usable in notification text: per person ({first_name}), listing ({listing_title}) and offer ({offer_code}) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["NotificationVariable"][];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/render-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The text as one person gets it (the signed-in admin, or user_id), with the listing/offer filled in (campaigns.view) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        title: string;
+                        body: string;
+                        email_subject?: string | null;
+                        email_body?: string | null;
+                        link_url?: string | null;
+                        /** Format: uuid */
+                        location_id?: string | null;
+                        /** Format: uuid */
+                        coupon_id?: string | null;
+                        /** Format: uuid */
+                        user_id?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                title: string;
+                                body: string;
+                                link_url: string | null;
+                                email_subject: string | null;
+                                email_body: string | null;
+                                /** Format: uuid */
+                                user_id: string;
+                                /** @description Person variables that person hasn't filled in (the fallback was used) */
+                                missing: string[];
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/audience-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Choices for a segment audience (professions, cities, shoot types) with how many people each reaches (campaigns.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                professions: {
+                                    /** @enum {string} */
+                                    value: "producer" | "director" | "cinematographer" | "photographer" | "production_house" | "ad_agency" | "content_creator" | "art_director" | "location_manager" | "student" | "location_owner" | "other";
+                                    label: string;
+                                    count: number;
+                                }[];
+                                cities: {
+                                    name: string;
+                                    count: number;
+                                }[];
+                                use_cases: {
+                                    /** Format: uuid */
+                                    id: string;
+                                    name: string;
+                                    count: number;
+                                }[];
+                                onboarded: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -10568,6 +11197,16 @@ export interface components {
             locations_count: number;
             bookings_count: number;
         };
+        UserPreferences: {
+            professions: ("producer" | "director" | "cinematographer" | "photographer" | "production_house" | "ad_agency" | "content_creator" | "art_director" | "location_manager" | "student" | "location_owner" | "other")[];
+            company: string | null;
+            cities: string[];
+            use_case_ids: string[];
+            category_ids: string[];
+            heard_from: string | null;
+            new_listing_alerts: boolean;
+            onboarding_completed_at: string | null;
+        };
         AdminUserFullDetail: components["schemas"]["AdminUserDetail"] & {
             /** @enum {string|null} */
             team_role: "super_admin" | "moderator" | "support" | "finance" | null;
@@ -10586,6 +11225,7 @@ export interface components {
                 /** Format: date-time */
                 updated_at: string;
             } | null;
+            preferences: components["schemas"]["UserPreferences"];
         };
         StartingPrice: {
             amount_minor_units: number;
@@ -10842,9 +11482,9 @@ export interface components {
             /** Format: uuid */
             admin_id: string;
             /** @enum {string} */
-            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON" | "ADMIN_UPDATED_INVOICE_SETTINGS" | "ADMIN_ISSUED_INVOICES" | "ADMIN_SENT_INVOICE" | "ADMIN_SENT_RECEIPT";
+            action: "ADMIN_APPROVED_LOCATION" | "ADMIN_REJECTED_LOCATION" | "ADMIN_SUSPENDED_LOCATION" | "ADMIN_RESTORED_LOCATION" | "ADMIN_UPDATED_LOCATION_STATUS" | "ADMIN_SUSPENDED_USER" | "ADMIN_RESTORED_USER" | "ADMIN_CANCELLED_BOOKING" | "ADMIN_CREATED_REFUND" | "ADMIN_CONFIRMED_BOOKING" | "ADMIN_REJECTED_BOOKING" | "ADMIN_COMPLETED_BOOKING" | "ADMIN_VERIFIED_PAYMENT" | "ADMIN_UPDATED_LOCATION" | "ADMIN_DELETED_MEDIA" | "ADMIN_DELETED_SECTION" | "ADMIN_CREATED_CATALOG_ITEM" | "ADMIN_UPDATED_CATALOG_ITEM" | "ADMIN_DELETED_CATALOG_ITEM" | "ADMIN_GRANTED_ROLE" | "ADMIN_REVOKED_ROLE" | "ADMIN_SET_TEAM_ROLE" | "ADMIN_REMOVED_TEAM_MEMBER" | "ADMIN_UPDATED_SETTINGS" | "ADMIN_CREATED_LOCATION" | "ADMIN_UPLOADED_MEDIA" | "ADMIN_REORDERED_MEDIA" | "ADMIN_UPDATED_PRICING" | "ADMIN_UPDATED_AVAILABILITY" | "ADMIN_UPDATED_SECTION" | "ADMIN_UPDATED_CATALOG_LISTINGS" | "ADMIN_UPDATED_CATALOG_COVER" | "ADMIN_CREATED_COLLECTION" | "ADMIN_UPDATED_COLLECTION" | "ADMIN_DELETED_COLLECTION" | "ADMIN_SENT_CAMPAIGN" | "ADMIN_CANCELLED_CAMPAIGN" | "ADMIN_CONNECTED_CHANNEL" | "ADMIN_DISCONNECTED_CHANNEL" | "ADMIN_UPDATED_JOBS_CONFIG" | "ADMIN_UPDATED_PLATFORM" | "ADMIN_UPDATED_FEATURE_FLAG" | "ADMIN_DELETED_FEATURE_FLAG" | "ADMIN_CREATED_INCIDENT" | "ADMIN_UPDATED_INCIDENT" | "ADMIN_CREATED_RELEASE" | "ADMIN_UPDATED_RELEASE" | "ADMIN_DELETED_RELEASE" | "ADMIN_CONNECTED_SITE_INTEGRATION" | "ADMIN_DISCONNECTED_SITE_INTEGRATION" | "ADMIN_ADDED_DOMAIN" | "ADMIN_UPDATED_DOMAIN" | "ADMIN_REMOVED_DOMAIN" | "ADMIN_SET_PRIMARY_DOMAIN" | "ADMIN_CREATED_PAGE" | "ADMIN_UPDATED_PAGE" | "ADMIN_DELETED_PAGE" | "ADMIN_UPDATED_SEO" | "ADMIN_APPROVED_REFUND_REQUEST" | "ADMIN_DECLINED_REFUND_REQUEST" | "ADMIN_COMPLETED_ACCOUNT_DELETION" | "ADMIN_DECLINED_ACCOUNT_DELETION" | "ADMIN_VIEWED_PAYOUT_DETAILS" | "ADMIN_RECORDED_PAYOUT" | "ADMIN_CREATED_COUPON" | "ADMIN_UPDATED_COUPON" | "ADMIN_DELETED_COUPON" | "ADMIN_UPDATED_INVOICE_SETTINGS" | "ADMIN_ISSUED_INVOICES" | "ADMIN_SENT_INVOICE" | "ADMIN_SENT_RECEIPT" | "ADMIN_CREATED_NOTIFICATION_TEMPLATE" | "ADMIN_UPDATED_NOTIFICATION_TEMPLATE" | "ADMIN_DELETED_NOTIFICATION_TEMPLATE";
             /** @enum {string} */
-            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon" | "invoice";
+            target_type: "location" | "user" | "booking" | "payment" | "media" | "section" | "catalog_item" | "settings" | "collection" | "campaign" | "channel" | "platform" | "feature_flag" | "incident" | "release" | "site_integration" | "site" | "site_page" | "seo" | "refund_request" | "deletion_request" | "payout_account" | "payout" | "coupon" | "invoice" | "notification_template";
             /** Format: uuid */
             target_id: string;
             reason: string | null;
@@ -11210,12 +11850,29 @@ export interface components {
             } | {
                 /** @enum {string} */
                 type: "platform_users";
+            } | {
+                /** @enum {string} */
+                type: "segment";
+                /** @enum {string} */
+                role?: "booker" | "host";
+                professions?: ("producer" | "director" | "cinematographer" | "photographer" | "production_house" | "ad_agency" | "content_creator" | "art_director" | "location_manager" | "student" | "location_owner" | "other")[];
+                cities?: string[];
+                use_case_ids?: string[];
+                /** @enum {string} */
+                booked?: "yes" | "no";
+                new_listing_alerts?: boolean;
             };
             title: string;
             body: string;
             link_url: string | null;
             email_subject: string | null;
             email_body: string | null;
+            /** Format: uuid */
+            location_id: string | null;
+            /** Format: uuid */
+            coupon_id: string | null;
+            /** Format: uuid */
+            template_id: string | null;
             /** @enum {string} */
             status: "draft" | "scheduled" | "sending" | "sent" | "cancelled" | "failed";
             /** Format: date-time */
@@ -11824,6 +12481,32 @@ export interface components {
             listing: string | null;
             invoice_number: string | null;
             last_sent_at: string | null;
+        };
+        NotificationTemplate: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** @enum {string} */
+            category: "new_listing" | "new_offer" | "casual" | "reminder" | "host" | "custom";
+            description: string | null;
+            /** @enum {string|null} */
+            needs: "listing" | "offer" | null;
+            title: string;
+            body: string;
+            email_subject: string | null;
+            email_body: string | null;
+            channels: ("in_app" | "push" | "email")[];
+            is_builtin: boolean;
+            created_at: string;
+            updated_at: string;
+            uses: number;
+        };
+        NotificationVariable: {
+            key: string;
+            label: string;
+            example: string;
+            /** @enum {string} */
+            scope: "person" | "listing" | "offer";
         };
     };
     responses: never;

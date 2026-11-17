@@ -12,10 +12,21 @@ export const CAMPAIGN_TONE: Record<string, BadgeTone> = {
 };
 
 export function audienceLabel(a: Campaign["audience"]): string {
-  const x = a as { type: string; role?: string; user_ids?: string[] };
+  const x = a as { type: string; role?: string; user_ids?: string[]; professions?: string[]; cities?: string[]; use_case_ids?: string[]; booked?: string; new_listing_alerts?: boolean };
   if (x.type === "all") return "Everyone";
   if (x.type === "role") return `All ${x.role}s`;
   if (x.type === "platform_users") return "App users";
+  if (x.type === "segment") {
+    const parts = [
+      x.role ? `${x.role}s` : null,
+      x.professions?.length ? x.professions.map((p) => p.replace(/_/g, " ")).join(" / ") : null,
+      x.cities?.length ? `in ${x.cities.join(", ")}` : null,
+      x.use_case_ids?.length ? `${x.use_case_ids.length} shoot type${x.use_case_ids.length === 1 ? "" : "s"}` : null,
+      x.booked === "yes" ? "who have booked" : x.booked === "no" ? "who haven't booked" : null,
+      x.new_listing_alerts ? "with alerts on" : null,
+    ].filter(Boolean);
+    return parts.length ? `Group: ${parts.join(", ")}` : "Everyone (no filters)";
+  }
   return `${x.user_ids?.length ?? 0} people`;
 }
 

@@ -5,8 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/lib/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, BellRing, Inbox, Mail, Send, Users } from "lucide-react";
+import { ArrowLeft, BellRing, Inbox, LayoutTemplate, Mail, Send, Users } from "lucide-react";
+import useSWR from "swr";
+import { ListingPicker, loadListing, OfferPicker, type PickedListing } from "@/components/messaging/ContextPickers";
 import { PeoplePicker, type Person } from "@/components/messaging/PeoplePicker";
+import { SegmentBuilder, type Segment } from "@/components/messaging/SegmentBuilder";
+import { useInsertTarget, VariableChips } from "@/components/messaging/VariableChips";
 import { useMessagingOverview, type Campaign } from "@/components/messaging/useMessaging";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -17,12 +21,18 @@ import { adminApi, unwrap } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { renderEmailPreview } from "@/lib/emailPreview";
 import { formatCount } from "@/lib/format";
+import { BRAND_NAME } from "@/lib/config";
 import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 
+type Template = components["schemas"]["NotificationTemplate"];
+type Rendered = { title: string; body: string; link_url: string | null; email_subject: string | null; email_body: string | null; user_id: string; missing: string[] };
+
+const usesScope = (texts: string[], scope: "listing" | "offer") => texts.some((t) => new RegExp(`\\{${scope}_[a-z_]+`).test(t));
+
 type Channel = "in_app" | "push" | "email";
 type Platform = "ios" | "android" | "web";
-type AudienceKind = "all" | "role:host" | "role:booker" | "role:admin" | "platform_users" | "users";
+type AudienceKind = "all" | "role:host" | "role:booker" | "role:admin" | "platform_users" | "segment" | "users";
 type Preview = components["schemas"]["AudiencePreview"];
 
 const AUDIENCES: { value: AudienceKind; label: string; help: string }[] = [
@@ -30,12 +40,14 @@ const AUDIENCES: { value: AudienceKind; label: string; help: string }[] = [
   { value: "role:host", label: "All hosts", help: "People with the host role." },
   { value: "role:booker", label: "All bookers", help: "People with the booker role." },
   { value: "platform_users", label: "App users on selected platforms", help: "Anyone with the app installed on the platforms you pick below." },
+  { value: "segment", label: "A group you choose", help: "By what they do, city, what they shoot, whether they've booked." },
   { value: "role:admin", label: "Admin team", help: "For internal notices." },
   { value: "users", label: "Specific people", help: "Pick recipients by name or email." },
 ];
 
-function audienceBody(kind: AudienceKind, people: Person[]) {
+function audienceBody(kind: AudienceKind, people: Person[], segment: Segment) {
   if (kind === "all" || kind === "platform_users") return { type: kind };
+  if (kind === "segment") return segment;
   if (kind === "users") return { type: "users" as const, user_ids: people.map((p) => p.id) };
   return { type: "role" as const, role: kind.split(":")[1] as "host" | "booker" | "admin" };
 }
@@ -74,6 +86,45 @@ function Composer() {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState<"draft" | "send" | "test" | null>(null);
   const [loadedDraft, setLoadedDraft] = useState(!draftId);
+  const [segment, setSegment] = useState<Segment>({ type: "segment" });
+  const [listing, setListing] = useState<PickedListing | null>(null);
+  const [offerId, setOfferId] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [previewAs, setPreviewAs] = useState<Person[]>([]);
+  const [rendered, setRendered] = useState<Rendered | null>(null);
+  const [renderError, setRenderError] = useState<string | null>(null);
+  const templates = useSWR("/v1/admin/notification-templates", () => adminApi.GET("/notification-templates").then(unwrap<Template[]>));
+  const insert = useInsertTarget(
+    {
+      title: { value: title, set: setTitle },
+      body: { value: body, set: setBody },
+      subject: { value: subject, set: setSubject },
+      emailBody: { value: emailBody, set: setEmailBody },
+    },
+    "body",
+  );
+
+  function applyTemplate(t: Template) {
+    setTemplateId(t.id);
+    setTitle(t.title);
+    setBody(t.body);
+    setSubject(t.email_subject ?? "");
+    setEmailBody(t.email_body ?? "");
+    if (t.channels.length) setChannels(t.channels as Channel[]);
+    if (!name.trim()) setName(t.name);
+    if (t.needs !== "listing") setListing(null);
+    if (t.needs !== "offer") setOfferId(null);
+  }
+
+  // ?template=<id> starts from that template.
+  const templateParam = searchParams.get("template");
+  const [appliedParam, setAppliedParam] = useState(false);
+  useEffect(() => {
+    if (!templateParam || appliedParam || !templates.data) return;
+    const t = templates.data.find((x) => x.id === templateParam);
+    if (t) applyTemplate(t);
+    setAppliedParam(true);
+  }, [templateParam, appliedParam, templates.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Editing an existing draft.
   useEffect(() => {
@@ -92,6 +143,10 @@ function Composer() {
         setEmailBody(c.email_body ?? "");
         const a = c.audience as { type: string; role?: string; user_ids?: string[] };
         setAudience(a.type === "role" ? (`role:${a.role}` as AudienceKind) : (a.type as AudienceKind));
+        if (a.type === "segment") setSegment(c.audience as Segment);
+        setOfferId(c.coupon_id ?? null);
+        setTemplateId(c.template_id ?? null);
+        if (c.location_id) void loadListing(c.location_id).then(setListing);
         if (a.type === "users" && a.user_ids?.length) {
           setPeople(a.user_ids.map((id) => ({ id, first_name: null, last_name: id.slice(0, 8), email: null, status: "active", is_host: false, location_count: 0 })));
         }
@@ -113,7 +168,7 @@ function Composer() {
     if (!r.push.ios && !r.push.android && !r.push.web) setChannels(["in_app"]);
   }, [overview.data, defaultsAdjusted, draftId, searchParams]);
 
-  const audiencePayload = useMemo(() => audienceBody(audience, people), [audience, people]);
+  const audiencePayload = useMemo(() => audienceBody(audience, people, segment), [audience, people, segment]);
   const audienceReady = audience !== "users" || people.length > 0;
 
   useEffect(() => {
@@ -155,6 +210,12 @@ function Composer() {
   if (!audienceReady) problems.push("Pick at least one recipient.");
   if (channels.length === 0) problems.push("Choose at least one channel.");
   if (!title.trim() || !body.trim()) problems.push("Write a title and message.");
+  const texts = [title, body, ...(channels.includes("email") ? [subject, emailBody] : [])];
+  const needsListing = usesScope(texts, "listing") || templates.data?.find((t) => t.id === templateId)?.needs === "listing";
+  const needsOffer = usesScope(texts, "offer") || templates.data?.find((t) => t.id === templateId)?.needs === "offer";
+  if (needsListing && !listing) problems.push("Pick the listing it's about.");
+  if (needsOffer && !offerId) problems.push("Pick the offer it's about.");
+  if (renderError) problems.push(renderError);
   if (wantsEmail && (!subject.trim() || !emailBody.trim())) problems.push("Write the email subject and body.");
   if (wantsEmail && ready && !ready.email) problems.push("Email is not connected yet.");
   if (wantsPush && platforms.length === 0) problems.push("Choose at least one push platform.");
@@ -173,7 +234,49 @@ function Composer() {
     link_url: link.trim() || null,
     email_subject: wantsEmail ? subject.trim() : null,
     email_body: wantsEmail ? emailBody : null,
+    location_id: listing?.id ?? null,
+    coupon_id: offerId,
+    template_id: templateId,
   };
+
+  // The text as one real person gets it, rendered by the backend (same code as sending).
+  const previewUserId = previewAs[0]?.id;
+  useEffect(() => {
+    if (!title.trim() && !body.trim()) {
+      setRendered(null);
+      setRenderError(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      const res = await adminApi.POST("/campaigns/render-preview", {
+        body: {
+          title,
+          body,
+          email_subject: wantsEmail ? subject : null,
+          email_body: wantsEmail ? emailBody : null,
+          link_url: link.trim() || null,
+          location_id: listing?.id ?? null,
+          coupon_id: offerId,
+          ...(previewUserId ? { user_id: previewUserId } : {}),
+        },
+      });
+      if (cancelled) return;
+      if (res.error) {
+        const message = (res.error as { error?: { message?: string } }).error?.message ?? "Couldn't preview.";
+        // "Pick the listing…" is already listed under the send button; show only other problems.
+        setRenderError(/Pick the (listing|offer)/.test(message) ? null : message);
+        setRendered(null);
+      } else {
+        setRenderError(null);
+        setRendered((res.data as { data: Rendered }).data);
+      }
+    }, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [title, body, subject, emailBody, wantsEmail, link, listing, offerId, previewUserId]);
 
   async function saveDraft(): Promise<string> {
     if (draftId) {
@@ -229,6 +332,8 @@ function Composer() {
             link_url: payload.link_url,
             email_subject: payload.email_subject,
             email_body: payload.email_body,
+            location_id: payload.location_id,
+            coupon_id: payload.coupon_id,
           } as never,
         })
         .then(unwrap<{ push?: { outcome: string; sent: number; failed: number }; email?: { ok: boolean; detail: string } }>);
@@ -271,6 +376,66 @@ function Composer() {
 
       <div className="grid gap-6 xl:grid-cols-5">
         <div className="space-y-6 xl:col-span-3">
+          <Card
+            title="Start from a template"
+            description="Pick one to fill in the wording, then change anything you like."
+            actions={
+              <Link href="/messaging/templates" className="inline-flex items-center gap-1 text-[13px] text-slate-500 hover:text-slate-900">
+                <LayoutTemplate aria-hidden className="h-3.5 w-3.5" /> Manage templates
+              </Link>
+            }
+          >
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Template">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!templateId}
+                onClick={() => setTemplateId(null)}
+                className={cn("rounded-lg border px-3 py-1.5 text-sm", !templateId ? "border-accent-500 bg-accent-50 text-accent-800" : "border-slate-200 text-slate-700 hover:border-slate-300")}
+              >
+                Blank
+              </button>
+              {(templates.data ?? []).map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={templateId === t.id}
+                  title={t.description ?? undefined}
+                  onClick={() => applyTemplate(t)}
+                  className={cn("rounded-lg border px-3 py-1.5 text-sm", templateId === t.id ? "border-accent-500 bg-accent-50 text-accent-800" : "border-slate-200 text-slate-700 hover:border-slate-300")}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </Card>
+
+          {(needsListing || needsOffer || listing || offerId) && (
+            <Card title="What it's about" description="Its details fill in the {listing_…} and {offer_…} variables. A message about a listing opens that listing when tapped.">
+              <div className="space-y-4">
+                {(needsListing || listing) && (
+                  <div>
+                    <ListingPicker value={listing} onChange={setListing} />
+                    {listing?.city && audience !== "users" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAudience("segment");
+                          setSegment({ ...segment, type: "segment", cities: [listing.city!] });
+                        }}
+                        className="mt-2 text-xs font-medium text-accent-700 hover:underline"
+                      >
+                        Send it to people interested in {listing.city}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {(needsOffer || offerId) && <OfferPicker value={offerId} onChange={(id) => setOfferId(id)} />}
+              </div>
+            </Card>
+          )}
+
           <Card title="1 · Audience">
             <TextField className="mb-4" label="Internal name" value={name} maxLength={120} onChange={(e) => setName(e.target.value)} placeholder="Diwali offer — hosts" hint="Only admins see this." />
             <fieldset>
@@ -296,6 +461,11 @@ function Composer() {
             {audience === "users" && (
               <div className="mt-4">
                 <PeoplePicker value={people} onChange={setPeople} />
+              </div>
+            )}
+            {audience === "segment" && (
+              <div className="mt-4">
+                <SegmentBuilder value={segment} onChange={setSegment} />
               </div>
             )}
             {preview && (
@@ -377,24 +547,26 @@ function Composer() {
 
           <Card title="3 · Message">
             <div className="space-y-4">
-              <TextField label="Title" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} hint={`${title.length}/120 — the notification headline.`} />
-              <TextAreaField label="Message" rows={3} maxLength={1000} value={body} onChange={(e) => setBody(e.target.value)} hint={`${body.length}/1000 — keep it short; push shows ~2 lines.`} />
+              <TextField label="Title" value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} hint={`${title.length}/120 — the notification headline.`} {...insert.bind("title")} />
+              <TextAreaField label="Message" rows={3} maxLength={1000} value={body} onChange={(e) => setBody(e.target.value)} hint={`${body.length}/1000 — keep it short; push shows ~2 lines.`} {...insert.bind("body")} />
+              <VariableChips onInsert={insert.insert} listing={Boolean(listing) || needsListing} offer={Boolean(offerId) || needsOffer} />
               <TextField
                 label="Link (optional)"
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
-                placeholder="https://prodbnb.com/collections/goa or prodbnb://…"
-                hint="Opened when the notification is tapped, and shown as a button in the email."
+                placeholder={listing ? "Leave empty to open the listing" : "https://… or an app link"}
+                hint={listing ? "Leave empty and it opens the listing. Also shown as a button in the email." : "Opened when the notification is tapped, and shown as a button in the email."}
               />
               {wantsEmail && (
                 <div className="space-y-4 rounded-lg border border-slate-200 p-4">
-                  <TextField label="Email subject" value={subject} maxLength={200} onChange={(e) => setSubject(e.target.value)} />
+                  <TextField label="Email subject" value={subject} maxLength={200} onChange={(e) => setSubject(e.target.value)} {...insert.bind("subject")} />
                   <TextAreaField
                     label="Email body"
                     rows={8}
                     maxLength={50000}
                     value={emailBody}
                     onChange={(e) => setEmailBody(e.target.value)}
+                    {...insert.bind("emailBody")}
                     hint="Blank line = new paragraph · **bold** · [link text](https://…). Announcements get an unsubscribe link automatically."
                   />
                   <div className="flex gap-2">
@@ -462,29 +634,41 @@ function Composer() {
 
         <aside className="xl:col-span-2" aria-label="Preview">
           <div className="sticky top-20 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-700">Preview</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-slate-700">Preview</h2>
+              <span className="text-xs text-slate-500">{previewAs[0] ? `As ${previewAs[0].first_name ?? previewAs[0].email ?? "them"}` : "As you"}</span>
+            </div>
+            <details className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+              <summary className="cursor-pointer text-slate-600">Preview as someone else</summary>
+              <div className="mt-2">
+                <PeoplePicker value={previewAs} onChange={(p) => setPreviewAs(p.slice(-1))} />
+              </div>
+            </details>
+            {rendered && rendered.missing.length > 0 && (
+              <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                This person hasn&apos;t given their {rendered.missing.map((m) => m.replace(/_/g, " ")).join(", ")}, so the fallback is used.
+              </p>
+            )}
             <div className="rounded-[2rem] border-8 border-ink-900 bg-[#0b0f17] p-4">
               <div className="rounded-2xl bg-white/90 p-3 shadow-lg backdrop-blur" style={{ background: "rgba(255,255,255,0.92)" }}>
                 <div className="flex items-center gap-2 text-[11px] text-[#475569]">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#c28014] text-[10px] font-bold text-snow">P</span>
-                  PRODBNB · now
+                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#c28014] text-[10px] font-bold text-snow">{BRAND_NAME.slice(0, 1).toUpperCase()}</span>
+                  {BRAND_NAME.toUpperCase()} · now
                 </div>
-                <p className="mt-1.5 text-sm font-semibold text-[#0f172a]">{title || "Notification title"}</p>
-                <p className="line-clamp-3 text-[13px] text-[#334155]">{body || "Your message appears here."}</p>
+                <p className="mt-1.5 text-sm font-semibold text-[#0f172a]">{rendered?.title || title || "Notification title"}</p>
+                <p className="line-clamp-3 text-[13px] text-[#334155]">{rendered?.body || body || "Your message appears here."}</p>
               </div>
             </div>
             {wantsEmail && (
               <div className="overflow-hidden rounded-lg border border-slate-200">
                 <div className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600">
-                  <b>Subject:</b> {subject || "—"}
+                  <b>Subject:</b> {rendered?.email_subject || subject || "—"}
                 </div>
                 <div className="bg-[#f4f4f5] p-4">
                   <div className="rounded-lg bg-white p-5 text-[14px] text-[#18181b]">
-                    <p className="mb-4 text-base font-bold">
-                      Prod<span className="text-[#c28014]">.</span>Bnb
-                    </p>
-                    <div dangerouslySetInnerHTML={{ __html: renderEmailPreview(emailBody || "Your email body appears here.") }} />
-                    {link.startsWith("https://") && (
+                    <p className="mb-4 text-base font-bold">{BRAND_NAME}</p>
+                    <div dangerouslySetInnerHTML={{ __html: renderEmailPreview(rendered?.email_body || emailBody || "Your email body appears here.") }} />
+                    {(rendered?.link_url ?? link).startsWith("https://") && (
                       <p className="mt-4">
                         <span className="inline-block rounded-lg bg-[#c28014] px-4 py-2 text-sm font-semibold text-snow">Open</span>
                       </p>
