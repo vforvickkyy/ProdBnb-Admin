@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { adminApi, unwrap } from "@/lib/api";
 import { useAdminMe } from "@/lib/useAdminMe";
+import { BRAND_NAME } from "@/lib/config";
 
 interface Preset {
   id: string;
@@ -69,7 +70,7 @@ export default function EmailSetupPage() {
   const [secure, setSecure] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [fromName, setFromName] = useState("ProdBnb");
+  const [fromName, setFromName] = useState(BRAND_NAME);
   const [fromEmail, setFromEmail] = useState("");
   const [replyTo, setReplyTo] = useState("");
   const [rate, setRate] = useState("60");
@@ -82,7 +83,7 @@ export default function EmailSetupPage() {
       setPort(String(config.port ?? 587));
       setSecure(Boolean(config.secure));
       setUsername(String(config.username ?? ""));
-      setFromName(String(config.from_name ?? "ProdBnb"));
+      setFromName(String(config.from_name ?? BRAND_NAME));
       setFromEmail(String(config.from_email ?? ""));
       setReplyTo(String(config.reply_to ?? ""));
       setRate(String(config.max_per_minute ?? 60));
@@ -139,7 +140,7 @@ export default function EmailSetupPage() {
     <>
       <PageHeader
         title="Email"
-        description="Connect the mailbox ProdBnb sends announcements and direct emails from."
+        description={`Connect the mailbox ${BRAND_NAME} sends announcements and direct emails from.`}
         actions={
           can("campaigns.send") && (
             <Link
@@ -203,8 +204,8 @@ export default function EmailSetupPage() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <TextField label="From name" value={fromName} onChange={(e) => setFromName(e.target.value)} />
-                  <TextField label="From address" type="email" value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} placeholder="hello@prodbnb.com" />
-                  <TextField label="Reply-to (optional)" type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="support@prodbnb.com" />
+                  <TextField label="From address" type="email" value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} placeholder="hello@yourdomain.com" />
+                  <TextField label="Reply-to (optional)" type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="support@yourdomain.com" />
                   <TextField
                     label="Max emails per minute"
                     inputMode="numeric"
@@ -231,7 +232,7 @@ export default function EmailSetupPage() {
               title="Setup guide"
               steps={[
                 <>
-                  <b>Use an address on your own domain</b> (e.g. hello@prodbnb.com). Free webmail “from” addresses are often rejected by Gmail and Outlook.
+                  <b>Use an address on your own domain</b> (e.g. hello@yourdomain.com). Free webmail “from” addresses are often rejected by Gmail and Outlook.
                 </>,
                 <>
                   <b>Pick a provider.</b> For a few hundred emails a day, Google Workspace or Zoho is fine. For announcements to all users, use a sending

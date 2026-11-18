@@ -7,6 +7,7 @@ import { adminApi, unwrap } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { personName } from "@/lib/format";
 import type { components } from "@/types/admin-api";
+import { BRAND_NAME } from "@/lib/config";
 
 export type HostCandidate = components["schemas"]["HostCandidate"];
 
@@ -65,7 +66,7 @@ export function HostPicker({ value, onChange }: { value: HostCandidate | null; o
       {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
       {loading && <p className="mt-2 text-sm text-slate-500">Searching…</p>}
       {!loading && query.trim().length >= 2 && results.length === 0 && !error && (
-        <p className="mt-2 text-sm text-slate-500">Nobody matches. The host needs a ProdBnb account first — ask them to sign up in the app.</p>
+        <p className="mt-2 text-sm text-slate-500">Nobody matches. The host needs a {BRAND_NAME} account first — ask them to sign up in the app.</p>
       )}
       {results.length > 0 && (
         <ul

@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { TabPanel, Tabs } from "@/components/ui/Tabs";
 import { adminApi, unwrap } from "@/lib/api";
 import { useAdminMe } from "@/lib/useAdminMe";
+import { BRAND_NAME } from "@/lib/config";
 
 type Tab = "ios" | "android" | "web";
 
@@ -174,7 +175,7 @@ function ApnsSetup({ status, canManage, onChanged }: { status: ChannelStatus; ca
                 <option value="sandbox">Sandbox (Xcode builds)</option>
               </SelectField>
             </div>
-            <TextField label="Bundle ID" value={bundleId} onChange={(e) => setBundleId(e.target.value)} placeholder="com.prodbnb.app" />
+            <TextField label="Bundle ID" value={bundleId} onChange={(e) => setBundleId(e.target.value)} placeholder="com.eastape.prodbnbapp" />
             <TextAreaField
               label="Auth key (.p8)"
               rows={5}
@@ -216,7 +217,7 @@ function ApnsSetup({ status, canManage, onChanged }: { status: ChannelStatus; ca
               Sign in to <b>developer.apple.com</b> → Certificates, Identifiers &amp; Profiles → <b>Keys</b> → “+”.
             </>,
             <>
-              Name it “ProdBnb push”, tick <b>Apple Push Notifications service (APNs)</b>, continue and register.
+              Name it “{BRAND_NAME} push”, tick <b>Apple Push Notifications service (APNs)</b>, continue and register.
             </>,
             <>
               <b>Download the .p8 file</b> — Apple lets you download it only once. Note the <b>Key ID</b> shown with it.
@@ -297,7 +298,7 @@ function FcmSetup({ status, canManage, onChanged }: { status: ChannelStatus; can
           title="Get your Firebase key"
           steps={[
             <>
-              Open <b>console.firebase.google.com</b> and create (or open) the ProdBnb project; add the Android app with its package name.
+              Open <b>console.firebase.google.com</b> and create (or open) the {BRAND_NAME} project; add the Android app with its package name.
             </>,
             <>
               Project settings → <b>Cloud Messaging</b>: make sure <b>Firebase Cloud Messaging API (V1)</b> is enabled.
@@ -368,7 +369,7 @@ function WebPushSetup({ status, canManage, onChanged }: { status: ChannelStatus;
               label="Contact (subject)"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              hint="mailto:ops@prodbnb.com or https://prodbnb.com — browser push services contact this if something goes wrong."
+              hint="mailto:ops@yourdomain.com or https://yourdomain.com — browser push services contact this if something goes wrong."
             />
             <SelectField label="Keys" value={mode} onChange={(e) => setMode(e.target.value as never)}>
               <option value="generate">{status.connected ? "Keep current keys (or generate new — breaks existing subscriptions)" : "Generate a new key pair"}</option>
@@ -432,7 +433,7 @@ function WebPushSetup({ status, canManage, onChanged }: { status: ChannelStatus;
               <code className="text-xs">POST /v1/devices</code> (platform “web”).
             </>,
             <>
-              From then on, announcements with <b>Web</b> selected reach that browser — even when ProdBnb isn&apos;t open.
+              From then on, announcements with <b>Web</b> selected reach that browser — even when {BRAND_NAME} isn&apos;t open.
             </>,
             <>
               <b>Don&apos;t regenerate keys</b> once the web app is live: every existing browser subscription would stop working.

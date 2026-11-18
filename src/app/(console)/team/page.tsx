@@ -18,6 +18,7 @@ import { adminApi, unwrap } from "@/lib/api";
 import { formatDate, personName } from "@/lib/format";
 import { TEAM_ROLE_DESCRIPTIONS, TEAM_ROLE_LABELS, type TeamRole, useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
+import { BRAND_NAME } from "@/lib/config";
 
 type TeamMember = components["schemas"]["TeamMember"];
 const ROLES = Object.keys(TEAM_ROLE_LABELS) as TeamRole[];
@@ -126,7 +127,7 @@ export default function TeamPage() {
     <>
       <PageHeader
         title="Admin team"
-        description="Who can operate ProdBnb, and what each person is allowed to do."
+        description={`Who can operate ${BRAND_NAME}, and what each person is allowed to do.`}
         actions={
           manage && (
             <Button variant="primary" onClick={() => setAddOpen(true)}>
@@ -168,7 +169,7 @@ export default function TeamPage() {
         open={addOpen}
         onOpenChange={setAddOpen}
         title="Add an admin"
-        description="The person must already have a ProdBnb account (they can sign up in any ProdBnb app first)."
+        description={`The person must already have a ${BRAND_NAME} account (they can sign up on the website or in the app first).`}
       >
         <div className="space-y-4">
           <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />

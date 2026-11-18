@@ -15,6 +15,7 @@ import { formatDateTime } from "@/lib/format";
 import { getReadiness } from "@/lib/health";
 import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
+import { BRAND_NAME } from "@/lib/config";
 
 type IntegrationsReport = components["schemas"]["IntegrationsReport"];
 type IntegrationStatus = components["schemas"]["IntegrationStatus"];
@@ -104,7 +105,7 @@ export default function SystemPage() {
     <>
       <PageHeader
         title="Integrations & health"
-        description="Every service ProdBnb depends on, the keys it is configured with, and whether it works. Secret values are never shown here — they stay in Vercel (or, for email and push, in Supabase Vault)."
+        description={`Every service ${BRAND_NAME} depends on, the keys it is configured with, and whether it works. Secret values are never shown here — they stay in Vercel (or, for email and push, in Supabase Vault).`}
         actions={
           <>
             <a href={VERCEL_LINKS.backendEnv} target="_blank" rel="noreferrer" className="text-sm text-slate-600 underline hover:text-slate-900">

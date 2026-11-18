@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/Switch";
 import { HostPicker, type HostCandidate } from "@/components/listing/HostPicker";
 import { adminApi, unwrapPaginated } from "@/lib/api";
 import type { components } from "@/types/admin-api";
+import { BRAND_NAME } from "@/lib/config";
 
 export type Coupon = components["schemas"]["Coupon"];
 type Listing = { id: string; title: string; city: string | null; host_id: string };
@@ -177,7 +178,7 @@ export function CouponForm({ draft, onChange, editing }: { draft: CouponDraft; o
                 value={draft.owner_type}
                 onChange={(v) => set({ owner_type: v, host: v === "platform" ? null : draft.host, location_ids: [] })}
                 options={[
-                  { value: "platform", label: "ProdBnb (we pay the discount)" },
+                  { value: "platform", label: `${BRAND_NAME} (we pay the discount)` },
                   { value: "host", label: "A host (comes out of their earning)" },
                 ]}
               />

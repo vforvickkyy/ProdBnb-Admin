@@ -20,6 +20,7 @@ import { useRouter } from "@/lib/navigation";
 import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 import { discountText, STATUS_BADGE } from "@/components/coupons/couponText";
+import { BRAND_NAME } from "@/lib/config";
 
 type Redemption = components["schemas"]["CouponRedemption"];
 
@@ -93,7 +94,7 @@ export default function CouponPage({ params }: { params: Promise<{ id: string }>
             {data.code} <Badge tone={st.tone}>{st.label}</Badge>
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            {data.title} · {discountText(data)} · {data.owner_type === "platform" ? "From ProdBnb" : `From ${data.host ? personName(data.host) : "a host"} (comes out of their earning)`}
+            {data.title} · {discountText(data)} · {data.owner_type === "platform" ? `From ${BRAND_NAME}` : `From ${data.host ? personName(data.host) : "a host"} (comes out of their earning)`}
           </p>
         </div>
         {canEdit && (
@@ -112,7 +113,7 @@ export default function CouponPage({ params }: { params: Promise<{ id: string }>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <StatTile label="Uses" value={`${data.uses}${data.usage_limit ? ` / ${data.usage_limit}` : ""}`} />
-        <StatTile label="Discount given (paid bookings)" value={formatMoney(data.discount_given_minor_units)} hint={data.owner_type === "platform" ? "Paid by ProdBnb" : "Paid by the host"} />
+        <StatTile label="Discount given (paid bookings)" value={formatMoney(data.discount_given_minor_units)} hint={data.owner_type === "platform" ? `Paid by ${BRAND_NAME}` : "Paid by the host"} />
         <StatTile label="Runs" value={data.ends_at ? `until ${formatDate(data.ends_at)}` : "No end date"} hint={data.starts_at ? `from ${formatDate(data.starts_at)}` : undefined} />
       </div>
 

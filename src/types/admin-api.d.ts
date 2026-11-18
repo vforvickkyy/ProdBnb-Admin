@@ -9295,7 +9295,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Every coupon (ProdBnb's and hosts'), with status and uses (payments.view) */
+        /** Every coupon (the platform's and hosts'), with status and uses (payments.view) */
         get: {
             parameters: {
                 query?: {
@@ -9359,7 +9359,7 @@ export interface paths {
             };
         };
         put?: never;
-        /** Create a ProdBnb coupon, or one on a host's behalf (coupons.manage). Audited */
+        /** Create a platform coupon, or one on a host's behalf (coupons.manage). Audited */
         post: {
             parameters: {
                 query?: never;

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { AdminShell } from "./AdminShell";
+import { BRAND_NAME } from "@/lib/config";
 
 const { useAdminGateMock, signOutMock, clearSessionHintMock, replaceMock, mutateMock } = vi.hoisted(() => ({
   useAdminGateMock: vi.fn(),
@@ -142,7 +143,7 @@ describe("AdminShell when the server cannot be reached", () => {
         <p>Page content</p>
       </AdminShell>
     );
-    expect(screen.getByRole("alert")).toHaveTextContent("Can't reach ProdBnb right now");
+    expect(screen.getByRole("alert")).toHaveTextContent(`Can't reach ${BRAND_NAME} right now`);
     expect(screen.getByRole("button", { name: "Retry now" })).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });

@@ -6,14 +6,15 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "@fontsource-variable/inter";
 import "./globals.css";
+import { BRAND_NAME } from "@/lib/config";
 
 // Every page renders per request so it can carry that request's CSP nonce (src/middleware.ts) -- a
 // page prerendered at build time has no nonce and its inline scripts would be blocked.
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "ProdBnb Admin",
-  description: "Operational admin panel for the ProdBnb marketplace.",
+  title: `${BRAND_NAME} Admin`,
+  description: `Operational admin panel for the ${BRAND_NAME} marketplace.`,
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

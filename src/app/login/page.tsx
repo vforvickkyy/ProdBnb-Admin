@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { setSessionHint } from "@/lib/sessionHint";
 import { INPUT_CLASS } from "@/components/ui/Field";
+import { BRAND_NAME } from "@/lib/config";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     // Sign-in goes directly through Supabase Auth -- the same authority
-    // every ProdBnb client uses. This project never has its own password
+    // every client of the platform uses. This project never has its own password
     // store or a second auth system.
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
@@ -56,11 +57,12 @@ export default function LoginPage() {
       <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-500/10 blur-3xl" />
       <form onSubmit={handleSubmit} className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-pop">
         <div className="mb-7">
-          <span aria-hidden className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#c28014] text-sm font-bold text-snow">
-            P
-          </span>
-          <h1 className="mt-4 text-xl font-semibold tracking-tight text-slate-900">Sign in to ProdBnb Admin</h1>
-          <p className="mt-1 text-sm text-slate-500">Use your ProdBnb admin account.</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-wordmark.png" alt={BRAND_NAME} width={960} height={278} className="h-8 w-auto dark:hidden" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-wordmark-light.png" alt={BRAND_NAME} width={960} height={278} className="hidden h-8 w-auto dark:block" />
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-slate-900">Sign in to {BRAND_NAME} Admin</h1>
+          <p className="mt-1 text-sm text-slate-500">Use your {BRAND_NAME} admin account.</p>
         </div>
         <label htmlFor="login-email" className="mb-1.5 block text-[13px] font-medium text-slate-700">
           Email
@@ -99,7 +101,7 @@ export default function LoginPage() {
           {loading ? "Signing in…" : "Sign in"}
         </button>
         <p className="mt-5 text-xs leading-5 text-slate-500">
-          Only an account holding the ProdBnb <code className="rounded bg-slate-100 px-1 py-px text-slate-700">admin</code> role can access
+          Only an account holding the {BRAND_NAME} <code className="rounded bg-slate-100 px-1 py-px text-slate-700">admin</code> role can access
           anything past this screen — everything else is enforced server-side.
         </p>
       </form>

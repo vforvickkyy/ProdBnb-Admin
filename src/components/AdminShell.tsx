@@ -17,6 +17,7 @@ import { consoleEnvironment } from "@/lib/config";
 import { cn } from "@/lib/cn";
 import { findActive } from "@/lib/nav";
 import { clearSessionHint } from "@/lib/sessionHint";
+import { BRAND_NAME } from "@/lib/config";
 
 /**
  * SWR's cache is a module-level singleton for the whole tab (Phase 14-B5) --
@@ -128,7 +129,7 @@ function ThemeQuickToggle() {
 function Breadcrumb() {
   const { pathname, search } = useEffectiveUrl();
   const active = findActive(pathname, search);
-  if (!active) return <span className="truncate text-sm font-medium text-slate-900">ProdBnb Admin</span>;
+  if (!active) return <span className="truncate text-sm font-medium text-slate-900">{BRAND_NAME} Admin</span>;
   const Icon = active.section.icon;
   const itemPath = active.item.href.split("?")[0]!;
   const deeper = pathname && pathname !== itemPath ? (pathname.endsWith("/edit") ? "Edit" : "Details") : null;
@@ -207,7 +208,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen items-center justify-center p-8">
         <div role="alert" className="max-w-sm text-center">
           <span aria-hidden className="mx-auto mb-4 block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-accent-500" />
-          <p className="text-sm font-medium text-slate-900">Can&apos;t reach ProdBnb right now</p>
+          <p className="text-sm font-medium text-slate-900">Can&apos;t reach {BRAND_NAME} right now</p>
           <p className="mt-1 text-sm text-slate-500">Your connection or the server is slow. Retrying automatically — you are still signed in.</p>
           <div className="mt-5 flex justify-center gap-2">
             <button

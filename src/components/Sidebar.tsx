@@ -11,6 +11,7 @@ import type { ThemeChoice } from "@/lib/theme";
 import { TEAM_ROLE_LABELS, type AdminMe, type AdminPermission } from "@/lib/useAdminMe";
 import { useEffectiveUrl } from "./NavigationProvider";
 import { useTheme } from "./ThemeProvider";
+import { BRAND_NAME } from "@/lib/config";
 
 const RAIL_COLLAPSED = "w-14";
 const RAIL_EXPANDED = "w-[212px]";
@@ -21,23 +22,27 @@ function useActive(permissions?: readonly AdminPermission[]) {
   return { sections, active: findActive(pathname, search, sections) };
 }
 
+/**
+ * The brand in the sidebar. Expanded: the text logo (cream in dark mode) and an "Admin" tag.
+ * Collapsed to the icon rail: the square app icon alone -- the two are never shown side by side.
+ */
 export function Logo({ text = "show" }: { text?: "show" | "hover" | "hidden" }) {
-  return (
-    <span className="flex min-w-0 items-center gap-2.5">
-      {/* The ProdBnb mark keeps the brand amber shared with the iOS app. */}
-      <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#c28014] text-[13px] font-bold text-snow">
-        P
-      </span>
-      <span
-        className={cn(
-          "flex min-w-0 items-center gap-1.5 whitespace-nowrap transition-opacity duration-150",
-          text === "hover" && "opacity-0 group-hover/rail:opacity-100 group-has-[:focus-visible]/rail:opacity-100",
-          text === "hidden" && "sr-only",
-        )}
-      >
-        <span className="text-[15px] font-semibold tracking-tight text-slate-900">ProdBnb</span>
+  if (text === "show") {
+    return (
+      <span className="flex min-w-0 items-center gap-2 whitespace-nowrap">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/logo-wordmark.png" alt={BRAND_NAME} width={960} height={278} className="h-6 w-auto dark:hidden" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/logo-wordmark-light.png" alt={BRAND_NAME} width={960} height={278} className="hidden h-6 w-auto dark:block" />
         <span className="rounded-md border border-slate-200 px-1.5 py-px text-2xs font-medium text-slate-500">Admin</span>
       </span>
+    );
+  }
+  return (
+    <span className="flex min-w-0 items-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/icon-192.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-lg" />
+      <span className="sr-only">{BRAND_NAME} Admin</span>
     </span>
   );
 }
@@ -291,7 +296,7 @@ export function Sidebar({
           )}
           onPointerLeave={() => setSettled(false)}
         >
-          <Link href="/dashboard" className="flex h-12 shrink-0 items-center rounded-lg px-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400" aria-label="ProdBnb Admin home">
+          <Link href="/dashboard" className="flex h-12 shrink-0 items-center rounded-lg px-[6px] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400" aria-label={`${BRAND_NAME} Admin home`}>
             <Logo text={mode === "expanded" ? "show" : hoverReveal ? "hover" : "hidden"} />
           </Link>
           <ul className="mt-2 space-y-1">

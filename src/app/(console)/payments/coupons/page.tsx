@@ -18,6 +18,7 @@ import { adminApi, unwrapPaginated } from "@/lib/api";
 import { formatDate, formatMoney, personName } from "@/lib/format";
 import { useRouter } from "@/lib/navigation";
 import { useAdminMe } from "@/lib/useAdminMe";
+import { BRAND_NAME } from "@/lib/config";
 
 type Owner = "all" | "platform" | "host";
 type Status = "all" | "active" | "scheduled" | "ended" | "inactive";
@@ -49,7 +50,7 @@ function CouponsInner() {
     },
     { key: "title", header: "Offer", render: (c) => <span className="text-slate-700">{c.title}</span> },
     { key: "discount", header: "Discount", render: (c) => discountText(c) },
-    { key: "from", header: "From", render: (c) => (c.owner_type === "platform" ? "ProdBnb" : c.host ? personName(c.host) : "Host") },
+    { key: "from", header: "From", render: (c) => (c.owner_type === "platform" ? BRAND_NAME : c.host ? personName(c.host) : "Host") },
     { key: "status", header: "Status", render: (c) => <Badge tone={STATUS_BADGE[c.status].tone}>{STATUS_BADGE[c.status].label}</Badge> },
     { key: "uses", header: "Uses", render: (c) => <span className="tabular-nums">{c.uses}{c.usage_limit ? ` / ${c.usage_limit}` : ""}</span> },
     { key: "given", header: "Discount given", render: (c) => <span className="tabular-nums">{formatMoney(c.discount_given_minor_units)}</span> },
@@ -60,7 +61,7 @@ function CouponsInner() {
     <>
       <PageHeader
         title="Coupons & offers"
-        description="ProdBnb's coupons (we pay the discount) and hosts' coupons (they do). The discount comes off the listing price, before the service fee and tax."
+        description={`${BRAND_NAME}'s coupons (we pay the discount) and hosts' coupons (they do). The discount comes off the listing price, before the service fee and tax.`}
         actions={
           can("coupons.manage") ? (
             <Link
@@ -79,7 +80,7 @@ function CouponsInner() {
           onChange={(v) => go({ owner: v })}
           options={[
             { value: "all", label: "All" },
-            { value: "platform", label: "ProdBnb" },
+            { value: "platform", label: BRAND_NAME },
             { value: "host", label: "Hosts" },
           ]}
         />

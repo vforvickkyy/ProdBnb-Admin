@@ -40,10 +40,11 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Static assets and image optimisation never need a nonce; prefetches skip middleware work too.
+  // Static assets, image optimisation and the public brand images (logo and app icons, which the
+  // signed-out login page shows) never need a nonce or a session; prefetches skip middleware too.
   matcher: [
     {
-      source: "/((?!_next/static|_next/image|favicon.ico).*)",
+      source: "/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|brand/).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },
