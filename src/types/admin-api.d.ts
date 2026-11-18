@@ -522,6 +522,8 @@ export interface paths {
                         capacity?: number | null;
                         timezone?: string;
                         instant_booking_enabled?: boolean;
+                        area?: string | null;
+                        price_on_request?: boolean;
                         /** @default [] */
                         category_ids?: string[];
                         /** @default [] */
@@ -537,6 +539,7 @@ export interface paths {
                          * @enum {string}
                          */
                         status?: "draft" | "published";
+                        show_exact_location?: boolean;
                     };
                 };
             };
@@ -679,10 +682,13 @@ export interface paths {
                         capacity?: number | null;
                         timezone?: string;
                         instant_booking_enabled?: boolean;
+                        area?: string | null;
+                        price_on_request?: boolean;
                         category_ids?: string[];
                         amenity_ids?: string[];
                         use_case_ids?: string[];
                         reason?: string;
+                        show_exact_location?: boolean;
                     };
                 };
             };
@@ -11250,6 +11256,11 @@ export interface components {
             capacity: number | null;
             timezone: string;
             instant_booking_enabled: boolean;
+            area: string | null;
+            public_latitude: number | null;
+            public_longitude: number | null;
+            show_exact_location: boolean;
+            price_on_request: boolean;
             /** @enum {string} */
             status: "draft" | "submitted" | "under_review" | "approved" | "published" | "rejected" | "suspended" | "archived";
             moderation_reason: string | null;
@@ -11316,6 +11327,11 @@ export interface components {
             capacity: number | null;
             timezone: string;
             instant_booking_enabled: boolean;
+            area: string | null;
+            public_latitude: number | null;
+            public_longitude: number | null;
+            show_exact_location: boolean;
+            price_on_request: boolean;
             /** @enum {string} */
             status: "draft" | "submitted" | "under_review" | "approved" | "published" | "rejected" | "suspended" | "archived";
             moderation_reason: string | null;
@@ -11330,11 +11346,29 @@ export interface components {
             media: components["schemas"]["PublicMediaItem"][];
             host: components["schemas"]["HostPublicSummary"];
             booking_options: components["schemas"]["BookingOption"][];
+            bookable_options: {
+                type: string;
+                half_day_duration_hours?: number | null;
+            }[];
+            /** @enum {string} */
+            location_precision: "exact" | "approximate";
+            approximate_radius_m: number | null;
         };
         NameRef: {
             first_name: string | null;
             last_name: string | null;
         } | null;
+        BookingShootDetails: {
+            /** Format: uuid */
+            type_id: string | null;
+            type: string | null;
+            crew_size: number | null;
+            project_name: string | null;
+            production_name: string | null;
+            notes: string | null;
+            /** Format: date-time */
+            terms_accepted_at: string | null;
+        };
         BookingDetail: {
             /** Format: uuid */
             id: string;
@@ -11388,6 +11422,11 @@ export interface components {
             cancellation_reason: string | null;
             /** Format: date-time */
             hold_expired_at: string | null;
+            shoot: components["schemas"]["BookingShootDetails"];
+            /** @enum {string} */
+            pricing_status: "priced" | "awaiting_quote" | "quoted";
+            /** Format: date-time */
+            quoted_at: string | null;
         };
         AdminBooking: components["schemas"]["BookingDetail"] & {
             /** Format: date-time */

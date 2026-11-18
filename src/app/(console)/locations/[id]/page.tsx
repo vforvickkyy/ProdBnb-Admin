@@ -175,9 +175,25 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                   <dt className="text-slate-500">Timezone</dt>
                   <dd>{location.timezone}</dd>
                 </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="shrink-0 text-slate-500">Area</dt>
+                  <dd className="min-w-0 break-words text-right">{location.area ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="shrink-0 text-slate-500">Before booking</dt>
+                  <dd className="min-w-0 text-right">
+                    {location.show_exact_location
+                      ? "Exact address and pin shown"
+                      : "Area and 2 km circle only"}
+                  </dd>
+                </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Instant booking</dt>
                   <dd>{location.instant_booking_enabled ? "Enabled" : "Disabled"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Prices</dt>
+                  <dd>{location.price_on_request ? "On request" : "Shown"}</dd>
                 </div>
                 {location.moderation_reason && (
                   <div className="flex justify-between gap-4">

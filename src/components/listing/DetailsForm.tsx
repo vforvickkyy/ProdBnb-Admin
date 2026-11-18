@@ -11,14 +11,20 @@ export interface ListingDetails {
   capacity: string;
   timezone: string;
   instant_booking_enabled: boolean;
+  /** Hide prices; bookings become requests the host answers with a price. */
+  price_on_request: boolean;
   address_line1: string;
   address_line2: string;
+  /** Neighbourhood shown to everyone before booking. */
+  area: string;
   city: string;
   region: string;
   country: string;
   postal_code: string;
   latitude: string;
   longitude: string;
+  /** The team's call: full address and exact pin visible before booking (famous places). */
+  show_exact_location: boolean;
 }
 
 export const EMPTY_DETAILS: ListingDetails = {
@@ -27,14 +33,17 @@ export const EMPTY_DETAILS: ListingDetails = {
   capacity: "",
   timezone: "Asia/Kolkata",
   instant_booking_enabled: false,
+  price_on_request: false,
   address_line1: "",
   address_line2: "",
+  area: "",
   city: "",
   region: "",
   country: "India",
   postal_code: "",
   latitude: "",
   longitude: "",
+  show_exact_location: false,
 };
 
 /** Form strings -> the API's body (empty optional strings become null; numbers parsed). */
@@ -47,14 +56,17 @@ export function detailsToBody(d: ListingDetails) {
     capacity: num(d.capacity),
     timezone: d.timezone,
     instant_booking_enabled: d.instant_booking_enabled,
+    price_on_request: d.price_on_request,
     address_line1: opt(d.address_line1),
     address_line2: opt(d.address_line2),
+    area: opt(d.area),
     city: d.city.trim(),
     region: opt(d.region),
     country: d.country.trim(),
     postal_code: opt(d.postal_code),
     latitude: num(d.latitude),
     longitude: num(d.longitude),
+    show_exact_location: d.show_exact_location,
   };
 }
 
@@ -64,14 +76,17 @@ export function detailsFromListing(l: {
   capacity: number | null;
   timezone: string;
   instant_booking_enabled: boolean;
+  price_on_request?: boolean;
   address_line1: string | null;
   address_line2: string | null;
+  area?: string | null;
   city: string;
   region: string | null;
   country: string;
   postal_code: string | null;
   latitude: number | null;
   longitude: number | null;
+  show_exact_location?: boolean;
 }): ListingDetails {
   const s = (v: string | number | null) => (v === null || v === undefined ? "" : String(v));
   return {
@@ -80,14 +95,17 @@ export function detailsFromListing(l: {
     capacity: s(l.capacity),
     timezone: l.timezone,
     instant_booking_enabled: l.instant_booking_enabled,
+    price_on_request: l.price_on_request ?? false,
     address_line1: s(l.address_line1),
     address_line2: s(l.address_line2),
+    area: s(l.area ?? null),
     city: l.city,
     region: s(l.region),
     country: l.country,
     postal_code: s(l.postal_code),
     latitude: s(l.latitude),
     longitude: s(l.longitude),
+    show_exact_location: l.show_exact_location ?? false,
   };
 }
 
@@ -173,6 +191,14 @@ export function DetailsForm({
               description="Bookers can confirm a slot without waiting for the host to accept."
             />
           </div>
+          <div className="sm:col-span-2">
+            <Switch
+              checked={value.price_on_request}
+              onChange={(v) => set("price_on_request", v)}
+              label="Price on request"
+              description="Hide prices. Bookers send a request with their shoot details, the host replies with a price, and the booker pays to confirm."
+            />
+          </div>
         </div>
       )}
       {sections.includes("address") && (
@@ -188,6 +214,13 @@ export function DetailsForm({
             label="Address line 2"
             value={value.address_line2}
             onChange={(e) => set("address_line2", e.target.value)}
+          />
+          <TextField
+            label="Area"
+            value={value.area}
+            maxLength={80}
+            onChange={(e) => set("area", e.target.value)}
+            hint="Shown to everyone with the city, e.g. Bandra West."
           />
           <TextField label="City" value={value.city} onChange={(e) => set("city", e.target.value)} error={errors.city} />
           <TextField label="State / region" value={value.region} onChange={(e) => set("region", e.target.value)} />
@@ -219,6 +252,18 @@ export function DetailsForm({
             Tip: right-click the spot in Google Maps, copy the coordinates and paste them into Latitude — both fields fill in. Listings need
             coordinates to appear in map search.
           </p>
+          <div className="sm:col-span-2">
+            <Switch
+              checked={value.show_exact_location}
+              onChange={(v) => set("show_exact_location", v)}
+              label="Show exact location before booking"
+              description={
+                value.show_exact_location
+                  ? "Everyone sees the full address and the exact pin. Use this for well-known places (a film city, a landmark)."
+                  : "Bookers see the area and a 2 km circle on the map. The full address and pin appear once a booking is confirmed and paid. Hosts can't change this."
+              }
+            />
+          </div>
         </div>
       )}
     </div>

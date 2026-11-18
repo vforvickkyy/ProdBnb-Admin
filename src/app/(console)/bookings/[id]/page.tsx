@@ -112,6 +112,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             <StatusBadge status={booking.status} />
           </div>
 
+          {booking.pricing_status === "awaiting_quote" && booking.status === "requested" && (
+            <p className="mb-4 rounded-lg bg-sky-50 px-3 py-2.5 text-sm text-sky-800">
+              Price request: the listing&apos;s prices are on request, so this booking has no price yet. The host sends one (or declines);
+              until then it doesn&apos;t hold the slot, and it closes by itself if the time passes.
+            </p>
+          )}
+          {booking.pricing_status === "quoted" && booking.quoted_at && (
+            <p className="mb-4 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">
+              The host sent this price {formatDateTime(booking.quoted_at)}.
+            </p>
+          )}
           {booking.hold_expires_at && (
             <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2.5 text-sm text-amber-700">
               Unpaid: this booking holds its slot without a payment. The hold {new Date(booking.hold_expires_at).getTime() < Date.now() ? "has lapsed and will be released within a minute" : `expires ${relativeTime(booking.hold_expires_at)} (${formatDateTime(booking.hold_expires_at)})`}, unless a checkout is in progress. The host cannot see it until it is paid.
@@ -163,6 +174,29 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 </div>
               </dl>
             </section>
+
+            {booking.shoot && (
+              <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
+                <h2 className="mb-3 text-sm font-semibold text-slate-700">Shoot</h2>
+                <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                  {(
+                    [
+                      ["Shoot type", booking.shoot.type],
+                      ["People on set", booking.shoot.crew_size !== null ? String(booking.shoot.crew_size) : null],
+                      ["Project", booking.shoot.project_name],
+                      ["Production", booking.shoot.production_name],
+                      ["Terms accepted", booking.shoot.terms_accepted_at ? formatDateTime(booking.shoot.terms_accepted_at) : null],
+                    ] as const
+                  ).map(([label, value]) => (
+                    <div key={label} className="flex justify-between gap-4">
+                      <dt className="shrink-0 text-slate-500">{label}</dt>
+                      <dd className="min-w-0 break-words text-right">{value ?? "—"}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {booking.shoot.notes && <p className="mt-3 whitespace-pre-wrap text-sm text-slate-600">{booking.shoot.notes}</p>}
+              </section>
+            )}
 
             <section className="rounded border border-slate-200 bg-white p-4 sm:col-span-2">
               <h2 className="mb-3 text-sm font-semibold text-slate-700">Payments</h2>
