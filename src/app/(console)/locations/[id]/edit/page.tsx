@@ -79,7 +79,9 @@ function EditListing({ id }: { id: string }) {
     if (!location) return [];
     return [
       { key: "photos", label: "At least 3 photos (the first is the cover)", done: location.media.length >= 3, tab: "photos" as Tab },
-      { key: "price", label: "At least one price offered", done: location.booking_options.length > 0, tab: "pricing" as Tab },
+      location.price_on_request
+        ? { key: "price", label: "Price on request (no prices needed)", done: true, tab: "pricing" as Tab }
+        : { key: "price", label: "At least one price offered", done: location.booking_options.length > 0, tab: "pricing" as Tab },
       { key: "hours", label: "Weekly opening hours", done: (rules.data ?? []).length > 0, tab: "timings" as Tab },
       { key: "description", label: "A description of 80+ characters", done: location.description.trim().length >= 80, tab: "details" as Tab },
       {
@@ -196,7 +198,7 @@ function EditListing({ id }: { id: string }) {
       )}
       {tab === "pricing" && (
         <TabPanel value="pricing">
-          <PricingEditor locationId={id} canEdit={canEdit} onChanged={refresh} />
+          <PricingEditor locationId={id} canEdit={canEdit} onChanged={refresh} priceOnRequest={Boolean(location?.price_on_request)} />
         </TabPanel>
       )}
       {tab === "timings" && (

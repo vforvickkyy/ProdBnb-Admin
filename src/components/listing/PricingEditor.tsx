@@ -32,7 +32,18 @@ function toMinor(value: string): number | null {
   return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : null;
 }
 
-export function PricingEditor({ locationId, canEdit, onChanged }: { locationId: string; canEdit: boolean; onChanged?: () => void }) {
+export function PricingEditor({
+  locationId,
+  canEdit,
+  onChanged,
+  priceOnRequest = false,
+}: {
+  locationId: string;
+  canEdit: boolean;
+  onChanged?: () => void;
+  /** The listing hides its prices: these are only a private guide, and none are needed. */
+  priceOnRequest?: boolean;
+}) {
   const { data, error, isLoading, mutate } = useSWR(`/v1/locations/${locationId}/pricing`, () => listingApi.pricing(locationId));
   const { data: settings } = useSWR("/v1/admin/settings", () => adminApi.GET("/settings").then(unwrap<PlatformSettings>));
 
@@ -41,6 +52,12 @@ export function PricingEditor({ locationId, canEdit, onChanged }: { locationId: 
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
+      {priceOnRequest && (
+        <p className="rounded-lg bg-sky-50 px-3 py-2.5 text-sm text-sky-800 lg:col-span-2">
+          Price on request is on, so bookers don&apos;t see these prices and none are needed. Bookers can ask about the booking types switched on
+          here; with none switched on, they can ask about hourly, full day and multi-day. The host replies to each request with a price.
+        </p>
+      )}
       {TYPES.map((t) => (
         <PriceRow
           key={t.type}
