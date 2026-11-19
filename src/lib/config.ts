@@ -10,12 +10,15 @@ export const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME?.trim() || "Heken";
 
 export type ConsoleEnvironment = "local" | "staging" | "production" | "unknown";
 
-/** Which backend this build talks to, inferred from its base URL (for the header badge). */
+/**
+ * Which backend this build talks to, inferred from its base URL (for the header badge): anything
+ * with "staging" in it is staging, and an `https://api.<domain>` address is production.
+ */
 export function consoleEnvironment(url: string = API_BASE_URL): ConsoleEnvironment {
   if (!url) return "unknown";
   if (/localhost|127\.0\.0\.1/.test(url)) return "local";
   if (/staging/i.test(url)) return "staging";
-  if (/api\.prodbnb\.com/i.test(url)) return "production";
+  if (/^https:\/\/api\.[^/]+\.[a-z]{2,}(\/|$)/i.test(url)) return "production";
   return "unknown";
 }
 
