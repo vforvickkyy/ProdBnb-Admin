@@ -171,7 +171,7 @@ export default function MapsPage() {
     <>
       <PageHeader
         title="Google Maps"
-        description="Maps, “near me” and place search on the website. The browser key is sent to every visitor by design, so it must be locked to your domains in Google Cloud; the optional server key stays encrypted on the backend."
+        description="Maps, “near me” and place search on the website and in the apps. The browser key is sent to every visitor by design, so it must be locked to your domains in Google Cloud; the optional server key stays encrypted on the backend."
       />
       {integrations.isLoading ? (
         <Skeleton className="h-72 w-full rounded-xl" />
@@ -264,7 +264,7 @@ export default function MapsPage() {
                     autoComplete="off"
                     value={serverKey}
                     onChange={(e) => setServerKey(e.target.value)}
-                    hint="Only for backend geocoding. Stored encrypted; never shown again."
+                    hint="Powers place search in the iPhone and Android apps (and backend geocoding). Stored encrypted; never shown again."
                   />
                 </div>
                 <div className="mt-4 flex justify-end">
@@ -299,7 +299,10 @@ export default function MapsPage() {
                 <>
                   Optional: Google Maps Platform → Map management → Create Map ID (JavaScript, Vector) to style the map; paste the ID here.
                 </>,
-                <>Optional: a second key restricted to Geocoding + Places only (no website restriction) as the Server key.</>,
+                <>
+                  For place search in the apps: create a second key with Application restrictions → <strong>None</strong> and API restrictions →{" "}
+                  <strong>Places API (New)</strong> + <strong>Geocoding API</strong>. Paste it here as the Server key, then press Test server key.
+                </>,
               ]}
             />
           </div>
