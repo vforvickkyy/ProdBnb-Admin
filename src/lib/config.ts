@@ -25,18 +25,18 @@ export function consoleEnvironment(url: string = API_BASE_URL): ConsoleEnvironme
 /**
  * Where an admin edits each project's environment variables. Secrets are managed in Vercel, never
  * in this console (the Admin Console's "status only" decision), so the Integrations page links out.
- * Overridable per deployment; the defaults are the current staging projects.
+ * Overridable per deployment; the defaults are the heken-backend and heken-admin projects.
  */
 export const VERCEL_LINKS = {
   backendEnv:
     process.env.NEXT_PUBLIC_VERCEL_BACKEND_ENV_URL ??
-    "https://vercel.com/vickys-projects-56995e9c/prodbnb-backend-staging/settings/environment-variables",
+    "https://vercel.com/vickys-projects-56995e9c/heken-backend/settings/environment-variables",
   adminEnv:
     process.env.NEXT_PUBLIC_VERCEL_ADMIN_ENV_URL ??
-    "https://vercel.com/vickys-projects-56995e9c/prodbnb-admin-staging/settings/environment-variables",
+    "https://vercel.com/vickys-projects-56995e9c/heken-admin/settings/environment-variables",
   backendDeployments:
     process.env.NEXT_PUBLIC_VERCEL_BACKEND_DEPLOYMENTS_URL ??
-    "https://vercel.com/vickys-projects-56995e9c/prodbnb-backend-staging/deployments",
+    "https://vercel.com/vickys-projects-56995e9c/heken-backend/deployments",
 };
 
 /** The Admin Panel's own public configuration, reported on the Integrations page (values are public). */
