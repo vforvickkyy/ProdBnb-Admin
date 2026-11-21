@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { Switch } from "@/components/ui/Switch";
 import { adminApi, unwrap } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
+import { formatListingCode } from "@/lib/listingCode";
 import { SIDEBAR_MODE_OPTIONS, useSidebarMode } from "@/lib/sidebarMode";
 import type { ThemeChoice } from "@/lib/theme";
 import { useAdminMe } from "@/lib/useAdminMe";
@@ -130,6 +131,122 @@ function BookingRules() {
   );
 }
 
+function ListingIds() {
+  const { can } = useAdminMe();
+  const editable = can("settings.manage");
+  const { data, error, isLoading, mutate } = useSWR("/v1/admin/settings", () => adminApi.GET("/settings").then(unwrap<PlatformSettings>));
+  const [prefix, setPrefix] = useState("HKLS");
+  const [digits, setDigits] = useState("2");
+  const [next, setNext] = useState("1");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!data) return;
+    setPrefix(data.listing_id_prefix);
+    setDigits(String(data.listing_id_digits));
+    setNext(String(data.listing_id_next));
+  }, [data]);
+
+  const cleanPrefix = prefix.trim().toUpperCase();
+  const digitsNum = Number(digits);
+  const nextNum = Number(next);
+  const prefixError = !/^[A-Z0-9]{1,10}$/.test(cleanPrefix) ? "1–10 capital letters or numbers, no spaces." : undefined;
+  const digitsError = !Number.isInteger(digitsNum) || digitsNum < 1 || digitsNum > 8 ? "A whole number from 1 to 8." : undefined;
+  const nextError = !Number.isInteger(nextNum) || nextNum < 1 || nextNum > 99_999_999 ? "A whole number from 1." : undefined;
+  const invalid = Boolean(prefixError || digitsError || nextError);
+  const dirty =
+    Boolean(data) && (cleanPrefix !== data!.listing_id_prefix || digitsNum !== data!.listing_id_digits || nextNum !== data!.listing_id_next);
+
+  async function save() {
+    if (!data || invalid) return;
+    setBusy(true);
+    try {
+      const body: SettingsPatch = {};
+      if (cleanPrefix !== data.listing_id_prefix) body.listing_id_prefix = cleanPrefix;
+      if (digitsNum !== data.listing_id_digits) body.listing_id_digits = digitsNum;
+      if (nextNum !== data.listing_id_next) body.listing_id_next = nextNum;
+      if (reason.trim()) body.reason = reason.trim();
+      await adminApi.PATCH("/settings", { body }).then(unwrap);
+      toast.success("Listing ID settings saved. They apply to listings created from now on.");
+      setReason("");
+      await mutate();
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Failed to save settings."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (isLoading) return <Skeleton className="h-64 w-full rounded-xl" />;
+  if (error || !data) return <ErrorState message={extractErrorMessage(error, "Failed to load settings.")} onRetry={() => mutate()} />;
+
+  const preview = invalid ? "—" : formatListingCode(cleanPrefix, digitsNum, nextNum);
+  return (
+    <Card
+      title="Listing IDs"
+      description="Every listing gets an ID like HKLS01 so the team and hosts can refer to it. Bookers never see it. Existing listings already have theirs."
+    >
+      <div className="grid gap-4 sm:grid-cols-3">
+        <TextField
+          label="Prefix"
+          value={prefix}
+          maxLength={10}
+          onChange={(e) => setPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+          disabled={!editable}
+          error={prefixError}
+          hint="The letters at the front."
+        />
+        <TextField
+          label="Digits"
+          type="number"
+          min={1}
+          max={8}
+          value={digits}
+          onChange={(e) => setDigits(e.target.value)}
+          disabled={!editable}
+          error={digitsError}
+          hint="2 gives 01, 02 … 99; bigger numbers just get longer."
+        />
+        <TextField
+          label="Next number"
+          type="number"
+          min={1}
+          value={next}
+          onChange={(e) => setNext(e.target.value)}
+          disabled={!editable}
+          error={nextError}
+          hint="The number the next new listing gets. Numbers already in use are skipped."
+        />
+      </div>
+      <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+        The next new listing will be <span className="font-mono font-semibold text-slate-900">{preview}</span>.
+        <span className="mt-1 block text-xs text-slate-500">
+          Changing the prefix doesn&apos;t rename listings that already have an ID. To give one listing a particular ID, open it and change its ID
+          there.
+        </span>
+      </div>
+      {editable ? (
+        <div className="mt-5 flex flex-wrap items-end gap-3 border-t border-slate-200 pt-4">
+          <TextField
+            className="min-w-[240px] flex-1"
+            label="Reason (recorded in the audit log)"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="e.g. New prefix for the Delhi launch"
+            maxLength={500}
+          />
+          <Button variant="primary" onClick={save} disabled={!dirty || invalid || busy}>
+            {busy ? "Saving…" : "Save listing IDs"}
+          </Button>
+        </div>
+      ) : (
+        <p className="mt-4 text-sm text-slate-500">Only a super admin can change listing ID settings.</p>
+      )}
+    </Card>
+  );
+}
+
 function Appearance() {
   const { choice, setChoice } = useTheme();
   const [mode, setMode] = useSidebarMode();
@@ -172,6 +289,7 @@ export default function SettingsPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           {can("settings.view") ? <BookingRules /> : <p className="text-sm text-slate-500">Your role cannot view platform settings.</p>}
+          {can("settings.view") && <ListingIds />}
           <Appearance />
         </div>
         <div className="space-y-4">

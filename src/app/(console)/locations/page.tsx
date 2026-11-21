@@ -118,6 +118,7 @@ function LocationsPageInner() {
             <span className="min-w-0">
               <span className="block truncate font-medium text-slate-900 group-hover:underline">{l.title}</span>
               <span className="block text-xs text-slate-500">
+                {l.listing_code && <span className="mr-1.5 rounded bg-slate-100 px-1.5 py-0.5 font-mono font-semibold text-slate-700">{l.listing_code}</span>}
                 {l.city}, {l.country} · {l.media_count} photo{l.media_count === 1 ? "" : "s"}
               </span>
             </span>
@@ -186,7 +187,8 @@ function LocationsPageInner() {
                 .then(unwrapPaginated<LocationDetail>)
             }
             columns={[
-              { header: "Listing ID", value: (l) => l.id },
+              { header: "Listing ID", value: (l) => l.listing_code },
+              { header: "System ID", value: (l) => l.id },
               { header: "Title", value: (l) => l.title },
               { header: "City", value: (l) => l.city },
               { header: "Region", value: (l) => l.region },
@@ -203,10 +205,10 @@ function LocationsPageInner() {
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <SearchInput
-          label="Search locations by title"
+          label="Search locations by title or listing ID"
           value={search}
           onChange={(v) => updateParams({ search: v || undefined })}
-          placeholder="Search by title…"
+          placeholder="Search by title or ID (HKLS07)…"
         />
         <select
           aria-label="Filter by status"
@@ -267,6 +269,7 @@ function LocationsPageInner() {
                     <div className="p-3">
                       <p className="truncate font-medium text-slate-900 group-hover:underline">{l.title}</p>
                       <p className="truncate text-xs text-slate-500">
+                        {l.listing_code ? `${l.listing_code} · ` : ""}
                         {l.city}, {l.country} · {personName(l.host)}
                       </p>
                       <p className="mt-1 text-sm text-slate-800">{priceLabel(l)}</p>

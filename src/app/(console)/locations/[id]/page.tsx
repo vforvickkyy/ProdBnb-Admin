@@ -37,6 +37,18 @@ function hostDisplayName(h: { first_name: string | null; last_name: string | nul
   return name || "(no name set)";
 }
 
+function propPrice(p: { price_minor_units: number | null; price_unit: string | null }): string {
+  if (p.price_minor_units === null) return "for hire, ask the host";
+  const unit = p.price_unit === "per_hour" ? "hour" : p.price_unit === "per_day" ? "day" : "booking";
+  return `for hire, ₹${(p.price_minor_units / 100).toLocaleString("en-IN")} per ${unit}`;
+}
+
+const ELECTRICITY_LABEL: Record<string, string> = {
+  included: "Included in the price",
+  extra: "Charged extra",
+  not_available: "Not available",
+};
+
 const actionCopy: Record<Action, { title: string; requireReason: boolean; danger: boolean; label: string }> = {
   approve: { title: "Approve location", requireReason: false, danger: false, label: "Approve" },
   reject: { title: "Reject location", requireReason: true, danger: true, label: "Reject" },
@@ -142,6 +154,16 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
           <div className="mb-6 flex items-start justify-between">
             <div className="min-w-0">
               <h1 className="break-words text-xl font-semibold">{location.title}</h1>
+              {location.listing_code && (
+                <p className="mt-0.5">
+                  <span
+                    title="Listing ID — only the host and the team see it"
+                    className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-semibold text-slate-700"
+                  >
+                    {location.listing_code}
+                  </span>
+                </p>
+              )}
               <p className="break-words text-sm text-slate-500">
                 {location.city}, {location.region ? `${location.region}, ` : ""}
                 {location.country}
@@ -168,8 +190,38 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-slate-500">Capacity</dt>
+                  <dt className="text-slate-500">Max crew size</dt>
                   <dd>{location.capacity ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Area</dt>
+                  <dd>{location.area_sqft != null ? `${location.area_sqft.toLocaleString("en-IN")} sq ft` : "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Sets</dt>
+                  <dd>{location.set_count ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Parking spaces</dt>
+                  <dd>{location.parking_spaces ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Restrooms</dt>
+                  <dd>{location.restroom_count ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Electricity</dt>
+                  <dd>{ELECTRICITY_LABEL[location.electricity ?? ""] ?? "—"}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="shrink-0 text-slate-500">Permission to shoot</dt>
+                  <dd className="min-w-0 break-words text-right">
+                    {location.permission_needed == null
+                      ? "—"
+                      : location.permission_needed
+                        ? `Needed${location.permission_details ? `: ${location.permission_details}` : ""}`
+                        : "Not needed"}
+                  </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Timezone</dt>
@@ -241,12 +293,50 @@ export default function LocationDetailPage({ params }: { params: Promise<{ id: s
                 <div>
                   <p className="mb-1 text-slate-500">Amenities</p>
                   <div className="flex flex-wrap gap-1">
-                    {location.amenities.length === 0 ? (
+                    {location.amenities.length === 0 && (location.custom_amenities ?? []).length === 0 ? (
                       <span className="text-slate-400">None set</span>
                     ) : (
-                      location.amenities.map((a) => <Badge key={a.id}>{a.name}</Badge>)
+                      <>
+                        {location.amenities.map((a) => (
+                          <Badge key={a.id}>{a.name}</Badge>
+                        ))}
+                        {(location.custom_amenities ?? []).map((a) => (
+                          <Badge key={`custom-${a}`}>{a}</Badge>
+                        ))}
+                      </>
                     )}
                   </div>
+                </div>
+                <div>
+                  <p className="mb-1 text-slate-500">Location rules</p>
+                  <div className="flex flex-wrap gap-1">
+                    {(location.rules ?? []).length === 0 && (location.custom_rules ?? []).length === 0 ? (
+                      <span className="text-slate-400">None set</span>
+                    ) : (
+                      <>
+                        {(location.rules ?? []).map((r) => (
+                          <Badge key={r.id}>{r.name}</Badge>
+                        ))}
+                        {(location.custom_rules ?? []).map((r) => (
+                          <Badge key={`custom-${r}`}>{r}</Badge>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-1 text-slate-500">Props</p>
+                  {(location.props ?? []).length === 0 ? (
+                    <span className="text-slate-400">None set</span>
+                  ) : (
+                    <ul className="space-y-0.5">
+                      {(location.props ?? []).map((p) => (
+                        <li key={p.name} className="text-slate-700">
+                          {p.name} <span className="text-slate-400">— {p.kind === "included" ? "included" : propPrice(p)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div>
                   <p className="mb-1 text-slate-500">Use cases</p>

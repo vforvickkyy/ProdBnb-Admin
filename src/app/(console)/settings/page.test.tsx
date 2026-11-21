@@ -18,6 +18,9 @@ const settings = {
   tax_bps: 1800,
   unpaid_hold_minutes: null,
   availability_requires_login: true,
+  listing_id_prefix: "HKLS",
+  listing_id_digits: 2,
+  listing_id_next: 18,
   updated_by: null,
   updated_at: "2026-11-15T10:00:00Z",
 };
@@ -76,5 +79,40 @@ describe("General settings page", () => {
     await user.click(toggle);
     await user.click(screen.getByRole("button", { name: "Save booking rules" }));
     expect(patchMock).toHaveBeenCalledWith("/settings", { body: { availability_requires_login: false } });
+  });
+
+  it("shows the next listing ID and saves only the listing ID fields that changed", async () => {
+    getMock.mockImplementation((path: string) => (path === "/me" ? jsonOk(me("super_admin", ["settings.view", "settings.manage"])) : jsonOk(settings)));
+    patchMock.mockImplementation(() => jsonOk({ ...settings, listing_id_prefix: "HK", listing_id_next: 100 }));
+    const user = userEvent.setup();
+    renderPage();
+
+    const save = await screen.findByRole("button", { name: "Save listing IDs" });
+    expect(await screen.findByText("HKLS18")).toBeInTheDocument();
+    expect(save).toBeDisabled();
+
+    const prefix = screen.getByLabelText("Prefix");
+    await user.clear(prefix);
+    await user.type(prefix, "hk");
+    const next = screen.getByLabelText("Next number");
+    await user.clear(next);
+    await user.type(next, "100");
+    expect(screen.getByText("HK100")).toBeInTheDocument();
+    await user.click(save);
+
+    expect(patchMock).toHaveBeenCalledWith("/settings", { body: { listing_id_prefix: "HK", listing_id_next: 100 } });
+  });
+
+  it("will not save a prefix with spaces or digits outside 1 to 8", async () => {
+    getMock.mockImplementation((path: string) => (path === "/me" ? jsonOk(me("super_admin", ["settings.view", "settings.manage"])) : jsonOk(settings)));
+    const user = userEvent.setup();
+    renderPage();
+
+    const save = await screen.findByRole("button", { name: "Save listing IDs" });
+    const digits = screen.getByLabelText("Digits");
+    await user.clear(digits);
+    await user.type(digits, "9");
+    expect(screen.getByText("A whole number from 1 to 8.")).toBeInTheDocument();
+    expect(save).toBeDisabled();
   });
 });

@@ -524,6 +524,25 @@ export interface paths {
                         instant_booking_enabled?: boolean;
                         area?: string | null;
                         price_on_request?: boolean;
+                        area_sqft?: number | null;
+                        set_count?: number | null;
+                        parking_spaces?: number | null;
+                        restroom_count?: number | null;
+                        /** @enum {string|null} */
+                        electricity?: "included" | "extra" | "not_available" | null;
+                        permission_needed?: boolean | null;
+                        permission_details?: string | null;
+                        custom_amenities?: string[];
+                        custom_rules?: string[];
+                        props?: {
+                            name: string;
+                            /** @enum {string} */
+                            kind: "included" | "addon";
+                            price_minor_units?: number | null;
+                            /** @enum {string|null} */
+                            price_unit?: "per_booking" | "per_hour" | "per_day" | null;
+                            note?: string | null;
+                        }[];
                         /** @default [] */
                         category_ids?: string[];
                         /** @default [] */
@@ -540,6 +559,7 @@ export interface paths {
                          */
                         status?: "draft" | "published";
                         show_exact_location?: boolean;
+                        listing_code?: string;
                     };
                 };
             };
@@ -684,6 +704,26 @@ export interface paths {
                         instant_booking_enabled?: boolean;
                         area?: string | null;
                         price_on_request?: boolean;
+                        area_sqft?: number | null;
+                        set_count?: number | null;
+                        parking_spaces?: number | null;
+                        restroom_count?: number | null;
+                        /** @enum {string|null} */
+                        electricity?: "included" | "extra" | "not_available" | null;
+                        permission_needed?: boolean | null;
+                        permission_details?: string | null;
+                        custom_amenities?: string[];
+                        custom_rules?: string[];
+                        props?: {
+                            name: string;
+                            /** @enum {string} */
+                            kind: "included" | "addon";
+                            price_minor_units?: number | null;
+                            /** @enum {string|null} */
+                            price_unit?: "per_booking" | "per_hour" | "per_day" | null;
+                            note?: string | null;
+                        }[];
+                        listing_code?: string;
                         category_ids?: string[];
                         amenity_ids?: string[];
                         use_case_ids?: string[];
@@ -2119,6 +2159,9 @@ export interface paths {
                         tax_bps?: number;
                         unpaid_hold_minutes?: number | null;
                         availability_requires_login?: boolean;
+                        listing_id_prefix?: string;
+                        listing_id_digits?: number;
+                        listing_id_next?: number;
                         reason?: string;
                     };
                 };
@@ -2726,6 +2769,10 @@ export interface paths {
                     "application/json": {
                         name: string;
                         description?: string | null;
+                        /** @enum {string} */
+                        kind?: "amenity" | "rule";
+                        group_name?: string | null;
+                        position?: number;
                     };
                 };
             };
@@ -2861,6 +2908,10 @@ export interface paths {
                     "application/json": {
                         name?: string;
                         description?: string | null;
+                        /** @enum {string} */
+                        kind?: "amenity" | "rule";
+                        group_name?: string | null;
+                        position?: number;
                     };
                 };
             };
@@ -11233,6 +11284,15 @@ export interface components {
             } | null;
             preferences: components["schemas"]["UserPreferences"];
         };
+        ListingProp: {
+            name: string;
+            /** @enum {string} */
+            kind: "included" | "addon";
+            price_minor_units: number | null;
+            /** @enum {string|null} */
+            price_unit: "per_booking" | "per_hour" | "per_day" | null;
+            note: string | null;
+        };
         StartingPrice: {
             amount_minor_units: number;
             currency: string;
@@ -11261,6 +11321,18 @@ export interface components {
             public_longitude: number | null;
             show_exact_location: boolean;
             price_on_request: boolean;
+            listing_code: string | null;
+            area_sqft: number | null;
+            set_count: number | null;
+            parking_spaces: number | null;
+            restroom_count: number | null;
+            /** @enum {string|null} */
+            electricity: "included" | "extra" | "not_available" | null;
+            permission_needed: boolean | null;
+            permission_details: string | null;
+            custom_amenities: string[];
+            custom_rules: string[];
+            props: components["schemas"]["ListingProp"][];
             /** @enum {string} */
             status: "draft" | "submitted" | "under_review" | "approved" | "published" | "rejected" | "suspended" | "archived";
             moderation_reason: string | null;
@@ -11283,6 +11355,13 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        AmenityRef: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            group_name: string | null;
+            position: number;
         };
         PublicMediaItem: {
             /** Format: uuid */
@@ -11332,6 +11411,18 @@ export interface components {
             public_longitude: number | null;
             show_exact_location: boolean;
             price_on_request: boolean;
+            listing_code: string | null;
+            area_sqft: number | null;
+            set_count: number | null;
+            parking_spaces: number | null;
+            restroom_count: number | null;
+            /** @enum {string|null} */
+            electricity: "included" | "extra" | "not_available" | null;
+            permission_needed: boolean | null;
+            permission_details: string | null;
+            custom_amenities: string[];
+            custom_rules: string[];
+            props: components["schemas"]["ListingProp"][];
             /** @enum {string} */
             status: "draft" | "submitted" | "under_review" | "approved" | "published" | "rejected" | "suspended" | "archived";
             moderation_reason: string | null;
@@ -11341,7 +11432,8 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
             categories: components["schemas"]["CatalogRef"][];
-            amenities: components["schemas"]["CatalogRef"][];
+            amenities: components["schemas"]["AmenityRef"][];
+            rules: components["schemas"]["AmenityRef"][];
             use_cases: components["schemas"]["CatalogRef"][];
             media: components["schemas"]["PublicMediaItem"][];
             host: components["schemas"]["HostPublicSummary"];
@@ -11567,6 +11659,9 @@ export interface components {
             tax_bps: number;
             unpaid_hold_minutes: number | null;
             availability_requires_login: boolean;
+            listing_id_prefix: string;
+            listing_id_digits: number;
+            listing_id_next: number;
             /** Format: uuid */
             updated_by: string | null;
             /** Format: date-time */
@@ -11682,6 +11777,10 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             usage_count: number;
+            /** @enum {string} */
+            kind?: "amenity" | "rule";
+            group_name?: string | null;
+            position?: number;
         };
         PaymentNeedingAttention: components["schemas"]["AdminPaymentDetail"] & {
             booking_status: string;

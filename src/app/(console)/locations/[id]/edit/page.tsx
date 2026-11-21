@@ -8,8 +8,10 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { ArrowLeft, CheckCircle2, Circle, ExternalLink, ImageIcon } from "lucide-react";
 import { DetailsForm, detailsFromListing, detailsToBody, ListingDetails, validateDetails } from "@/components/listing/DetailsForm";
+import { CustomPoints, GroupedChecks } from "@/components/listing/Features";
 import { PhotoManager } from "@/components/listing/PhotoManager";
 import { PricingEditor } from "@/components/listing/PricingEditor";
+import { PropRow, PropsEditor, propsFromListing, propsToBody, validateProps } from "@/components/listing/PropsEditor";
 import { SectionsEditor } from "@/components/listing/SectionsEditor";
 import { TimingsEditor } from "@/components/listing/TimingsEditor";
 import { useCatalogOptions } from "@/components/listing/useCatalogOptions";
@@ -31,8 +33,8 @@ import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
 
 type LocationDetail = components["schemas"]["LocationDetail"];
-type Tab = "details" | "photos" | "pricing" | "timings" | "sections" | "tags" | "seo" | "publish";
-const TABS: Tab[] = ["details", "photos", "pricing", "timings", "sections", "tags", "seo", "publish"];
+type Tab = "details" | "photos" | "pricing" | "timings" | "sections" | "tags" | "props" | "seo" | "publish";
+const TABS: Tab[] = ["details", "photos", "pricing", "timings", "sections", "tags", "props", "seo", "publish"];
 
 export default function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -91,6 +93,12 @@ function EditListing({ id }: { id: string }) {
         tab: "details" as Tab,
       },
       { key: "category", label: "At least one category", done: location.categories.length > 0, tab: "tags" as Tab },
+      {
+        key: "space",
+        label: "Space details (area, parking, restrooms)",
+        done: location.area_sqft !== null && location.parking_spaces !== null && location.restroom_count !== null,
+        tab: "details" as Tab,
+      },
     ];
   }, [location, rules.data]);
   const missing = checklist.filter((c) => !c.done).length;
@@ -136,6 +144,14 @@ function EditListing({ id }: { id: string }) {
             <h1 className="line-clamp-2 break-words text-lg font-semibold text-slate-900 sm:text-xl">{location.title}</h1>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500">
               <StatusBadge status={location.status} />
+              {location.listing_code && (
+                <span
+                  title="Listing ID — only the host and the team see it"
+                  className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-semibold text-slate-700"
+                >
+                  {location.listing_code}
+                </span>
+              )}
               <span className="whitespace-nowrap">
                 {location.city}, {location.country}
               </span>
@@ -178,7 +194,8 @@ function EditListing({ id }: { id: string }) {
           { value: "pricing", label: "Pricing", badge: <Count n={location.booking_options.length} /> },
           { value: "timings", label: "Timings" },
           { value: "sections", label: "Sections" },
-          { value: "tags", label: "Categories & amenities" },
+          { value: "tags", label: "Features & rules" },
+          { value: "props", label: "Props", badge: <Count n={location.props.length} /> },
           { value: "seo", label: "SEO" },
           { value: "publish", label: "Publish", badge: missing > 0 ? <Count n={missing} warn /> : undefined },
         ]}
@@ -214,6 +231,11 @@ function EditListing({ id }: { id: string }) {
       {tab === "tags" && (
         <TabPanel value="tags">
           <TagsTab location={location} canEdit={canEdit} onSaved={refresh} />
+        </TabPanel>
+      )}
+      {tab === "props" && (
+        <TabPanel value="props">
+          <PropsTab location={location} canEdit={canEdit} onSaved={refresh} />
         </TabPanel>
       )}
       {tab === "seo" && (
@@ -314,6 +336,9 @@ function DetailsTab({ location, canEdit, onSaved }: { location: LocationDetail; 
       <Card title="Basics">
         <DetailsForm value={value} onChange={setValue} errors={errors} sections={["basics"]} />
       </Card>
+      <Card title="Space details" description="Shown on the listing page and used by the search filters. Leave empty what you don't know.">
+        <DetailsForm value={value} onChange={setValue} errors={errors} sections={["space"]} />
+      </Card>
       <Card title="Address & map">
         <DetailsForm value={value} onChange={setValue} errors={errors} sections={["address"]} />
       </Card>
@@ -326,11 +351,14 @@ function TagsTab({ location, canEdit, onSaved }: { location: LocationDetail; can
   const categories = useCatalogOptions("categories");
   const amenities = useCatalogOptions("amenities");
   const useCases = useCatalogOptions("use-cases");
+  // Amenities and "allowed here" rules are the same kind of row; the listing stores both in one list.
   const initial = useMemo(
     () => ({
       category_ids: location.categories.map((c) => c.id),
-      amenity_ids: location.amenities.map((c) => c.id),
+      amenity_ids: [...location.amenities, ...location.rules].map((c) => c.id),
       use_case_ids: location.use_cases.map((c) => c.id),
+      custom_amenities: location.custom_amenities,
+      custom_rules: location.custom_rules,
     }),
     [location],
   );
@@ -342,8 +370,8 @@ function TagsTab({ location, canEdit, onSaved }: { location: LocationDetail; can
   async function save() {
     setBusy(true);
     try {
-      await adminApi.PATCH("/locations/{id}", { params: { path: { id: location.id } }, body: value }).then(unwrap);
-      toast.success("Categories & amenities saved.");
+      await adminApi.PATCH("/locations/{id}", { params: { path: { id: location.id } }, body: value as never }).then(unwrap);
+      toast.success("Features & rules saved.");
       onSaved();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not save.");
@@ -352,9 +380,17 @@ function TagsTab({ location, canEdit, onSaved }: { location: LocationDetail; can
     }
   }
 
+  const setIds = (ids: string[], kind: "amenity" | "rule") => {
+    const others = value.amenity_ids.filter((id) => {
+      const item = amenities.items.find((a) => a.id === id);
+      return (item?.kind ?? "amenity") !== kind;
+    });
+    setValue({ ...value, amenity_ids: [...others, ...ids.filter((id) => !others.includes(id))] });
+  };
+
   return (
     <fieldset disabled={!canEdit} className="space-y-6">
-      <Card>
+      <Card title="Categories & good for">
         <div className="space-y-6">
           <ChipSelect
             label="Categories"
@@ -362,13 +398,6 @@ function TagsTab({ location, canEdit, onSaved }: { location: LocationDetail; can
             selected={value.category_ids}
             max={20}
             onChange={(ids) => setValue({ ...value, category_ids: ids })}
-          />
-          <ChipSelect
-            label="Amenities"
-            options={amenities.items}
-            selected={value.amenity_ids}
-            max={30}
-            onChange={(ids) => setValue({ ...value, amenity_ids: ids })}
           />
           <ChipSelect
             label="Good for"
@@ -379,7 +408,79 @@ function TagsTab({ location, canEdit, onSaved }: { location: LocationDetail; can
           />
         </div>
       </Card>
+      <Card title="Amenities" description="What the place offers. Shown under “Amenities” on the listing page.">
+        <div className="space-y-6">
+          <GroupedChecks
+            label="Tick what applies"
+            options={amenities.items}
+            kind="amenity"
+            selected={value.amenity_ids}
+            onChange={(ids) => setIds(ids, "amenity")}
+          />
+          <CustomPoints
+            label="Your own amenities"
+            hint="Anything the list above doesn't cover."
+            placeholder="e.g. Rooftop water tank"
+            values={value.custom_amenities}
+            onChange={(next) => setValue({ ...value, custom_amenities: next })}
+          />
+        </div>
+      </Card>
+      <Card title="Location rules" description="What is and isn't allowed. Shown under “Location rules” on the listing page.">
+        <div className="space-y-6">
+          <GroupedChecks
+            label="Allowed here"
+            options={amenities.items}
+            kind="rule"
+            selected={value.amenity_ids}
+            onChange={(ids) => setIds(ids, "rule")}
+          />
+          <CustomPoints
+            label="Your own rules"
+            hint="Write rules in your own words, e.g. “No shoes inside”."
+            placeholder="e.g. No shoes inside the set"
+            values={value.custom_rules}
+            onChange={(next) => setValue({ ...value, custom_rules: next })}
+          />
+        </div>
+      </Card>
       <SaveBar dirty={dirty} busy={busy} onSave={save} onReset={() => setValue(initial)} />
+    </fieldset>
+  );
+}
+
+function PropsTab({ location, canEdit, onSaved }: { location: LocationDetail; canEdit: boolean; onSaved: () => void }) {
+  const initialRows = useMemo(() => propsFromListing(location.props), [location]);
+  const [rows, setRows] = useState<PropRow[]>(initialRows);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => setRows(initialRows), [initialRows]);
+  // Compare what would be saved, not the row keys (which change on every reload).
+  const dirty = JSON.stringify(propsToBody(rows)) !== JSON.stringify(propsToBody(initialRows));
+
+  async function save() {
+    const problem = validateProps(rows);
+    if (problem) {
+      toast.error(problem);
+      return;
+    }
+    setBusy(true);
+    try {
+      await adminApi.PATCH("/locations/{id}", { params: { path: { id: location.id } }, body: { props: propsToBody(rows) } as never }).then(unwrap);
+      toast.success("Props saved.");
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not save.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <fieldset disabled={!canEdit} className="space-y-6">
+      <Card title="Props" description="What comes with the place, and what the host can provide for an extra price.">
+        <PropsEditor rows={rows} onChange={setRows} />
+      </Card>
+      <SaveBar dirty={dirty} busy={busy} onSave={save} onReset={() => setRows(initialRows)} />
     </fieldset>
   );
 }

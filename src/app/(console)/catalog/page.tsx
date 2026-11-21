@@ -13,7 +13,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Dialog } from "@/components/ui/Dialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState, extractErrorMessage } from "@/components/ui/ErrorState";
-import { TextAreaField, TextField } from "@/components/ui/Field";
+import { SelectField, TextAreaField, TextField } from "@/components/ui/Field";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { Segmented } from "@/components/ui/Segmented";
@@ -45,6 +45,10 @@ export default function CatalogPage() {
   const [editing, setEditing] = useState<Item | "new" | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  // Amenities only: a tick-box feature or a house rule, which heading it sits under, and its order.
+  const [amenityKind, setAmenityKind] = useState<"amenity" | "rule">("amenity");
+  const [groupName, setGroupName] = useState("");
+  const [position, setPosition] = useState("");
   const [deleting, setDeleting] = useState<Item | null>(null);
   const [openItem, setOpenItem] = useState<Item | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,13 +57,28 @@ export default function CatalogPage() {
     setEditing(item);
     setName(item === "new" ? "" : item.name);
     setDescription(item === "new" ? "" : (item.description ?? ""));
+    setAmenityKind(item === "new" ? "amenity" : (item.kind ?? "amenity"));
+    setGroupName(item === "new" ? "" : (item.group_name ?? ""));
+    setPosition(item === "new" ? "" : item.position === undefined ? "" : String(item.position));
   }
 
   async function save() {
     if (!editing) return;
     setBusy(true);
     try {
-      const body = { name: name.trim(), description: description.trim() || null };
+      const positionNumber = position.trim() === "" ? undefined : Number(position);
+      if (kind === "amenities" && positionNumber !== undefined && (!Number.isInteger(positionNumber) || positionNumber < 0 || positionNumber > 10000)) {
+        toast.error("Order must be a whole number from 0 to 10000.");
+        setBusy(false);
+        return;
+      }
+      const body = {
+        name: name.trim(),
+        description: description.trim() || null,
+        ...(kind === "amenities"
+          ? { kind: amenityKind, group_name: groupName.trim() || null, ...(positionNumber !== undefined ? { position: positionNumber } : {}) }
+          : {}),
+      };
       if (editing === "new") {
         await adminApi.POST("/catalog/{kind}", { params: { path: { kind } }, body }).then(unwrap);
         toast.success(`Added “${body.name}”.`);
@@ -144,6 +163,12 @@ export default function CatalogPage() {
                 </div>
                 <div className="p-3">
                   <p className="font-medium text-slate-900">{item.name}</p>
+                  {kind === "amenities" && (
+                    <p className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                      {item.kind === "rule" ? "Location rule" : "Amenity"}
+                      {item.group_name ? ` · ${item.group_name}` : ""}
+                    </p>
+                  )}
                   <p className="mt-0.5 line-clamp-2 min-h-[2.5em] text-xs text-slate-500">{item.description || "No description"}</p>
                 </div>
               </button>
@@ -197,6 +222,37 @@ export default function CatalogPage() {
             onChange={(e) => setDescription(e.target.value)}
             hint="Shown under the tile in the apps."
           />
+          {kind === "amenities" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SelectField label="Shown under" value={amenityKind} onChange={(e) => setAmenityKind(e.target.value as "amenity" | "rule")}>
+                <option value="amenity">Amenities</option>
+                <option value="rule">Location rules (“Allowed here”)</option>
+              </SelectField>
+              <TextField
+                label="Order"
+                type="number"
+                min={0}
+                max={10000}
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+                hint="Lower numbers come first."
+              />
+              <TextField
+                className="sm:col-span-2"
+                label="Group heading"
+                list="catalog-groups"
+                value={groupName}
+                maxLength={60}
+                onChange={(e) => setGroupName(e.target.value)}
+                hint="Options with the same heading are shown together, e.g. “Power and internet”."
+              />
+              <datalist id="catalog-groups">
+                {[...new Set((items ?? []).map((i) => i.group_name).filter((g): g is string => Boolean(g)))].map((g) => (
+                  <option key={g} value={g} />
+                ))}
+              </datalist>
+            </div>
+          )}
           <div className="flex justify-end gap-2">
             <Button onClick={() => setEditing(null)}>Cancel</Button>
             <Button variant="primary" onClick={save} disabled={busy || name.trim().length === 0}>
