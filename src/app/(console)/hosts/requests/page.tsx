@@ -254,7 +254,8 @@ function HostRequestsInner() {
       ) : (
         <div className="space-y-4">
           {rows.map((r) => (
-            <RequestCard key={`${r.id}-${r.updated_at}`} request={r} canManage={canManage} onChanged={changed} />
+            // Keyed by id only: a refresh (after a status change) must not wipe notes being typed.
+            <RequestCard key={r.id} request={r} canManage={canManage} onChanged={changed} />
           ))}
           {meta && meta.total > PAGE_SIZE && (
             <Pagination page={meta.page} pageSize={meta.pageSize} total={meta.total} onPageChange={(p) => go({ page: p })} label="Host requests" />
