@@ -8964,6 +8964,234 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/host-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Callback requests from people who want to list a place (host_requests.manage). Waiting ones oldest first */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "new" | "contacted" | "done" | "closed" | "withdrawn" | "open";
+                    search?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminHostRequest"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/host-requests/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How many callback requests are new and contacted (host_requests.manage) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                new: number;
+                                contacted: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/host-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Move a callback request along (New, Contacted, Done, Closed) and keep the team's notes (host_requests.manage) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status?: "new" | "contacted" | "done" | "closed";
+                        admin_notes?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminHostRequest"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Withdrawn by the person, or they have another open request */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
     "/payouts/due": {
         parameters: {
             query?: never;
@@ -11633,7 +11861,7 @@ export interface components {
             last_name: string | null;
             /** @enum {string} */
             team_role: "super_admin" | "moderator" | "support" | "finance";
-            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "locations.create" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view" | "campaigns.view" | "campaigns.send" | "channels.manage" | "platforms.view" | "platforms.manage" | "incidents.manage" | "site.view" | "site.manage" | "content.manage" | "coupons.manage" | "invoices.manage")[];
+            permissions: ("dashboard.view" | "analytics.view" | "users.view" | "users.manage" | "locations.view" | "locations.moderate" | "locations.create" | "catalog.manage" | "bookings.view" | "bookings.manage" | "payments.view" | "payments.verify" | "payments.refund" | "messages.access" | "notifications.diagnostics" | "audit.view" | "team.manage" | "settings.view" | "settings.manage" | "system.view" | "campaigns.view" | "campaigns.send" | "channels.manage" | "platforms.view" | "platforms.manage" | "incidents.manage" | "site.view" | "site.manage" | "content.manage" | "coupons.manage" | "invoices.manage" | "host_requests.manage")[];
         };
         TeamMember: {
             /** Format: uuid */
@@ -12369,6 +12597,54 @@ export interface components {
             blockers: {
                 upcoming_bookings: number;
                 upcoming_hosted_bookings: number;
+            } | null;
+        };
+        AdminHostRequest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            /** Format: uuid */
+            location_id: string | null;
+            name: string;
+            phone: string;
+            email: string | null;
+            city: string | null;
+            space_type: string | null;
+            /** @enum {string} */
+            best_time: "morning" | "afternoon" | "evening" | "anytime";
+            note: string | null;
+            /** @enum {string} */
+            source: "ios" | "android" | "web";
+            /** @enum {string} */
+            status: "new" | "contacted" | "done" | "closed" | "withdrawn";
+            contacted_at: string | null;
+            closed_at: string | null;
+            created_at: string;
+            updated_at: string;
+            admin_notes: string | null;
+            /** Format: uuid */
+            handled_by: string | null;
+            user: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
+                status: string;
+            } | null;
+            listing: {
+                /** Format: uuid */
+                id: string;
+                title: string;
+                status: string;
+                listing_code: string | null;
+                city: string | null;
+            } | null;
+            handler: {
+                /** Format: uuid */
+                id: string;
+                first_name: string | null;
+                last_name: string | null;
             } | null;
         };
         PayoutAccount: {

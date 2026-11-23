@@ -23,7 +23,8 @@ vi.mock("@/lib/sessionHint", () => ({ clearSessionHint: clearSessionHintMock }))
 // above -- so mocking the whole `swr` module is safe here and lets this
 // test verify the logout flow calls the documented global-cache-clear
 // pattern without asserting anything about SWR's own internals (Phase 14-B5).
-vi.mock("swr", () => ({ mutate: mutateMock }));
+// `default` is useSWR, which the sidebar's live counts use; nothing is fetched in these tests.
+vi.mock("swr", () => ({ default: () => ({ data: undefined }), mutate: mutateMock }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   usePathname: () => "/dashboard",

@@ -27,7 +27,12 @@ export interface NavItem {
   permission?: AdminPermission;
   /** Extra words the command palette matches on. */
   keywords?: string;
+  /** A live count shown beside the label (see `useNavCounts`). */
+  count?: NavCountKey;
 }
+
+/** Counts the sidebar can show next to an item. */
+export type NavCountKey = "hostRequests";
 
 export interface NavGroup {
   /** Small uppercase heading in the sub-sidebar; omitted for the first, unlabelled group. */
@@ -125,6 +130,13 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { href: "/users", label: "Users", permission: "users.view", keywords: "bookers accounts" },
           { href: "/hosts", label: "Hosts", permission: "users.view", keywords: "owners" },
+          {
+            href: "/hosts/requests",
+            label: "Host requests",
+            permission: "host_requests.manage",
+            keywords: "callback call back phone lead onboarding help list my space become host request",
+            count: "hostRequests",
+          },
           { href: "/users/deletion-requests", label: "Deletion requests", permission: "users.view", keywords: "delete account privacy gdpr dpdp erase" },
         ],
       },

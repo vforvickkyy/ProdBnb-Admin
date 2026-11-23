@@ -65,6 +65,12 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   opted_out: "neutral",
   unsubscribed: "neutral",
   no_email: "neutral",
+  // Callback requests from would-be hosts
+  new: "warning",
+  contacted: "info",
+  done: "success",
+  closed: "neutral",
+  withdrawn: "neutral",
 };
 
 export function StatusBadge({ status }: { status: string }) {

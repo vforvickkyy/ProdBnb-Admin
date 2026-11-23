@@ -5,13 +5,14 @@ import Link from "next/link";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Check, LogOut, Monitor, Moon, PanelLeft, Sun, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { findActive, sectionHref, sectionItems, visibleSections, type NavSection } from "@/lib/nav";
+import { findActive, sectionHref, sectionItems, visibleSections, type NavCountKey, type NavItem, type NavSection } from "@/lib/nav";
 import { SIDEBAR_MODE_OPTIONS, useSidebarMode, type SidebarMode } from "@/lib/sidebarMode";
 import type { ThemeChoice } from "@/lib/theme";
 import { TEAM_ROLE_LABELS, type AdminMe, type AdminPermission } from "@/lib/useAdminMe";
 import { useEffectiveUrl } from "./NavigationProvider";
 import { useTheme } from "./ThemeProvider";
 import { BRAND_NAME } from "@/lib/config";
+import { navCountLabel, useNavCounts } from "@/lib/useNavCounts";
 
 const RAIL_COLLAPSED = "w-14";
 const RAIL_EXPANDED = "w-[212px]";
@@ -219,8 +220,27 @@ function AccountMenu({ me, mode, hoverReveal, onSignOut }: { me?: AdminMe; mode:
   );
 }
 
+/** A small count beside a menu item ("Host requests  3"): things waiting for the team. */
+function NavCount({ item, counts }: { item: NavItem; counts: Partial<Record<NavCountKey, number>> }) {
+  const label = item.count ? navCountLabel(counts[item.count]) : null;
+  if (!label) return null;
+  return (
+    <span className="ml-auto shrink-0 rounded-full bg-accent-500 px-1.5 py-px text-2xs font-semibold tabular-nums text-snow" aria-label={`${label} waiting`}>
+      {label}
+    </span>
+  );
+}
+
 /** The selected section's own menu -- grouped, Supabase-style, no icons. */
-function SectionMenu({ section, currentHref }: { section: NavSection; currentHref: string | null }) {
+function SectionMenu({
+  section,
+  currentHref,
+  counts = {},
+}: {
+  section: NavSection;
+  currentHref: string | null;
+  counts?: Partial<Record<NavCountKey, number>>;
+}) {
   return (
     <nav aria-label={`${section.label} menu`} className="flex h-full w-[220px] shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-canvas px-3 pb-6">
       <div className="flex h-12 shrink-0 items-center px-2">
@@ -244,6 +264,7 @@ function SectionMenu({ section, currentHref }: { section: NavSection; currentHre
                       )}
                     >
                       <span className="truncate">{item.label}</span>
+                      <NavCount item={item} counts={counts} />
                     </Link>
                   </li>
                 );
@@ -273,6 +294,7 @@ export function Sidebar({
 } = {}) {
   const [mode] = useSidebarMode();
   const { sections, active } = useActive(permissions);
+  const counts = useNavCounts(permissions);
   // In "expand on hover", a click collapses the rail at once so the section menu it opens is not
   // left covered; it expands again once the pointer has left and come back.
   const [settled, setSettled] = useState(false);
@@ -315,7 +337,7 @@ export function Sidebar({
           </div>
         </nav>
       </div>
-      {showSectionMenu && <SectionMenu section={active.section} currentHref={active.item.href} />}
+      {showSectionMenu && <SectionMenu section={active.section} currentHref={active.item.href} counts={counts} />}
     </div>
   );
 }
@@ -331,6 +353,7 @@ export function NavTree({
   navLabel?: string;
 }) {
   const { sections, active } = useActive(permissions);
+  const counts = useNavCounts(permissions);
   return (
     <nav aria-label={navLabel} className="space-y-5">
       {sections.map((section) => {
@@ -355,7 +378,8 @@ export function NavTree({
                         current ? "bg-slate-100 font-medium text-slate-900" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                       )}
                     >
-                      {item.label}
+                      <span className="truncate">{item.label}</span>
+                      <NavCount item={item} counts={counts} />
                     </Link>
                   </li>
                 );
