@@ -61,8 +61,34 @@ interface Draft {
   email_subject: string;
   email_body: string;
   channels: Channel[];
+  email_design: Design;
+  email_heading: string;
+  email_button_label: string;
+  email_image_url: string;
 }
-const EMPTY: Draft = { name: "", category: "custom", description: "", needs: "", title: "", body: "", email_subject: "", email_body: "", channels: ["in_app", "push"] };
+type Design = "plain" | "spotlight" | "collection" | "offer" | "news";
+const DESIGN_LABEL: Record<Design, string> = {
+  plain: "Plain",
+  spotlight: "Listing spotlight (needs a listing)",
+  collection: "Listing collection (2–6 listings picked when sending)",
+  offer: "Offer with code (needs an offer)",
+  news: "News / host tips (picture + headline)",
+};
+const EMPTY: Draft = {
+  name: "",
+  category: "custom",
+  description: "",
+  needs: "",
+  title: "",
+  body: "",
+  email_subject: "",
+  email_body: "",
+  channels: ["in_app", "push"],
+  email_design: "plain",
+  email_heading: "",
+  email_button_label: "",
+  email_image_url: "",
+};
 const draftOf = (t: Template): Draft => ({
   name: t.name,
   category: t.category,
@@ -73,6 +99,10 @@ const draftOf = (t: Template): Draft => ({
   email_subject: t.email_subject ?? "",
   email_body: t.email_body ?? "",
   channels: t.channels as Channel[],
+  email_design: (t.email_design as Design) ?? "plain",
+  email_heading: t.email_heading ?? "",
+  email_button_label: t.email_button_label ?? "",
+  email_image_url: t.email_image_url ?? "",
 });
 
 function TemplateEditor({ open, template, onClose, onSaved }: { open: boolean; template: Template | null; onClose: () => void; onSaved: () => void }) {
@@ -106,6 +136,10 @@ function TemplateEditor({ open, template, onClose, onSaved }: { open: boolean; t
       email_subject: email ? d.email_subject.trim() || null : null,
       email_body: email ? d.email_body.trim() || null : null,
       channels: d.channels,
+      email_design: email ? d.email_design : ("plain" as Design),
+      email_heading: email ? d.email_heading.trim() || null : null,
+      email_button_label: email ? d.email_button_label.trim() || null : null,
+      email_image_url: email && d.email_design === "news" ? d.email_image_url.trim() || null : null,
     };
     try {
       if (template) unwrap(await adminApi.PATCH("/notification-templates/{templateId}", { params: { path: { templateId: template.id } }, body }));
@@ -164,8 +198,22 @@ function TemplateEditor({ open, template, onClose, onSaved }: { open: boolean; t
         <VariableChips onInsert={insert.insert} listing={d.needs === "listing"} offer={d.needs === "offer"} />
         {email && (
           <div className="space-y-4 rounded-lg border border-slate-200 p-4">
+            <SelectField label="Email design" value={d.email_design} onChange={(e) => set("email_design")(e.target.value as Design)}>
+              {(Object.keys(DESIGN_LABEL) as Design[]).map((k) => (
+                <option key={k} value={k}>
+                  {DESIGN_LABEL[k]}
+                </option>
+              ))}
+            </SelectField>
             <TextField label="Email subject" maxLength={200} value={d.email_subject} onChange={(e) => set("email_subject")(e.target.value)} {...insert.bind("email_subject")} />
+            <TextField label="Headline (optional)" maxLength={200} value={d.email_heading} onChange={(e) => set("email_heading")(e.target.value)} hint="Big line at the top. Empty = the subject." />
             <TextAreaField label="Email body" rows={6} value={d.email_body} onChange={(e) => set("email_body")(e.target.value)} {...insert.bind("email_body")} hint="Blank line = new paragraph · **bold** · [link](https://…)" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField label="Button text (optional)" maxLength={40} value={d.email_button_label} onChange={(e) => set("email_button_label")(e.target.value)} />
+              {d.email_design === "news" && (
+                <TextField label="Picture link (optional)" value={d.email_image_url} onChange={(e) => set("email_image_url")(e.target.value)} placeholder="https://…" />
+              )}
+            </div>
           </div>
         )}
         <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
@@ -188,8 +236,8 @@ export default function TemplatesPage() {
 
   return (
     <>
-      <Link href="/messaging" className="mb-3 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
-        <ArrowLeft aria-hidden className="h-4 w-4" /> Announcements
+      <Link href="/marketing" className="mb-3 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+        <ArrowLeft aria-hidden className="h-4 w-4" /> Marketing
       </Link>
       <PageHeader
         title="Notification templates"
@@ -244,7 +292,7 @@ export default function TemplatesPage() {
                   )}
                   {canEdit && (
                     <Link
-                      href={`/messaging/new?template=${t.id}`}
+                      href={`/marketing/new?channel=${t.channels.length === 1 && t.channels[0] === "email" ? "email" : "push"}&template=${t.id}`}
                       className="inline-flex h-7 items-center rounded-lg bg-accent-500 px-2.5 text-xs font-medium text-snow shadow-sm hover:bg-accent-600"
                     >
                       Use

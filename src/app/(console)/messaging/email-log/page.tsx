@@ -21,6 +21,7 @@ import {
   EMAIL_TEMPLATE_LABELS,
   SUPPRESSION_REASONS,
   templateLabel,
+  isAuthEmail,
 } from "@/lib/emailLog";
 import { formatDateTime, relativeTime } from "@/lib/format";
 import { useRouter } from "@/lib/navigation";
@@ -266,7 +267,7 @@ function EmailLogInner() {
   return (
     <>
       <PageHeader
-        title="Email log"
+        title="Automatic emails"
         description="Every booking, payment, listing and payout email: who it went to and what happened. Emails that fail are retried automatically for a few hours."
       />
       <div className="mb-5">
@@ -414,7 +415,7 @@ function EmailLogInner() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {can("campaigns.send") && r.status !== "sending" && (
+                        {can("campaigns.send") && r.status !== "sending" && !isAuthEmail(r.template) && (
                           <Button
                             size="sm"
                             onClick={() => void resend(r)}

@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   MapPin,
   Megaphone,
+  MessagesSquare,
   MonitorSmartphone,
   Settings,
   Users,
@@ -143,25 +144,45 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    id: "marketing",
+    label: "Marketing",
+    icon: Megaphone,
+    groups: [
+      {
+        items: [
+          { href: "/marketing", label: "Dashboard", permission: "campaigns.view", keywords: "marketing open rate click rate campaigns results" },
+          { href: "/marketing/email", label: "Email campaigns", permission: "campaigns.view", keywords: "newsletter news offers spotlight collection email marketing" },
+          { href: "/marketing/push", label: "Push campaigns", permission: "campaigns.view", keywords: "push notification announcement broadcast in-app" },
+          { href: "/marketing/templates", label: "Templates", permission: "campaigns.view", keywords: "notification template email design new listing offer variables first name" },
+          { href: "/marketing/subscribers", label: "Subscribers", permission: "campaigns.view", keywords: "subscribed unsubscribed opted out news and offers email list audience" },
+        ],
+      },
+    ],
+  },
+  {
     id: "messaging",
     label: "Messaging",
-    icon: Megaphone,
+    icon: MessagesSquare,
     groups: [
       {
         label: "Send",
         items: [
-          { href: "/messaging", label: "Sent & scheduled", permission: "campaigns.view", keywords: "announcements campaigns history" },
-          { href: "/messaging/new", label: "New announcement", permission: "campaigns.send", keywords: "notify broadcast campaign" },
-          { href: "/messaging/new?kind=direct", label: "Message users", permission: "campaigns.send", keywords: "direct notify specific" },
-          { href: "/messaging/templates", label: "Templates", permission: "campaigns.view", keywords: "notification template new listing offer variables first name" },
+          { href: "/messaging/new?kind=direct", label: "Message users", permission: "campaigns.send", keywords: "direct notify specific people" },
+          { href: "/messaging", label: "Sent messages", permission: "campaigns.view", keywords: "history sent scheduled direct announcements" },
         ],
       },
       {
-        label: "Channels",
+        label: "Automatic",
         items: [
-          { href: "/messaging/email", label: "Email", permission: "campaigns.view", keywords: "smtp" },
-          { href: "/messaging/email-log", label: "Email log", permission: "campaigns.view", keywords: "sent emails delivery failed bounce booking emails transactional resend" },
-          { href: "/messaging/push", label: "Push notifications", permission: "campaigns.view", keywords: "apns fcm web push" },
+          { href: "/messaging/email-log", label: "Automatic emails", permission: "campaigns.view", keywords: "email log sent emails delivery failed bounce booking emails transactional resend blocked" },
+          { href: "/messaging/delivery", label: "Background sending", permission: "campaigns.view", keywords: "jobs cron scheduler dispatch retries delivery engine" },
+        ],
+      },
+      {
+        label: "Setup",
+        items: [
+          { href: "/messaging/email", label: "Email setup", permission: "campaigns.view", keywords: "smtp resend sender domain" },
+          { href: "/messaging/push", label: "Push setup", permission: "campaigns.view", keywords: "apns fcm web push" },
         ],
       },
     ],

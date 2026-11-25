@@ -32,9 +32,9 @@ describe("Sidebar (Console 3: section rail + section menu)", () => {
     at("/messaging/email");
     render(<Sidebar />);
     const menu = screen.getByRole("navigation", { name: "Messaging menu" });
-    expect(menu).toHaveTextContent("Channels");
-    expect(screen.getByRole("link", { name: "Email" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Sent & scheduled" })).not.toHaveAttribute("aria-current");
+    expect(menu).toHaveTextContent("Setup");
+    expect(screen.getByRole("link", { name: "Email setup" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Sent messages" })).not.toHaveAttribute("aria-current");
   });
 
   it("lights up only the most specific item, including query-addressed tabs", () => {

@@ -19,7 +19,7 @@ import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import { StatTile } from "@/components/ui/StatTile";
 import { Column, Table } from "@/components/ui/Table";
 import { adminApi, unwrap, unwrapPaginated } from "@/lib/api";
-import { renderEmailPreview } from "@/lib/emailPreview";
+import { EmailPreview } from "@/components/messaging/EmailPreview";
 import { formatCount, formatDateTime, personName } from "@/lib/format";
 import { useAdminMe } from "@/lib/useAdminMe";
 import type { components } from "@/types/admin-api";
@@ -34,10 +34,34 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
   const { data, error, isLoading, mutate } = useSWR(`/v1/admin/campaigns/${id}`, () =>
     adminApi.GET("/campaigns/{campaignId}", { params: { path: { campaignId: id } } }).then(unwrap<Campaign>)
   );
+  const emailOnly = Boolean(data && data.channels.length === 1 && data.channels[0] === "email");
+  const backHref = !data || data.kind === "direct" ? "/messaging" : emailOnly ? "/marketing/email" : "/marketing/push";
+  const backLabel = !data || data.kind === "direct" ? "Sent messages" : emailOnly ? "Email campaigns" : "Push campaigns";
   const [confirm, setConfirm] = useState<"cancel" | "delete" | "send" | null>(null);
   const [busy, setBusy] = useState(false);
-  const [filter, setFilter] = useState<"all" | "failed" | "pending">("all");
+  const [filter, setFilter] = useState<"all" | "failed" | "pending" | "opened" | "clicked" | "not_opened">("all");
   const [page, setPage] = useState(1);
+  // The email as it was (or will be) sent, rendered by the backend.
+  const emailPreview = useSWR(data?.email_subject ? `/v1/admin/campaigns/${id}/email-preview?${data.updated_at}` : null, () =>
+    adminApi
+      .POST("/campaigns/render-preview", {
+        body: {
+          title: data!.title,
+          body: data!.body,
+          email_subject: data!.email_subject,
+          email_body: data!.email_body,
+          link_url: data!.link_url,
+          location_id: data!.location_id,
+          coupon_id: data!.coupon_id,
+          email_design: data!.email_design,
+          email_heading: data!.email_heading,
+          email_button_label: data!.email_button_label,
+          email_image_url: data!.email_image_url,
+          email_location_ids: data!.email_location_ids,
+        },
+      })
+      .then(unwrap<{ email_html: string | null; email_subject: string | null; email_problem: string | null }>)
+  );
   const recipients = useSWR(data && data.status !== "draft" ? `/v1/admin/campaigns/${id}/recipients?f=${filter}&p=${page}` : null, () =>
     adminApi
       .GET("/campaigns/{campaignId}/recipients", { params: { path: { campaignId: id }, query: { filter, page, pageSize: 20 } } })
@@ -74,7 +98,7 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
       } else if (confirm === "delete") {
         await adminApi.DELETE("/campaigns/{campaignId}", { params: { path: { campaignId: id } } }).then(unwrap);
         toast.success("Draft deleted.");
-        router.push("/messaging");
+        router.push(backHref);
         return;
       } else if (confirm === "send") {
         await mutate(await adminApi.POST("/campaigns/{campaignId}/send", { params: { path: { campaignId: id } }, body: {} }).then(unwrap<Campaign>), {
@@ -106,6 +130,7 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
   }
 
   const s = data.stats;
+  const pct = (n: number) => (s.email_sent ? `${Math.round((n / s.email_sent) * 100)}%` : "—");
   const progress = s.total ? s.processed / s.total : 0;
   const columns: Column<Recipient>[] = [
     {
@@ -133,14 +158,38 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
           },
         ]
       : []),
-    ...(data.channels.includes("email") ? [{ key: "email", header: "Email", render: (r: Recipient) => <StatusBadge status={r.email_status} /> }] : []),
+    ...(data.channels.includes("email")
+      ? [
+          {
+            key: "email",
+            header: "Email",
+            render: (r: Recipient) => (
+              <span className="flex flex-wrap items-center gap-1.5">
+                <StatusBadge status={r.email_bounced_at ? "bounced" : r.email_status} />
+                {r.email_delivered_at && !r.email_opened_at && <span className="text-xs text-slate-500">delivered</span>}
+                {r.email_opened_at && (
+                  <span className="text-xs text-emerald-700" title={formatDateTime(r.email_opened_at)}>
+                    opened{r.email_open_count > 1 ? ` ×${r.email_open_count}` : ""}
+                  </span>
+                )}
+                {r.email_clicked_at && (
+                  <span className="text-xs font-medium text-emerald-800" title={formatDateTime(r.email_clicked_at)}>
+                    · clicked{r.email_click_count > 1 ? ` ×${r.email_click_count}` : ""}
+                  </span>
+                )}
+                {r.email_complained_at && <span className="text-xs text-red-700">· marked as spam</span>}
+              </span>
+            ),
+          },
+        ]
+      : []),
     { key: "error", header: "Note", className: "max-w-xs", render: (r) => <span className="line-clamp-2 text-xs text-red-700">{r.error ?? ""}</span> },
   ];
 
   return (
     <>
-      <Link href="/messaging" className="mb-3 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
-        <ArrowLeft aria-hidden className="h-4 w-4" /> Announcements
+      <Link href={backHref} className="mb-3 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+        <ArrowLeft aria-hidden className="h-4 w-4" /> {backLabel}
       </Link>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -149,7 +198,7 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
             <Badge tone={CAMPAIGN_TONE[data.status] ?? "neutral"}>{data.status}</Badge>
           </div>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-            {data.kind === "direct" ? "Direct message" : "Announcement"} · {audienceLabel(data.audience)} · <ChannelIcons channels={data.channels} />
+            {data.kind === "direct" ? "Direct message" : emailOnly ? "Email campaign" : "Push campaign"} · {audienceLabel(data.audience)} · <ChannelIcons channels={data.channels} />
             {data.channels.includes("push") && <span>({data.platforms.join(", ")})</span>}
           </p>
         </div>
@@ -158,7 +207,7 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
             {data.status === "draft" && (
               <>
                 <Link
-                  href={`/messaging/new?draft=${id}`}
+                  href={`${data.kind === "announcement" ? "/marketing" : "/messaging"}/new?draft=${id}`}
                   className="inline-flex items-center h-8 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-800 shadow-card transition-colors hover:bg-slate-50"
                 >
                   Edit
@@ -202,9 +251,19 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
               <StatTile label="Push sent" value={formatCount(s.push_sent)} hint={`${s.push_failed} failed · ${s.push_no_devices} no device · ${s.push_opted_out} opted out`} />
             )}
             {data.channels.includes("email") && (
-              <StatTile label="Emails sent" value={formatCount(s.email_sent)} hint={`${s.email_failed} failed · ${s.email_unsubscribed} unsubscribed`} />
+              <>
+                <StatTile label="Emails sent" value={formatCount(s.email_sent)} hint={`${s.email_failed} failed · ${s.email_unsubscribed} unsubscribed · ${s.email_missing} no email`} />
+                <StatTile label="Delivered" value={formatCount(s.email_delivered)} hint={`${pct(s.email_delivered)} · ${s.email_bounced} bounced`} />
+                <StatTile label="Opened" value={pct(s.email_opened)} hint={`${formatCount(s.email_opened)} people`} />
+                <StatTile label="Clicked" value={pct(s.email_clicked)} hint={`${formatCount(s.email_clicked)} people${s.email_complained ? ` · ${s.email_complained} spam reports` : ""}`} />
+              </>
             )}
           </div>
+          {data.channels.includes("email") && s.email_sent > 0 && s.email_delivered === 0 && (
+            <p className="-mt-3 mb-6 text-xs text-slate-500">
+              Delivered / opened / clicked appear once Resend reports them (Messaging → Email setup: connect Resend and add its webhook). Opens and clicks need tracking switched on for the news domain in Resend.
+            </p>
+          )}
         </>
       )}
 
@@ -219,6 +278,13 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
                   value={filter}
                   options={[
                     { value: "all", label: "All" },
+                    ...(data.channels.includes("email")
+                      ? ([
+                          { value: "opened", label: "Opened" },
+                          { value: "clicked", label: "Clicked" },
+                          { value: "not_opened", label: "Not opened" },
+                        ] as const)
+                      : []),
                     { value: "failed", label: "Failed" },
                     { value: "pending", label: "Pending" },
                   ]}
@@ -252,10 +318,12 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
                 {data.link_url && <p className="mt-1 break-all text-xs text-slate-500">Opens {data.link_url}</p>}
               </div>
               {data.email_subject && (
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Email · {data.email_subject}</p>
-                  <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-4 text-slate-800" dangerouslySetInnerHTML={{ __html: renderEmailPreview(data.email_body ?? "") }} />
-                </div>
+                <EmailPreview
+                  html={emailPreview.data?.email_html ?? null}
+                  subject={emailPreview.data?.email_subject ?? data.email_subject}
+                  problem={emailPreview.data?.email_problem ?? (emailPreview.error ? "Couldn't build the preview." : null)}
+                  loading={emailPreview.isLoading}
+                />
               )}
             </div>
           </Card>

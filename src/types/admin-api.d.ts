@@ -5366,6 +5366,7 @@ export interface paths {
                 query?: {
                     page?: number;
                     pageSize?: number;
+                    channel?: "email" | "push";
                     status?: "draft" | "scheduled" | "sending" | "sent" | "cancelled" | "failed";
                     kind?: "announcement" | "direct";
                 };
@@ -5486,6 +5487,12 @@ export interface paths {
                         coupon_id?: string | null;
                         /** Format: uuid */
                         template_id?: string | null;
+                        /** @enum {string} */
+                        email_design?: "plain" | "spotlight" | "collection" | "offer" | "news";
+                        email_heading?: string | null;
+                        email_image_url?: string | null;
+                        email_button_label?: string | null;
+                        email_location_ids?: string[];
                     };
                 };
             };
@@ -5681,6 +5688,12 @@ export interface paths {
                         location_id?: string | null;
                         /** Format: uuid */
                         coupon_id?: string | null;
+                        /** @enum {string} */
+                        email_design?: "plain" | "spotlight" | "collection" | "offer" | "news";
+                        email_heading?: string | null;
+                        email_image_url?: string | null;
+                        email_button_label?: string | null;
+                        email_location_ids?: string[];
                     };
                 };
             };
@@ -5912,6 +5925,12 @@ export interface paths {
                         coupon_id?: string | null;
                         /** Format: uuid */
                         template_id?: string | null;
+                        /** @enum {string} */
+                        email_design?: "plain" | "spotlight" | "collection" | "offer" | "news";
+                        email_heading?: string | null;
+                        email_image_url?: string | null;
+                        email_button_label?: string | null;
+                        email_location_ids?: string[];
                     };
                 };
             };
@@ -6183,7 +6202,7 @@ export interface paths {
                 query?: {
                     page?: number;
                     pageSize?: number;
-                    filter?: "all" | "failed" | "pending";
+                    filter?: "all" | "failed" | "pending" | "opened" | "clicked" | "not_opened";
                 };
                 header?: never;
                 path: {
@@ -9206,7 +9225,7 @@ export interface paths {
             parameters: {
                 query?: {
                     status?: "queued" | "sending" | "sent" | "failed" | "skipped";
-                    template?: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "booking_reminder" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent" | "host_booking_reminder";
+                    template?: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "booking_reminder" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent" | "host_booking_reminder" | "welcome" | "auth_signup" | "auth_recovery" | "auth_magiclink" | "auth_invite" | "auth_email_change" | "auth_reauthentication";
                     search?: string;
                     page?: number;
                     pageSize?: number;
@@ -9552,6 +9571,157 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/email-subscribers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Everyone, with whether news and offers reach them by email (campaigns.view) */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "subscribed" | "unsubscribed" | "bounced" | "no_email";
+                    role?: "booker" | "host";
+                    search?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["EmailSubscriber"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/email-subscribers/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How many people get news and offers by email (campaigns.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                people: number;
+                                subscribed: number;
+                                unsubscribed: number;
+                                bounced: number;
+                                no_email: number;
+                                hosts_subscribed: number;
+                                bookers_subscribed: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -11285,6 +11455,11 @@ export interface paths {
                          *     ]
                          */
                         channels?: ("in_app" | "push" | "email")[];
+                        /** @enum {string} */
+                        email_design?: "plain" | "spotlight" | "collection" | "offer" | "news";
+                        email_heading?: string | null;
+                        email_image_url?: string | null;
+                        email_button_label?: string | null;
                     };
                 };
             };
@@ -11486,6 +11661,11 @@ export interface paths {
                         email_subject?: string | null;
                         email_body?: string | null;
                         channels?: ("in_app" | "push" | "email")[];
+                        /** @enum {string} */
+                        email_design?: "plain" | "spotlight" | "collection" | "offer" | "news";
+                        email_heading?: string | null;
+                        email_image_url?: string | null;
+                        email_button_label?: string | null;
                     };
                 };
             };
@@ -11630,6 +11810,12 @@ export interface paths {
                         coupon_id?: string | null;
                         /** Format: uuid */
                         user_id?: string;
+                        /** @enum {string} */
+                        email_design?: "plain" | "spotlight" | "collection" | "offer" | "news";
+                        email_heading?: string | null;
+                        email_image_url?: string | null;
+                        email_button_label?: string | null;
+                        email_location_ids?: string[];
                     };
                 };
             };
@@ -11651,6 +11837,13 @@ export interface paths {
                                 user_id: string;
                                 /** @description Person variables that person hasn't filled in (the fallback was used) */
                                 missing: string[];
+                                email_heading?: string | null;
+                                email_button_label?: string | null;
+                                /** @description The whole email as it will arrive (null when there's no email) */
+                                email_html: string | null;
+                                email_text: string | null;
+                                /** @description Why the email can't be built yet (e.g. the listing isn't published) */
+                                email_problem: string | null;
                             };
                         };
                     };
@@ -12557,6 +12750,11 @@ export interface components {
             email_failed: number;
             email_unsubscribed: number;
             email_missing: number;
+            email_delivered: number;
+            email_opened: number;
+            email_clicked: number;
+            email_bounced: number;
+            email_complained: number;
         };
         Campaign: {
             /** Format: uuid */
@@ -12605,6 +12803,12 @@ export interface components {
             /** Format: uuid */
             template_id: string | null;
             /** @enum {string} */
+            email_design: "plain" | "spotlight" | "collection" | "offer" | "news";
+            email_heading: string | null;
+            email_image_url: string | null;
+            email_button_label: string | null;
+            email_location_ids: string[];
+            /** @enum {string} */
             status: "draft" | "scheduled" | "sending" | "sent" | "cancelled" | "failed";
             /** Format: date-time */
             scheduled_at: string | null;
@@ -12627,6 +12831,12 @@ export interface components {
         AudiencePreview: {
             users: number;
             with_email: number;
+            email: {
+                will_receive: number;
+                unsubscribed: number;
+                bounced: number;
+                no_email: number;
+            };
             devices: {
                 ios: number;
                 android: number;
@@ -12647,6 +12857,13 @@ export interface components {
             error: string | null;
             /** Format: date-time */
             processed_at: string | null;
+            email_delivered_at: string | null;
+            email_opened_at: string | null;
+            email_clicked_at: string | null;
+            email_open_count: number;
+            email_click_count: number;
+            email_bounced_at: string | null;
+            email_complained_at: string | null;
         };
         AppPlatform: {
             /** Format: uuid */
@@ -13019,7 +13236,7 @@ export interface components {
             user_id: string | null;
             to_email: string;
             /** @enum {string} */
-            template: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "booking_reminder" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent" | "host_booking_reminder";
+            template: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "booking_reminder" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent" | "host_booking_reminder" | "welcome" | "auth_signup" | "auth_recovery" | "auth_magiclink" | "auth_invite" | "auth_email_change" | "auth_reauthentication";
             /** @enum {string} */
             stream: "transactional" | "marketing";
             idempotency_key: string;
@@ -13044,6 +13261,17 @@ export interface components {
             /** Format: uuid */
             user_id: string | null;
             created_at: string;
+        };
+        EmailSubscriber: {
+            /** Format: uuid */
+            user_id: string;
+            name: string | null;
+            email: string | null;
+            roles: string[];
+            /** @enum {string} */
+            status: "subscribed" | "unsubscribed" | "bounced" | "no_email";
+            status_since: string | null;
+            joined_at: string;
         };
         PayoutAccount: {
             account_holder_name: string;
@@ -13308,6 +13536,11 @@ export interface components {
             email_subject: string | null;
             email_body: string | null;
             channels: ("in_app" | "push" | "email")[];
+            /** @enum {string} */
+            email_design: "plain" | "spotlight" | "collection" | "offer" | "news";
+            email_heading: string | null;
+            email_image_url: string | null;
+            email_button_label: string | null;
             is_builtin: boolean;
             created_at: string;
             updated_at: string;

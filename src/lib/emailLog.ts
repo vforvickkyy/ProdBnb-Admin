@@ -24,6 +24,13 @@ export const EMAIL_TEMPLATE_LABELS: Record<Template, string> = {
   listing_restored: "Listing live again (host)",
   payout_sent: "Payout sent (host)",
   host_booking_reminder: "Shoot tomorrow reminder (host)",
+  welcome: "Welcome",
+  auth_signup: "Sign-in: confirm email",
+  auth_recovery: "Sign-in: reset password",
+  auth_magiclink: "Sign-in: link / code",
+  auth_invite: "Sign-in: invite",
+  auth_email_change: "Sign-in: change email",
+  auth_reauthentication: "Sign-in: verification code",
 };
 
 export function templateLabel(template: string): string {
@@ -46,3 +53,6 @@ export const SUPPRESSION_REASONS = {
     help: "No news and offers. Booking emails still go out.",
   },
 } as const;
+
+/** Sign-in emails carry one-time links that aren't stored, so they can't be sent again from the log. */
+export const isAuthEmail = (template: string) => template.startsWith("auth_");

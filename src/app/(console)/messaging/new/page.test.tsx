@@ -11,7 +11,8 @@ vi.mock("@/lib/api", async () => {
   return { ...actual, adminApi: { GET: getMock, POST: postMock, PATCH: vi.fn() } };
 });
 vi.mock("@/lib/navigation", () => ({ useRouter: () => ({ push, replace: vi.fn() }) }));
-vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams("") }));
+const search = vi.hoisted(() => ({ value: "channel=push" }));
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(search.value) }));
 
 const TEMPLATES = [
   {
@@ -37,7 +38,10 @@ const VARIABLES = [
 ];
 
 describe("Compose a notification", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    search.value = "channel=push";
+  });
 
   it("starts from a template, asks for the listing, previews it personally and sends it to a group", async () => {
     getMock.mockImplementation((path: string) => {
@@ -91,7 +95,7 @@ describe("Compose a notification", () => {
     expect(message).toHaveValue("Hi {first_name|there}, from {listing_price}.{listing_title}");
 
     await user.click(await screen.findByRole("button", { name: "Send to 7" }));
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/messaging/c-1"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/marketing/c-1"));
     expect(postMock).toHaveBeenCalledWith(
       "/campaigns",
       expect.objectContaining({
@@ -100,6 +104,60 @@ describe("Compose a notification", () => {
           template_id: "t-listing",
           audience: { type: "segment", cities: ["Pune"], professions: ["director"] },
         }),
+      }),
+    );
+  });
+
+  it("builds an email campaign: picks a design and listings, shows who gets it, previews the real email and sends email only", async () => {
+    search.value = "channel=email";
+    getMock.mockImplementation((path: string) => {
+      if (path === "/me") return jsonOk(me("support", ["campaigns.view", "campaigns.send"]));
+      if (path === "/messaging/overview") return jsonOk({ readiness: { email: true, push: { ios: false, android: false, web: false } }, jobs: { enabled: true } });
+      if (path === "/notification-templates") return jsonOk([]);
+      if (path === "/notification-variables") return jsonOk(VARIABLES);
+      if (path === "/locations")
+        return jsonOkPaginated([
+          { id: "loc-1", title: "Rooftop with a view", city: "Pune" },
+          { id: "loc-2", title: "Sea-facing Loft", city: "Mumbai" },
+        ]);
+      return jsonOk(null);
+    });
+    postMock.mockImplementation((path: string) => {
+      if (path === "/campaigns/audience-preview")
+        return jsonOk({ users: 10, with_email: 6, email: { will_receive: 6, unsubscribed: 3, bounced: 0, no_email: 1 }, devices: { ios: 0, android: 0, web: 0 } });
+      if (path === "/campaigns/render-preview")
+        return jsonOk({ title: "x", body: "x", link_url: null, email_subject: "Rooftops", email_body: "Hi", user_id: "u-me", missing: [], email_html: "<html lang=\"en\"><body>EMAIL</body></html>", email_problem: null });
+      if (path === "/campaigns") return jsonOk({ id: "c-2" });
+      if (path === "/campaigns/{campaignId}/send") return jsonOk({ id: "c-2", status: "sending" });
+      return jsonOk(null);
+    });
+    const user = userEvent.setup();
+    render(
+      <SWRConfig value={{ provider: () => new Map() }}>
+        <ComposePage />
+      </SWRConfig>,
+    );
+
+    expect(await screen.findByRole("heading", { name: "New email campaign" })).toBeInTheDocument();
+    // No channel choice: it's an email.
+    expect(screen.queryByRole("checkbox", { name: /Push notification/ })).not.toBeInTheDocument();
+    expect(await screen.findByText("6 will get the email")).toBeInTheDocument();
+    expect(screen.getByText("3 unsubscribed from news")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: /Listing collection/ }));
+    await user.click(await screen.findByRole("button", { name: /Rooftop with a view/ }));
+    await user.click(await screen.findByRole("button", { name: /Sea-facing Loft/ }));
+    await user.type(screen.getByLabelText("Internal name"), "Rooftops");
+    await user.type(screen.getByLabelText("Subject"), "Rooftops");
+    await user.type(screen.getByLabelText("Message"), "Hi");
+    expect(await screen.findByTitle("Email preview")).toBeInTheDocument();
+
+    await user.click(await screen.findByRole("button", { name: "Send to 10" }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/marketing/c-2"));
+    expect(postMock).toHaveBeenCalledWith(
+      "/campaigns",
+      expect.objectContaining({
+        body: expect.objectContaining({ channels: ["email"], email_design: "collection", email_location_ids: ["loc-1", "loc-2"], title: "Rooftops" }),
       }),
     );
   });
