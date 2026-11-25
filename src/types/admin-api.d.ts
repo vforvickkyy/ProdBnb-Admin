@@ -9192,6 +9192,223 @@ export interface paths {
         };
         trace?: never;
     };
+    "/emails": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Transactional emails sent or waiting (campaigns.view), newest first */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "queued" | "sending" | "sent" | "failed" | "skipped";
+                    template?: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent";
+                    search?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminEmail"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emails/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How many emails are in each state over the last 7 days (campaigns.view) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                queued?: number;
+                                sending?: number;
+                                sent?: number;
+                                failed?: number;
+                                skipped?: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emails/{id}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send an email again (campaigns.send) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminEmail"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/payouts/due": {
         parameters: {
             query?: never;
@@ -12646,6 +12863,31 @@ export interface components {
                 first_name: string | null;
                 last_name: string | null;
             } | null;
+        };
+        AdminEmail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string | null;
+            to_email: string;
+            /** @enum {string} */
+            template: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent";
+            /** @enum {string} */
+            stream: "transactional" | "marketing";
+            idempotency_key: string;
+            data: {
+                [key: string]: unknown;
+            };
+            subject: string | null;
+            /** @enum {string} */
+            status: "queued" | "sending" | "sent" | "failed" | "skipped";
+            attempts: number;
+            last_error: string | null;
+            provider_message_id: string | null;
+            send_after: string;
+            sent_at: string | null;
+            created_at: string;
+            updated_at: string;
         };
         PayoutAccount: {
             account_holder_name: string;

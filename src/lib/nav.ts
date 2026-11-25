@@ -160,6 +160,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: "Channels",
         items: [
           { href: "/messaging/email", label: "Email", permission: "campaigns.view", keywords: "smtp" },
+          { href: "/messaging/email-log", label: "Email log", permission: "campaigns.view", keywords: "sent emails delivery failed bounce booking emails transactional resend" },
           { href: "/messaging/push", label: "Push notifications", permission: "campaigns.view", keywords: "apns fcm web push" },
         ],
       },

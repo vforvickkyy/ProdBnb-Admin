@@ -29,6 +29,14 @@ interface Preset {
 const PRESETS: Preset[] = [
   { id: "custom", label: "Other / custom SMTP", host: "", port: 587, secure: false, note: "Use the SMTP details your email provider gives you." },
   {
+    id: "resend",
+    label: "Resend (recommended)",
+    host: "smtp.resend.com",
+    port: 465,
+    secure: true,
+    note: "Username: resend. Password: a Resend API key (resend.com → API Keys). From address must be on a domain verified in Resend, e.g. bookings@notify.yourdomain.com.",
+  },
+  {
     id: "gmail",
     label: "Google Workspace / Gmail",
     host: "smtp.gmail.com",

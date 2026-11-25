@@ -71,6 +71,9 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   done: "success",
   closed: "neutral",
   withdrawn: "neutral",
+  // Email log
+  queued: "warning",
+  retrying: "warning",
 };
 
 export function StatusBadge({ status }: { status: string }) {
