@@ -81,6 +81,7 @@ export default function EmailSetupPage() {
   const [fromName, setFromName] = useState(BRAND_NAME);
   const [fromEmail, setFromEmail] = useState("");
   const [replyTo, setReplyTo] = useState("");
+  const [newsFrom, setNewsFrom] = useState("");
   const [rate, setRate] = useState("60");
   const [testTo, setTestTo] = useState("");
   const [busy, setBusy] = useState(false);
@@ -94,6 +95,7 @@ export default function EmailSetupPage() {
       setFromName(String(config.from_name ?? BRAND_NAME));
       setFromEmail(String(config.from_email ?? ""));
       setReplyTo(String(config.reply_to ?? ""));
+      setNewsFrom(String(config.marketing_from_email ?? ""));
       setRate(String(config.max_per_minute ?? 60));
       setPreset(PRESETS.find((p) => p.host === config.host)?.id ?? "custom");
     }
@@ -127,6 +129,7 @@ export default function EmailSetupPage() {
             from_email: fromEmail.trim(),
             from_name: fromName.trim(),
             reply_to: replyTo.trim() || null,
+            marketing_from_email: newsFrom.trim() || null,
             max_per_minute: Number(rate) || 60,
           },
         })
@@ -214,6 +217,14 @@ export default function EmailSetupPage() {
                   <TextField label="From name" value={fromName} onChange={(e) => setFromName(e.target.value)} />
                   <TextField label="From address" type="email" value={fromEmail} onChange={(e) => setFromEmail(e.target.value)} placeholder="hello@yourdomain.com" />
                   <TextField label="Reply-to (optional)" type="email" value={replyTo} onChange={(e) => setReplyTo(e.target.value)} placeholder="support@yourdomain.com" />
+                  <TextField
+                    label="News & offers sender (optional)"
+                    type="email"
+                    value={newsFrom}
+                    onChange={(e) => setNewsFrom(e.target.value)}
+                    placeholder="news@news.yourdomain.com"
+                    hint="Announcements go out from this address, so they never affect booking emails."
+                  />
                   <TextField
                     label="Max emails per minute"
                     inputMode="numeric"

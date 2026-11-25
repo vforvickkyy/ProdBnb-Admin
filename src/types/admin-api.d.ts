@@ -4963,6 +4963,8 @@ export interface paths {
                         from_name: string;
                         /** Format: email */
                         reply_to?: string | null;
+                        /** Format: email */
+                        marketing_from_email?: string | null;
                         /** @default 60 */
                         max_per_minute?: number;
                     } | {
@@ -9204,7 +9206,7 @@ export interface paths {
             parameters: {
                 query?: {
                     status?: "queued" | "sending" | "sent" | "failed" | "skipped";
-                    template?: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent";
+                    template?: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "booking_reminder" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent" | "host_booking_reminder";
                     search?: string;
                     page?: number;
                     pageSize?: number;
@@ -9404,6 +9406,152 @@ export interface paths {
             };
         };
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emails/suppressions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Addresses we don't email: bounced (nothing is sent) or unsubscribed from news and offers (campaigns.view) */
+        get: {
+            parameters: {
+                query?: {
+                    reason?: "unsubscribed" | "bounced" | "admin";
+                    search?: string;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["AdminEmailSuppression"][];
+                            meta: {
+                                page: number;
+                                pageSize: number;
+                                total: number;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/emails/suppressions/{email}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Unblock an address (campaigns.send) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    email: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: {
+                                removed: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -12871,7 +13019,7 @@ export interface components {
             user_id: string | null;
             to_email: string;
             /** @enum {string} */
-            template: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent";
+            template: "quote_request_sent" | "quote_ready" | "booking_confirmed" | "booking_declined" | "booking_cancelled" | "payment_success" | "payment_failed" | "refund_processed" | "booking_reminder" | "host_booking_request" | "host_quote_request" | "host_booking_confirmed" | "host_booking_cancelled" | "listing_submitted" | "listing_approved" | "listing_rejected" | "listing_suspended" | "listing_restored" | "payout_sent" | "host_booking_reminder";
             /** @enum {string} */
             stream: "transactional" | "marketing";
             idempotency_key: string;
@@ -12888,6 +13036,14 @@ export interface components {
             sent_at: string | null;
             created_at: string;
             updated_at: string;
+        };
+        AdminEmailSuppression: {
+            email: string;
+            /** @enum {string} */
+            reason: "unsubscribed" | "bounced" | "admin";
+            /** Format: uuid */
+            user_id: string | null;
+            created_at: string;
         };
         PayoutAccount: {
             account_holder_name: string;

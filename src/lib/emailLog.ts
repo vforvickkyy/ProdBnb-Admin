@@ -12,6 +12,7 @@ export const EMAIL_TEMPLATE_LABELS: Record<Template, string> = {
   payment_success: "Payment received + receipt (booker)",
   payment_failed: "Payment failed (booker)",
   refund_processed: "Refund processed (booker)",
+  booking_reminder: "Shoot tomorrow reminder (booker)",
   host_booking_request: "New booking request (host)",
   host_quote_request: "Price request (host)",
   host_booking_confirmed: "Instant booking (host)",
@@ -22,8 +23,26 @@ export const EMAIL_TEMPLATE_LABELS: Record<Template, string> = {
   listing_suspended: "Listing paused (host)",
   listing_restored: "Listing live again (host)",
   payout_sent: "Payout sent (host)",
+  host_booking_reminder: "Shoot tomorrow reminder (host)",
 };
 
 export function templateLabel(template: string): string {
-  return EMAIL_TEMPLATE_LABELS[template as Template] ?? template.replace(/_/g, " ");
+  return (
+    EMAIL_TEMPLATE_LABELS[template as Template] ?? template.replace(/_/g, " ")
+  );
 }
+
+export const SUPPRESSION_REASONS = {
+  bounced: {
+    label: "Bounced",
+    help: "The address doesn't exist or refused mail. Nothing is sent to it.",
+  },
+  unsubscribed: {
+    label: "Unsubscribed",
+    help: "No news and offers. Booking emails still go out.",
+  },
+  admin: {
+    label: "Blocked by the team",
+    help: "No news and offers. Booking emails still go out.",
+  },
+} as const;
