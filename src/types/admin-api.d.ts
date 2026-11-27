@@ -12097,6 +12097,78 @@ export interface paths {
         };
         trace?: never;
     };
+    "/sms/hook-secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save (or clear with null) the Supabase Send SMS hook secret, kept in Vault (channels.manage) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        secret: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data: components["schemas"]["SmsOverview"];
+                        };
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Missing/invalid bearer token */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Authenticated but not an admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sms/providers/{provider}": {
         parameters: {
             query?: never;
@@ -14358,6 +14430,9 @@ export interface components {
                 [key: string]: string;
             };
             sign_in_hook_ready: boolean;
+            sign_in_hook_url: string;
+            /** @enum {string|null} */
+            sign_in_hook_source: "backend" | "admin" | null;
         };
         SmsTemplate: {
             key: string;

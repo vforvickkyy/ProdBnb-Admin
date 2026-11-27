@@ -131,6 +131,7 @@ export default function SmsSetupPage() {
   const [numbers, setNumbers] = useState("");
   const [testTo, setTestTo] = useState("");
   const [testTemplate, setTestTemplate] = useState("auth_otp");
+  const [hookSecret, setHookSecret] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -149,6 +150,20 @@ export default function SmsSetupPage() {
       const next = await adminApi.PATCH("/sms/settings", { body }).then(unwrap<Overview>);
       void mutate(next, { revalidate: false });
       toast.success(done);
+    } catch (err) {
+      toast.error(extractErrorMessage(err, "Couldn't save."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveHookSecret(secret: string | null) {
+    setBusy(true);
+    try {
+      const next = await adminApi.PUT("/sms/hook-secret", { body: { secret } }).then(unwrap<Overview>);
+      void mutate(next, { revalidate: false });
+      setHookSecret("");
+      toast.success(secret ? "Sign-in codes connected." : "Hook secret removed.");
     } catch (err) {
       toast.error(extractErrorMessage(err, "Couldn't save."));
     } finally {
@@ -325,22 +340,52 @@ export default function SmsSetupPage() {
         </div>
 
         <div className="space-y-6 lg:col-span-2">
-          <Card title="Sign-in codes" actions={<Badge tone={data.sign_in_hook_ready ? "success" : "warning"} dot>{data.sign_in_hook_ready ? "Connected" : "Not connected"}</Badge>}>
+          <Card
+            title="Sign-in codes"
+            actions={<Badge tone={data.sign_in_hook_ready ? "success" : "warning"} dot>{data.sign_in_hook_ready ? "Connected" : "Not connected"}</Badge>}
+          >
             <p className="text-sm text-slate-600">
               {data.sign_in_hook_ready
-                ? "Supabase hands every sign-in and phone-verification code to us, and it goes out like any other text (or is logged, in test mode)."
-                : "Codes still go through Supabase's own SMS settings. To send them through here: Supabase → Authentication → Hooks → Send SMS hook → HTTPS, address below, then put the hook's secret in the backend's AUTH_SMS_HOOK_SECRET."}
+                ? "Supabase hands every sign-in and phone-verification code to us, and it goes out like any other text (or is only logged, in test mode)."
+                : "Connect Supabase once so sign-in and phone-verification codes go through here:"}
             </p>
             {!data.sign_in_hook_ready && (
-              <div className="mt-3 flex items-center gap-2">
-                <code className="min-w-0 flex-1 truncate rounded bg-slate-50 px-2 py-1 text-[11px] text-slate-700 ring-1 ring-slate-200">
-                  {(data.report_urls.msg91 ?? "").replace(/\/v1\/webhooks\/sms\/.*$/, "/v1/auth/sms-hook")}
-                </code>
-                <Button size="sm" variant="secondary" onClick={() => copy((data.report_urls.msg91 ?? "").replace(/\/v1\/webhooks\/sms\/.*$/, "/v1/auth/sms-hook"), "Address")}>
-                  <Copy aria-hidden className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+              <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-slate-600">
+                <li>Supabase → Authentication → Sign In / Providers → Phone: switch it on.</li>
+                <li>
+                  Supabase → Authentication → Hooks → <b>Send SMS hook</b> → HTTPS, with this address, then <b>Generate secret</b> and save:
+                </li>
+              </ol>
             )}
+            <div className="mt-3 flex items-center gap-2">
+              <code className="min-w-0 flex-1 truncate rounded bg-slate-50 px-2 py-1 text-[11px] text-slate-700 ring-1 ring-slate-200">{data.sign_in_hook_url}</code>
+              <Button size="sm" variant="secondary" onClick={() => copy(data.sign_in_hook_url, "Address")}>
+                <Copy aria-hidden className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            {data.sign_in_hook_source !== "backend" && canManage && (
+              <fieldset disabled={busy} className="mt-4 space-y-2">
+                <TextField
+                  label={data.sign_in_hook_ready ? "Replace the hook secret" : "3. Paste the hook secret here"}
+                  type="password"
+                  autoComplete="off"
+                  value={hookSecret}
+                  placeholder={data.sign_in_hook_ready ? "Saved. Paste a new one to replace it" : "v1,whsec_…"}
+                  onChange={(e) => setHookSecret(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button variant="primary" size="sm" disabled={!hookSecret.trim()} onClick={() => void saveHookSecret(hookSecret)}>
+                    Save secret
+                  </Button>
+                  {data.sign_in_hook_ready && (
+                    <Button variant="ghost" size="sm" onClick={() => void saveHookSecret(null)}>
+                      Remove
+                    </Button>
+                  )}
+                </div>
+              </fieldset>
+            )}
+            {data.sign_in_hook_source === "backend" && <p className="mt-3 text-xs text-slate-500">The secret is set on the backend (AUTH_SMS_HOOK_SECRET).</p>}
           </Card>
           <Guide
             title="Going live in India (DLT)"
