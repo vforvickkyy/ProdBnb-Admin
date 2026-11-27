@@ -175,6 +175,7 @@ export const NAV_SECTIONS: NavSection[] = [
         label: "Automatic",
         items: [
           { href: "/messaging/email-log", label: "Automatic emails", permission: "campaigns.view", keywords: "email log sent emails delivery failed bounce booking emails transactional resend blocked" },
+          { href: "/messaging/sms-log", label: "Automatic texts", permission: "campaigns.view", keywords: "sms log text messages otp codes delivered failed booking texts" },
           { href: "/messaging/delivery", label: "Background sending", permission: "campaigns.view", keywords: "jobs cron scheduler dispatch retries delivery engine" },
         ],
       },
@@ -183,6 +184,8 @@ export const NAV_SECTIONS: NavSection[] = [
         items: [
           { href: "/messaging/email", label: "Email setup", permission: "campaigns.view", keywords: "smtp resend sender domain" },
           { href: "/messaging/push", label: "Push setup", permission: "campaigns.view", keywords: "apns fcm web push" },
+          { href: "/messaging/sms", label: "SMS setup", permission: "campaigns.view", keywords: "sms provider msg91 twilio 2factor gupshup dlt sender otp test mode live" },
+          { href: "/messaging/sms/texts", label: "SMS texts & DLT", permission: "campaigns.view", keywords: "sms templates dlt template id wording otp booking payment text" },
         ],
       },
     ],
